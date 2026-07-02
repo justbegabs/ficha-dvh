@@ -340,7 +340,6 @@ const references = {
   attributesList: document.getElementById("attributesList"),
   characteristicsList: document.getElementById("characteristicsList"),
   characterClassInfo: document.getElementById("characterClassInfo"),
-  characterRace: document.getElementById("characterRace"),
   characterRaceInfo: document.getElementById("characterRaceInfo"),
   characterOriginInfo: document.getElementById("characterOriginInfo"),
   realAge: document.getElementById("realAge"),
@@ -828,9 +827,6 @@ function bindEvents() {
     });
   }
 
-  if (references.characterRace) {
-    references.characterRace.addEventListener("change", handleRaceThemeChange);
-  }
   if (references.realAge) {
     references.realAge.addEventListener("input", () => {
       state.lastAgeField = "real";

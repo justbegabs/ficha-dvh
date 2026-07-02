@@ -58,7 +58,7 @@
           </div>
 
           <div class="field">
-            <label for="humanAge">Idade humana</label>
+            <label for="humanAge">Idade humana (automática)</label>
             <input id="humanAge" type="number" min="0" step="1" placeholder="Ex.: 35" />
           </div>
         </div>
@@ -75,12 +75,32 @@
 
         <div class="field">
           <label for="characterSexuality">Sexualidade</label>
-          <input id="characterSexuality" type="text" placeholder="Digite a sexualidade" autocomplete="off" />
+          <select id="characterSexuality">
+            <option value="">Selecione...</option>
+            <option value="Heterossexual">Heterossexual</option>
+            <option value="Homossexual">Homossexual</option>
+            <option value="Bissexual">Bissexual</option>
+            <option value="Pansexual">Pansexual</option>
+            <option value="Assexual">Assexual</option>
+            <option value="Demissexual">Demissexual</option>
+            <option value="PrefiroNaoInformar">Prefiro não informar</option>
+          </select>
         </div>
 
         <div class="field">
           <label for="bloodType">Tipo sanguíneo</label>
-          <input id="bloodType" type="text" placeholder="Ex.: O+, AB-" autocomplete="off" />
+          <select id="bloodType">
+            <option value="">Selecione...</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+            <option value="NaoSei">Não sei</option>
+          </select>
         </div>
       </div>
       <p id="ageHint" class="basic-info-hint">Edite a idade real ou humana para converter entre as duas conforme a raça selecionada.</p>

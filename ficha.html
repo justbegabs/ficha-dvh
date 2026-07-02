@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ficha DVH - Sistema Automático</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="background-glow" aria-hidden="true"></div>
+  <main class="app">
+    <header class="hero">
+      <h1>Ficha de RPG DVH</h1>
+    </header>
+
+    <section class="panel rules-panel is-collapsed">
+      <h2>
+        <button id="rulesToggle" class="rules-toggle" type="button" aria-expanded="false" aria-controls="rulesContent">
+          Resumo das Regras
+        </button>
+      </h2>
+      <ul id="rulesContent" hidden>
+        <li>Atributos: 15 pontos livres, todos começam em 1, máximo 3.</li>
+        <li>Características têm 13 pontos para distribuir no total.</li>
+        <li>Cada característica começa em 0 e tem 5 quadrados clicáveis; cada quadrado vale 1 ponto e 1 dado jogado no teste.</li>
+        <li>Os 13 pontos de características são distribuídos entre todas elas.</li>
+        <li>Características usam o mesmo sistema de rolagem com D10.</li>
+        <li>Perícias: 20 pontos livres, todas começam em 1, máximo 3.</li>
+        <li>Se uma perícia iniciar em 2 ou 3 no valor da direita, ela já é considerada nível 2 ou 3.</li>
+        <li>Cada perícia possui quadrados de evolução; ao completar, evolui para o próximo nível sem gastar pontos de criação. Exemplo: nível 1 exige 5 quadrados, nível 2 exige 6, nível 3 exige 7, e assim por diante.</li>
+        <li>Teste padrão: rola D10.</li>
+        <li>Compactuação: se cair 10, rola mais um D10, repetindo até parar de cair 10.</li>
+        <li>Todo valor 10 é extra: soma no resultado final, mas nunca entra na lista de dados mantidos.</li>
+        <li>Rolagem: atributo define dados jogados; perícia define dados mantidos.</li>
+        <li>Os dados mantidos sempre priorizam os maiores valores e descartam os menores.</li>
+        <li>Falha crítica escala por dados mantidos: 1 mantido exige 1 resultado 1; 2-3 mantidos exigem 2; 4-5 exigem 3, e assim por diante.</li>
+        <li>Se houver 10 na rolagem, ainda deve existir pelo menos um resultado 1 a mais do que a quantidade de 10 para ser falha crítica.</li>
+        <li>Em teste de perícia: falha crítica remove 1 quadrado de evolução, sucesso crítico adiciona 2; sem crítico, a evolução é manual.</li>
+        <li>Nem todo crítico é um sucesso automático.</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Informações Básicas</h2>
+      <div class="basic-info-grid">
+        <div class="field field-wide">
+          <label for="characterName">Nome do personagem</label>
+          <input id="characterName" type="text" placeholder="Digite o nome" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <label for="characterRace">Raça</label>
+          <select id="characterRace">
+            <option value="Humano">Humano</option>
+            <option value="Elfo">Elfo</option>
+            <option value="Anao">Anão</option>
+            <option value="Orc">Orc</option>
+            <option value="Draconico">Dracônico</option>
+            <option value="Fada">Fada</option>
+            <option value="Goblin">Goblin</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="realAge">Idade real</label>
+          <input id="realAge" type="number" min="0" step="1" placeholder="Ex.: 120" />
+        </div>
+
+        <div class="field">
+          <label for="humanAge">Idade humana (automática)</label>
+          <input id="humanAge" type="text" readonly aria-readonly="true" placeholder="Calculada pela raça" />
+        </div>
+
+        <div class="field">
+          <label for="birthDate">Data de nascimento</label>
+          <input id="birthDate" type="text" placeholder="dd/mm/aaaa (aceita A.C. e anos futuros)" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <label for="characterHeight">Altura</label>
+          <input id="characterHeight" type="text" placeholder="Ex.: 1,78 m" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <label for="characterSexuality">Sexualidade</label>
+          <input id="characterSexuality" type="text" placeholder="Digite a sexualidade" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <label for="bloodType">Tipo sanguíneo</label>
+          <input id="bloodType" type="text" placeholder="Ex.: O+, AB-" autocomplete="off" />
+        </div>
+      </div>
+      <p id="ageHint" class="basic-info-hint">Idade humana = idade real ajustada pelo fator da raça selecionada.</p>
+    </section>
+
+    <section class="grid info-dual-grid">
+      <section class="panel">
+        <h2>Informações do Personagem</h2>
+        <div class="basic-info-grid">
+          <div class="field field-wide">
+            <label for="characterClassInfo">Classe</label>
+            <select id="characterClassInfo">
+              <option value="">Selecione...</option>
+              <option value="Guerreiro">Guerreiro</option>
+              <option value="Arqueiro">Arqueiro</option>
+              <option value="Mago">Mago</option>
+              <option value="Clerigo">Clérigo</option>
+              <option value="Ladino">Ladino</option>
+            </select>
+          </div>
+
+          <div class="field field-wide">
+            <label for="characterRaceInfo">Raça</label>
+            <select id="characterRaceInfo">
+              <option value="">Selecione...</option>
+              <option value="Humano">Humano</option>
+              <option value="Elfo">Elfo</option>
+              <option value="Anao">Anão</option>
+              <option value="Orc">Orc</option>
+              <option value="Draconico">Dracônico</option>
+              <option value="Fada">Fada</option>
+              <option value="Goblin">Goblin</option>
+            </select>
+          </div>
+
+          <div class="field field-wide">
+            <label for="characterOriginInfo">Origem</label>
+            <select id="characterOriginInfo">
+              <option value="">Selecione...</option>
+              <option value="Nobreza">Nobreza</option>
+              <option value="Povoado">Povoado</option>
+              <option value="Exilio">Exílio</option>
+              <option value="Santuario">Santuário</option>
+              <option value="Fronteira">Fronteira</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Estatísticas</h2>
+        <div class="stats-grid">
+          <div class="field">
+            <label for="lifeCurrent">Vida</label>
+            <div class="stat-pair">
+              <input id="lifeCurrent" type="number" min="0" step="1" value="10" />
+              <span>/</span>
+              <input id="lifeMax" type="number" min="0" step="1" value="10" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="sanityCurrent">Sanidade</label>
+            <div class="stat-pair">
+              <input id="sanityCurrent" type="number" min="0" step="1" value="10" />
+              <span>/</span>
+              <input id="sanityMax" type="number" min="0" step="1" value="10" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="manaCurrent">Mana</label>
+            <div class="stat-pair">
+              <input id="manaCurrent" type="number" min="0" step="1" value="15" />
+              <span>/</span>
+              <input id="manaMax" type="number" min="0" step="1" value="15" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="soulCurrent">Alma</label>
+            <div class="stat-pair">
+              <input id="soulCurrent" type="number" min="0" step="1" value="15" />
+              <span>/</span>
+              <input id="soulMax" type="number" min="0" step="1" value="15" />
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="grid top-grid">
+      <section class="panel">
+        <h2>Atributos</h2>
+        <p class="pool" id="attributesPool"></p>
+        <div id="attributesList" class="list"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Características</h2>
+        <p class="pool" id="characteristicsCount"></p>
+        <div id="characteristicsList" class="list characteristics"></div>
+      </section>
+    </section>
+
+    <section class="panel">
+      <h2>Perícias</h2>
+      <p class="pool" id="skillsPool"></p>
+      <div id="skillsList" class="list skills"></div>
+    </section>
+
+    <div id="resultPopup" class="result-popup" aria-live="polite" aria-hidden="true">
+      <div class="result-popup__card" role="dialog" aria-modal="true" aria-labelledby="resultPopupTitle">
+        <div class="result-popup__header">
+          <h3 id="resultPopupTitle">Resultado do teste</h3>
+          <div class="result-popup__actions">
+            <button id="rerollButton" type="button" aria-label="Repetir teste">Re-rolar</button>
+            <button id="closeResultPopup" type="button" aria-label="Fechar resultado">Fechar</button>
+          </div>
+        </div>
+        <div id="rollResult" class="result result--popup"></div>
+      </div>
+    </div>
+
+    <section class="panel">
+      <h2>Dados de Dano</h2>
+      <p>D8/D6 para crítico, D4/D3 para dano base.</p>
+      <div class="damage-buttons">
+        <button class="damage" data-die="3" type="button">Rolar D3</button>
+        <button class="damage" data-die="4" type="button">Rolar D4</button>
+        <button class="damage" data-die="6" type="button">Rolar D6</button>
+        <button class="damage" data-die="8" type="button">Rolar D8</button>
+        <button class="damage" data-die="10" type="button">Rolar D10</button>
+      </div>
+      <div id="damageResult" class="result" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="script.js?v=20260702-crit"></script>
+</body>
+</html>

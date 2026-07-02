@@ -1,115 +1,175 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ficha DVH - Sistema Automático</title>
+  <title>Sistema dos Deuses</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;700;800&family=Teko:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-1: #07192f;
+      --bg-2: #153a62;
+      --ink: #eaf2ff;
+      --muted: #b6c8df;
+      --cyan: #00d5ff;
+      --panel: rgba(11, 31, 56, 0.8);
+      --line: rgba(0, 213, 255, 0.7);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Raleway", sans-serif;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(94, 196, 255, 0.2), transparent 30%),
+        radial-gradient(circle at 90% 0%, rgba(8, 255, 206, 0.15), transparent 22%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-2));
+      display: grid;
+      grid-template-rows: 1fr auto;
+    }
+
+    .top-bar {
+      position: fixed;
+      inset: 0 0 auto 0;
+      padding: 0.65rem;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .icon-btn {
+      pointer-events: auto;
+      width: 46px;
+      height: 46px;
+      border: 0;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffe17a;
+      font-size: 1.35rem;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 5rem 1rem 10rem;
+      text-align: center;
+    }
+
+    .hero h1 {
+      margin: 0 0 0.8rem;
+      font-size: clamp(2.1rem, 5vw, 3.4rem);
+      font-weight: 800;
+      color: #ffd8ff;
+      text-shadow: 0 0 8px #ff4ff3, 0 0 22px #b000ff;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2.2vw, 1.3rem);
+      line-height: 1.45;
+    }
+
+    .intro {
+      margin: 2rem auto 0;
+      max-width: 860px;
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel);
+      padding: 1.4rem;
+      box-shadow: 0 0 20px rgba(0, 213, 255, 0.28);
+    }
+
+    .dock {
+      border-top: 1px solid rgba(0, 213, 255, 0.55);
+      background: rgba(8, 24, 44, 0.88);
+      padding: 0.8rem 0.7rem;
+    }
+
+    .dock-grid {
+      max-width: 1040px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.55rem;
+    }
+
+    .dock-link {
+      text-decoration: none;
+      color: #dbecff;
+      background: rgba(20, 56, 88, 0.9);
+      border: 2px solid rgba(0, 213, 255, 0.55);
+      border-radius: 10px;
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Teko", sans-serif;
+      font-size: 1.33rem;
+      letter-spacing: 0.03em;
+      transition: transform 120ms ease, background-color 120ms ease;
+    }
+
+    .dock-link:hover {
+      transform: translateY(-2px);
+      background: rgba(29, 75, 116, 0.95);
+    }
+
+    .dock-link.primary {
+      border-color: #ffc14f;
+      color: #ffe6b0;
+      box-shadow: 0 0 12px rgba(255, 193, 79, 0.35);
+    }
+  </style>
 </head>
 <body>
-  <div class="background-glow" aria-hidden="true"></div>
-  <main class="app">
-    <header class="hero">
-      <p class="kicker">Sistema Automático</p>
-      <h1>Ficha de RPG DVH</h1>
-      <p>Distribua pontos, faça testes de atributo/perícia e calcule críticos automaticamente.</p>
-    </header>
+  <header class="top-bar">
+    <button class="icon-btn" type="button" aria-label="Menu">☰</button>
+    <button class="icon-btn" type="button" aria-label="Modo">🌙</button>
+  </header>
 
-    <section class="panel rules-panel">
-      <h2>Resumo das Regras</h2>
-      <ul>
-        <li>Atributos de teste: 15 pontos livres, todos começam em 1, máximo 3.</li>
-        <li>Atributos de sorte viraram características (Crença, Fortuna, Legado, Improviso e Perseverança).</li>
-        <li>Características têm 15 pontos para distribuir no total.</li>
-        <li>Cada característica começa em 0 e tem 5 quadrados clicáveis para marcar o nível atual.</li>
-        <li>Características usam o mesmo sistema de rolagem com D10.</li>
-        <li>Perícias: 20 pontos livres, todas começam em 1, máximo 3.</li>
-        <li>Teste padrão: rola D10.</li>
-        <li>Compactuação: se cair 10, rola mais um D10, repetindo até parar de cair 10.</li>
-        <li>Todo valor 10 é extra: soma no resultado final, mas nunca entra na lista de dados mantidos.</li>
-        <li>Rolagem: atributo define dados jogados; perícia define dados mantidos.</li>
-        <li>Os dados mantidos sempre priorizam os maiores valores e descartam os menores.</li>
-        <li>Falha crítica escala por dados mantidos: 1 mantido exige 1 resultado 1; 2-3 mantidos exigem 2; 4-5 exigem 3, e assim por diante.</li>
-        <li>Se houver 10 na rolagem, ainda deve existir pelo menos um resultado 1 a mais do que a quantidade de 10 para ser crítico.</li>
-      </ul>
-    </section>
-
-    <section class="grid">
-      <section class="panel">
-        <h2>Atributos de Teste</h2>
-        <p class="pool" id="attributesPool"></p>
-        <div id="attributesList" class="list"></div>
-
-        <h3>Características</h3>
-        <p class="pool" id="characteristicsCount"></p>
-        <div id="characteristicsList" class="list characteristics"></div>
-      </section>
-
-      <section class="panel">
-        <h2>Perícias</h2>
-        <p class="pool" id="skillsPool"></p>
-        <div id="skillsList" class="list skills"></div>
-      </section>
-    </section>
-
-    <section class="panel test-panel">
-      <h2>Teste Automático</h2>
-      <div class="controls">
-        <label for="testAttribute">Atributo</label>
-        <select id="testAttribute"></select>
-
-        <label for="testSkill">Perícia (opcional)</label>
-        <select id="testSkill"></select>
-
-        <button id="rollButton" type="button">Rolar Teste</button>
-      </div>
-    </section>
-
-    <div id="resultPopup" class="result-popup" aria-live="polite" aria-hidden="true">
-      <div class="result-popup__card" role="dialog" aria-modal="true" aria-labelledby="resultPopupTitle">
-        <div class="result-popup__header">
-          <h3 id="resultPopupTitle">Resultado do teste</h3>
-          <div class="result-popup__actions">
-            <button id="rerollButton" type="button" aria-label="Repetir teste">Re-rolar</button>
-            <button id="closeResultPopup" type="button" aria-label="Fechar resultado">Fechar</button>
-          </div>
-        </div>
-        <div id="rollResult" class="result result--popup"></div>
-      </div>
-    </div>
-
-    <section class="panel">
-      <h2>Evolução de Perícia por XP</h2>
-      <p>Custo por nível atual: nível 1 = 5 XP, 2 = 6 XP, 3 = 7 XP, e assim por diante.</p>
-      <div class="xp-controls">
-        <label for="xpSkill">Perícia</label>
-        <select id="xpSkill"></select>
-
-        <label for="xpAmount">XP para gastar</label>
-        <input id="xpAmount" type="number" min="1" value="5" />
-
-        <button id="xpButton" type="button">Aplicar XP</button>
-      </div>
-      <div id="xpResult" class="result" aria-live="polite"></div>
-    </section>
-
-    <section class="panel">
-      <h2>Dados de Dano</h2>
-      <p>D8/D6 para crítico, D4/D3 para dano base.</p>
-      <div class="damage-buttons">
-        <button class="damage" data-die="3" type="button">Rolar D3</button>
-        <button class="damage" data-die="4" type="button">Rolar D4</button>
-        <button class="damage" data-die="6" type="button">Rolar D6</button>
-        <button class="damage" data-die="8" type="button">Rolar D8</button>
-        <button class="damage" data-die="10" type="button">Rolar D10</button>
-      </div>
-      <div id="damageResult" class="result" aria-live="polite"></div>
+  <main class="hero">
+    <h1>Bem-vindo ao Sistema dos Deuses</h1>
+    <p>Escolha uma das opções abaixo para navegar pelo sistema.</p>
+    <section class="intro" aria-label="Resumo da aplicação">
+      <p>
+        A ficha é completamente automatizada e calcula rolagens, críticos e evolução.
+        Para ver mais detalhes das regras, abra a página da ficha principal.
+      </p>
     </section>
   </main>
 
-  <script src="script.js"></script>
+  <nav class="dock" aria-label="Atalhos do sistema">
+    <div class="dock-grid">
+      <a class="dock-link primary" href="ficha.html">Ficha</a>
+      <a class="dock-link" href="#">Atributos</a>
+      <a class="dock-link" href="#">Raças</a>
+      <a class="dock-link" href="#">Origens</a>
+      <a class="dock-link" href="#">Classes</a>
+      <a class="dock-link" href="#">Itens</a>
+      <a class="dock-link" href="#">Armas</a>
+      <a class="dock-link" href="#">Criação</a>
+      <a class="dock-link" href="#">Mapas</a>
+      <a class="dock-link" href="#">Músicas</a>
+      <a class="dock-link" href="#">Jogos</a>
+      <a class="dock-link" href="#">Mecânicas</a>
+      <a class="dock-link" href="#">Efeitos</a>
+      <a class="dock-link" href="#">Perícias</a>
+      <a class="dock-link" href="#">Bestiário</a>
+      <a class="dock-link" href="#">Materiais</a>
+    </div>
+  </nav>
+</body>
+</html>
+  <script src="script.js?v=20260702-crit"></script>
 </body>
 </html>

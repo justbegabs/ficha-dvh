@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ficha DVH - Sistema Automático</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="background-glow" aria-hidden="true"></div>
+  <main class="app">
+    <header class="hero">
+      <p class="kicker">Sistema Automático</p>
+      <h1>Ficha de RPG DVH</h1>
+      <p>Distribua pontos, faça testes de atributo/perícia e calcule críticos automaticamente.</p>
+    </header>
+
+    <section class="panel rules-panel">
+      <h2>Resumo das Regras</h2>
+      <ul>
+        <li>Atributos de teste: 15 pontos livres, todos começam em 1, máximo 3.</li>
+        <li>Atributos de sorte viraram características (Crença, Fortuna, Legado, Improviso e Perseverança).</li>
+        <li>Características têm 15 pontos para distribuir no total.</li>
+        <li>Cada característica começa em 0 e tem 5 quadrados clicáveis para marcar o nível atual.</li>
+        <li>Características usam o mesmo sistema de rolagem com D10.</li>
+        <li>Perícias: 20 pontos livres, todas começam em 1, máximo 3.</li>
+        <li>Teste padrão: rola D10.</li>
+        <li>Compactuação: se cair 10, rola mais um D10, repetindo até parar de cair 10.</li>
+        <li>Todo valor 10 é extra: soma no resultado final, mas nunca entra na lista de dados mantidos.</li>
+        <li>Rolagem: atributo define dados jogados; perícia define dados mantidos.</li>
+        <li>Os dados mantidos sempre priorizam os maiores valores e descartam os menores.</li>
+        <li>Falha crítica escala por dados mantidos: 1 mantido exige 1 resultado 1; 2-3 mantidos exigem 2; 4-5 exigem 3, e assim por diante.</li>
+        <li>Se houver 10 na rolagem, ainda deve existir pelo menos um resultado 1 a mais do que a quantidade de 10 para ser crítico.</li>
+      </ul>
+    </section>
+
+    <section class="grid">
+      <section class="panel">
+        <h2>Atributos de Teste</h2>
+        <p class="pool" id="attributesPool"></p>
+        <div id="attributesList" class="list"></div>
+
+        <h3>Características</h3>
+        <p class="pool" id="characteristicsCount"></p>
+        <div id="characteristicsList" class="list characteristics"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Perícias</h2>
+        <p class="pool" id="skillsPool"></p>
+        <div id="skillsList" class="list skills"></div>
+      </section>
+    </section>
+
+    <section class="panel test-panel">
+      <h2>Teste Automático</h2>
+      <div class="controls">
+        <label for="testAttribute">Atributo</label>
+        <select id="testAttribute"></select>
+
+        <label for="testSkill">Perícia (opcional)</label>
+        <select id="testSkill"></select>
+
+        <button id="rollButton" type="button">Rolar Teste</button>
+      </div>
+    </section>
+
+    <div id="resultPopup" class="result-popup" aria-live="polite" aria-hidden="true">
+      <div class="result-popup__card" role="dialog" aria-modal="true" aria-labelledby="resultPopupTitle">
+        <div class="result-popup__header">
+          <h3 id="resultPopupTitle">Resultado do teste</h3>
+          <div class="result-popup__actions">
+            <button id="rerollButton" type="button" aria-label="Repetir teste">Re-rolar</button>
+            <button id="closeResultPopup" type="button" aria-label="Fechar resultado">Fechar</button>
+          </div>
+        </div>
+        <div id="rollResult" class="result result--popup"></div>
+      </div>
+    </div>
+
+    <section class="panel">
+      <h2>Evolução de Perícia por XP</h2>
+      <p>Custo por nível atual: nível 1 = 5 XP, 2 = 6 XP, 3 = 7 XP, e assim por diante.</p>
+      <div class="xp-controls">
+        <label for="xpSkill">Perícia</label>
+        <select id="xpSkill"></select>
+
+        <label for="xpAmount">XP para gastar</label>
+        <input id="xpAmount" type="number" min="1" value="5" />
+
+        <button id="xpButton" type="button">Aplicar XP</button>
+      </div>
+      <div id="xpResult" class="result" aria-live="polite"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Dados de Dano</h2>
+      <p>D8/D6 para crítico, D4/D3 para dano base.</p>
+      <div class="damage-buttons">
+        <button class="damage" data-die="3" type="button">Rolar D3</button>
+        <button class="damage" data-die="4" type="button">Rolar D4</button>
+        <button class="damage" data-die="6" type="button">Rolar D6</button>
+        <button class="damage" data-die="8" type="button">Rolar D8</button>
+        <button class="damage" data-die="10" type="button">Rolar D10</button>
+      </div>
+      <div id="damageResult" class="result" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

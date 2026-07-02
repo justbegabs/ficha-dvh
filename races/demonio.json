@@ -1,17 +1,27 @@
-{
-  "displayName": "Demônio",
-  "ageFactor": 0.9,
-  "theme": {
-    "--page-bg-start": "#ffd9d3",
-    "--page-bg-mid": "#e4836f",
-    "--page-bg-end": "#581318",
-    "--page-glow": "rgba(230, 72, 72, 0.24)",
-    "--panel-bg": "rgba(255, 245, 243, 0.94)",
-    "--panel-border": "#e4aa9d",
-    "--line": "#d98b7a",
-    "--ink": "#3d1f1f",
-    "--ink-strong": "#230e10",
-    "--warn": "#b43832",
-    "--good": "#7b5640"
-  }
+﻿{
+    "displayName":  "DemÃ´nio",
+    "ageFactor":  0.9,
+    "theme":  {
+                  "--page-bg-start":  "#ffd9d3",
+                  "--page-bg-mid":  "#e4836f",
+                  "--page-bg-end":  "#581318",
+                  "--page-glow":  "rgba(230, 72, 72, 0.24)",
+                  "--panel-bg":  "rgba(255, 245, 243, 0.94)",
+                  "--panel-border":  "#e4aa9d",
+                  "--line":  "#d98b7a",
+                  "--ink":  "#3d1f1f",
+                  "--ink-strong":  "#230e10",
+                  "--warn":  "#b43832",
+                  "--good":  "#7b5640"
+              },
+    "description":  "Sem descrição definida.",
+    "skillBonuses":  {
+
+                     },
+    "level0Bonuses":  {
+                          "life":  0,
+                          "sanity":  0,
+                          "mana":  0,
+                          "conviction":  0
+                      }
 }

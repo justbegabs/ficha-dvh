@@ -1,17 +1,27 @@
-{
-  "displayName": "Kitsune",
-  "ageFactor": 1.5,
-  "theme": {
-    "--page-bg-start": "#fff0cf",
-    "--page-bg-mid": "#efb36e",
-    "--page-bg-end": "#8f4b3f",
-    "--page-glow": "rgba(255, 171, 76, 0.2)",
-    "--panel-bg": "rgba(255, 248, 238, 0.94)",
-    "--panel-border": "#e3c08b",
-    "--line": "#d6b27f",
-    "--ink": "#392419",
-    "--ink-strong": "#25140d",
-    "--warn": "#b15a2b",
-    "--good": "#6c6f4e"
-  }
+﻿{
+    "displayName":  "Kitsune",
+    "ageFactor":  1.5,
+    "theme":  {
+                  "--page-bg-start":  "#fff0cf",
+                  "--page-bg-mid":  "#efb36e",
+                  "--page-bg-end":  "#8f4b3f",
+                  "--page-glow":  "rgba(255, 171, 76, 0.2)",
+                  "--panel-bg":  "rgba(255, 248, 238, 0.94)",
+                  "--panel-border":  "#e3c08b",
+                  "--line":  "#d6b27f",
+                  "--ink":  "#392419",
+                  "--ink-strong":  "#25140d",
+                  "--warn":  "#b15a2b",
+                  "--good":  "#6c6f4e"
+              },
+    "description":  "Sem descrição definida.",
+    "skillBonuses":  {
+
+                     },
+    "level0Bonuses":  {
+                          "life":  0,
+                          "sanity":  0,
+                          "mana":  0,
+                          "conviction":  0
+                      }
 }

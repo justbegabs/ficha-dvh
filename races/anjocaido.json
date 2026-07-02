@@ -1,17 +1,27 @@
-{
-  "displayName": "Anjo Caído",
-  "ageFactor": 2.4,
-  "theme": {
-    "--page-bg-start": "#f5e8fb",
-    "--page-bg-mid": "#d9b8ee",
-    "--page-bg-end": "#8f7ab8",
-    "--page-glow": "rgba(176, 127, 223, 0.22)",
-    "--panel-bg": "rgba(255, 250, 255, 0.94)",
-    "--panel-border": "#d4b7e7",
-    "--line": "#cfaedc",
-    "--ink": "#2c2334",
-    "--ink-strong": "#1a1220",
-    "--warn": "#7d468e",
-    "--good": "#4e638d"
-  }
+﻿{
+    "displayName":  "Anjo CaÃ­do",
+    "ageFactor":  2.4,
+    "theme":  {
+                  "--page-bg-start":  "#f5e8fb",
+                  "--page-bg-mid":  "#d9b8ee",
+                  "--page-bg-end":  "#8f7ab8",
+                  "--page-glow":  "rgba(176, 127, 223, 0.22)",
+                  "--panel-bg":  "rgba(255, 250, 255, 0.94)",
+                  "--panel-border":  "#d4b7e7",
+                  "--line":  "#cfaedc",
+                  "--ink":  "#2c2334",
+                  "--ink-strong":  "#1a1220",
+                  "--warn":  "#7d468e",
+                  "--good":  "#4e638d"
+              },
+    "description":  "Sem descrição definida.",
+    "skillBonuses":  {
+
+                     },
+    "level0Bonuses":  {
+                          "life":  0,
+                          "sanity":  0,
+                          "mana":  0,
+                          "conviction":  0
+                      }
 }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Origens - Sistema dos Deuses</title>
+  <title>Personagens - Sistema dos Deuses</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;700;800&family=Teko:wght@500;700&display=swap" rel="stylesheet" />
@@ -13,12 +13,11 @@
       --bg-2: #153a62;
       --ink: #eaf2ff;
       --muted: #b6c8df;
-      --line: rgba(0, 213, 255, 0.7);
-      --panel: rgba(11, 31, 56, 0.8);
-      --dock-bg: rgba(8, 24, 44, 0.88);
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -34,7 +33,7 @@
     .shell {
       min-height: 100vh;
       display: grid;
-      grid-template-rows: auto 1fr auto;
+      grid-template-rows: auto 1fr;
     }
 
     .top-bar {
@@ -58,18 +57,24 @@
       color: #ffe17a;
       font-size: 1.35rem;
       box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+    }
+
+    main {
+      max-width: 1040px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.2rem 1rem 1.4rem;
     }
 
     .hero {
-      max-width: 1040px;
-      margin: 0 auto;
-      padding: 3.5rem 1rem 1.5rem;
       text-align: center;
+      margin-bottom: 1rem;
     }
 
     .hero h1 {
-      margin: 0 0 0.75rem;
-      font-size: clamp(2.2rem, 5vw, 4rem);
+      margin: 0 0 0.55rem;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
       font-weight: 800;
       color: #ffd8ff;
       text-shadow: 0 0 8px #ff4ff3, 0 0 22px #b000ff;
@@ -79,119 +84,90 @@
       margin: 0;
       color: var(--muted);
       font-size: clamp(1rem, 2.2vw, 1.2rem);
-      line-height: 1.45;
     }
 
-    .controls {
-      max-width: 1040px;
-      margin: 0 auto;
-      padding: 0 1rem;
+    .panel {
+      border: 2px solid rgba(255, 193, 79, 0.45);
+      border-radius: 14px;
+      background: rgba(8, 24, 44, 0.82);
+      padding: 1rem;
+      box-shadow: 0 0 18px rgba(255, 193, 79, 0.18);
+    }
+
+    .panel__header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.8rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .panel__header h2 {
+      margin: 0;
+      font-family: "Teko", sans-serif;
+      letter-spacing: 0.02em;
+      font-size: clamp(1.7rem, 3vw, 2.1rem);
+      color: #ffe6b0;
+    }
+
+    .status {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .characters-grid {
       display: grid;
-      grid-template-columns: 1fr auto;
       gap: 0.65rem;
-    }
-
-    .search {
-      min-height: 2.7rem;
-      border-radius: 12px;
-      border: 1px solid rgba(0, 213, 255, 0.45);
-      background: rgba(255, 255, 255, 0.1);
-      color: #f6fbff;
-      padding: 0.4rem 0.7rem;
-      font-size: 1rem;
-    }
-
-    .search::placeholder { color: rgba(234, 242, 255, 0.72); }
-
-    .stats {
-      min-height: 2.7rem;
-      padding: 0 0.9rem;
-      border-radius: 12px;
-      border: 1px solid rgba(0, 213, 255, 0.45);
-      background: rgba(255, 255, 255, 0.08);
-      display: inline-flex;
-      align-items: center;
-      color: #dce9f9;
-      font-weight: 700;
-    }
-
-    .race-grid {
-      max-width: 1040px;
-      margin: 1rem auto 0;
-      padding: 0 1rem 1rem;
-      display: grid;
-      gap: 0.9rem;
       grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     }
 
-    .race-card {
-      border: 0;
-      text-align: left;
-      color: #f8fbff;
-      padding: 1rem;
-      border-radius: 18px;
-      min-height: 190px;
+    .character-card {
+      border: 1px solid rgba(255, 193, 79, 0.35);
+      border-radius: 12px;
+      background: rgba(11, 31, 56, 0.9);
+      padding: 0.7rem;
       display: grid;
-      align-content: start;
-      gap: 0.35rem;
-      cursor: pointer;
-      background:
-        radial-gradient(circle at top right, var(--card-glow), transparent 55%),
-        linear-gradient(160deg, var(--card-start), var(--card-mid) 55%, var(--card-end));
-      box-shadow: 0 18px 28px rgba(0, 0, 0, 0.28);
-      position: relative;
-      overflow: hidden;
-      transition: transform 140ms ease, box-shadow 140ms ease;
+      gap: 0.45rem;
     }
 
-    .race-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 24px 36px rgba(0, 0, 0, 0.35);
-    }
-
-    .race-card::after {
-      content: "";
-      position: absolute;
-      inset: auto -20% -35% auto;
-      width: 160px;
-      height: 160px;
-      border-radius: 50%;
-      background: color-mix(in srgb, var(--card-accent) 65%, transparent);
-      filter: blur(18px);
-      opacity: 0.35;
-      pointer-events: none;
-    }
-
-    .race-card__tag {
-      display: inline-flex;
-      width: fit-content;
-      padding: 0.18rem 0.55rem;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.14);
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .race-card strong {
+    .character-card strong {
       font-family: "Teko", sans-serif;
-      font-size: 2rem;
+      font-size: 1.45rem;
+      letter-spacing: 0.02em;
+      color: #ffe6b0;
       line-height: 1;
-      margin-top: 0.15rem;
     }
 
-    .race-card__meta,
-    .race-card__detail {
-      font-size: 0.94rem;
-      color: rgba(255, 255, 255, 0.86);
+    .character-meta {
+      color: #d4e1f3;
+      font-size: 0.84rem;
+      line-height: 1.35;
     }
 
-    .race-card__action {
-      margin-top: 0.35rem;
-      padding-top: 0.55rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.22);
-      font-weight: 800;
-      letter-spacing: 0.03em;
+    .character-actions {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .character-action {
+      flex: 1 1 0;
+      border: 1px solid rgba(0, 213, 255, 0.45);
+      border-radius: 8px;
+      background: rgba(20, 56, 88, 0.88);
+      color: #eaf2ff;
+      min-height: 34px;
+      font-family: "Raleway", sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .character-action.is-danger {
+      border-color: rgba(255, 106, 106, 0.42);
+      color: #ffd6d6;
+      background: rgba(91, 26, 26, 0.78);
     }
 
     .menu-overlay {
@@ -283,8 +259,9 @@
     }
 
     @media (max-width: 640px) {
-      .controls {
-        grid-template-columns: 1fr;
+      .panel__header {
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
   </style>
@@ -298,16 +275,17 @@
 
     <main>
       <section class="hero">
-        <h1>Origens Disponíveis</h1>
-        <p>Veja os detalhes carregados dos arquivos JSON e escolha uma origem para abrir a ficha.</p>
+        <h1>Personagens Salvos</h1>
+        <p>Todos os personagens salvos no site ficam organizados nesta área.</p>
       </section>
 
-      <section class="controls" aria-label="Ferramentas de busca">
-        <input id="originSearch" class="search" type="search" placeholder="Pesquisar origem..." autocomplete="off" />
-        <div id="originStats" class="stats">Carregando...</div>
+      <section class="panel" aria-label="Lista de personagens salvos">
+        <div class="panel__header">
+          <h2>Personagens</h2>
+          <p id="charactersStatus" class="status">Carregando personagens...</p>
+        </div>
+        <div id="charactersGrid" class="characters-grid"></div>
       </section>
-
-      <section id="originGrid" class="race-grid" aria-label="Lista de origens"></section>
     </main>
 
     <div id="menuOverlay" class="menu-overlay" hidden></div>
@@ -318,15 +296,15 @@
       </div>
       <div class="side-menu__links">
         <a class="side-menu__link" href="index.html"><span>Home</span><small>Página inicial</small></a>
-        <a class="side-menu__link" href="#originGrid"><span>Origens</span><small>Página atual</small></a>
+        <a class="side-menu__link" href="#charactersGrid"><span>Personagens</span><small>Página atual</small></a>
+        <a class="side-menu__link" href="races.html"><span>Raças</span><small>Ver detalhes</small></a>
         <a class="side-menu__link" href="classes.html"><span>Classes</span><small>Ver detalhes</small></a>
         <a class="side-menu__link" href="ficha.html"><span>Ficha</span><small>Abrir personagem</small></a>
-        <a class="side-menu__link" href="personagens.html"><span>Personagens</span><small>Lista de salvos</small></a>
-        <a class="side-menu__link" href="races.html"><span>Raças</span><small>Detalhes</small></a>
+        <a class="side-menu__link" href="origens.html"><span>Origens</span><small>Ver detalhes</small></a>
       </div>
     </aside>
   </div>
 
-  <script src="origens.js"></script>
+  <script src="personagens.js"></script>
 </body>
 </html>

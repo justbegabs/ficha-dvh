@@ -1,17 +1,27 @@
-{
-  "displayName": "Vampiro",
-  "ageFactor": 2,
-  "theme": {
-    "--page-bg-start": "#f0d8e4",
-    "--page-bg-mid": "#b76b8b",
-    "--page-bg-end": "#2a0f19",
-    "--page-glow": "rgba(208, 95, 135, 0.22)",
-    "--panel-bg": "rgba(253, 246, 249, 0.95)",
-    "--panel-border": "#ddb1c2",
-    "--line": "#cb98ad",
-    "--ink": "#341d25",
-    "--ink-strong": "#1d0f14",
-    "--warn": "#a14566",
-    "--good": "#6a4f5a"
-  }
+﻿{
+    "displayName":  "Vampiro",
+    "ageFactor":  2,
+    "theme":  {
+                  "--page-bg-start":  "#f0d8e4",
+                  "--page-bg-mid":  "#b76b8b",
+                  "--page-bg-end":  "#2a0f19",
+                  "--page-glow":  "rgba(208, 95, 135, 0.22)",
+                  "--panel-bg":  "rgba(253, 246, 249, 0.95)",
+                  "--panel-border":  "#ddb1c2",
+                  "--line":  "#cb98ad",
+                  "--ink":  "#341d25",
+                  "--ink-strong":  "#1d0f14",
+                  "--warn":  "#a14566",
+                  "--good":  "#6a4f5a"
+              },
+    "description":  "Sem descrição definida.",
+    "skillBonuses":  {
+
+                     },
+    "level0Bonuses":  {
+                          "life":  0,
+                          "sanity":  0,
+                          "mana":  0,
+                          "conviction":  0
+                      }
 }

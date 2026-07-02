@@ -1,17 +1,28 @@
-{
-  "displayName": "Semideus",
-  "ageFactor": 2.2,
-  "theme": {
-    "--page-bg-start": "#fff4c8",
-    "--page-bg-mid": "#e0c15f",
-    "--page-bg-end": "#5b69a7",
-    "--page-glow": "rgba(246, 205, 94, 0.24)",
-    "--panel-bg": "rgba(255, 251, 242, 0.94)",
-    "--panel-border": "#dfcf90",
-    "--line": "#d1bf7a",
-    "--ink": "#2f2b21",
-    "--ink-strong": "#19150d",
-    "--warn": "#a57c2b",
-    "--good": "#4d628f"
-  }
+﻿{
+    "displayName":  "Semideus",
+    "ageFactor":  2.2,
+    "theme":  {
+                  "--page-bg-start":  "#fff4c8",
+                  "--page-bg-mid":  "#e0c15f",
+                  "--page-bg-end":  "#5b69a7",
+                  "--page-glow":  "rgba(246, 205, 94, 0.24)",
+                  "--panel-bg":  "rgba(255, 251, 242, 0.94)",
+                  "--panel-border":  "#dfcf90",
+                  "--line":  "#d1bf7a",
+                  "--ink":  "#2f2b21",
+                  "--ink-strong":  "#19150d",
+                  "--warn":  "#a57c2b",
+                  "--good":  "#4d628f"
+              },
+    "description":  "Herdeiros de sangue divino, equilibram poder mistico e presenca heroica.",
+    "skillBonuses":  {
+                         "Conviccao":  1,
+                         "Liturgia":  1
+                     },
+    "level0Bonuses":  {
+                          "life":  2,
+                          "sanity":  1,
+                          "mana":  2,
+                          "conviction":  2
+                      }
 }

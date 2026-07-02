@@ -1,17 +1,27 @@
-{
-  "displayName": "Alien",
-  "ageFactor": 0.8,
-  "theme": {
-    "--page-bg-start": "#dff9ff",
-    "--page-bg-mid": "#9fe3f2",
-    "--page-bg-end": "#7d9fb8",
-    "--page-glow": "rgba(92, 208, 232, 0.22)",
-    "--panel-bg": "rgba(246, 253, 255, 0.92)",
-    "--panel-border": "#a3d7e4",
-    "--line": "#9ccad7",
-    "--ink": "#1d2c34",
-    "--ink-strong": "#10212c",
-    "--warn": "#2a6d84",
-    "--good": "#2f7a68"
-  }
+﻿{
+    "displayName":  "Alien",
+    "ageFactor":  0.8,
+    "theme":  {
+                  "--page-bg-start":  "#dff9ff",
+                  "--page-bg-mid":  "#9fe3f2",
+                  "--page-bg-end":  "#7d9fb8",
+                  "--page-glow":  "rgba(92, 208, 232, 0.22)",
+                  "--panel-bg":  "rgba(246, 253, 255, 0.92)",
+                  "--panel-border":  "#a3d7e4",
+                  "--line":  "#9ccad7",
+                  "--ink":  "#1d2c34",
+                  "--ink-strong":  "#10212c",
+                  "--warn":  "#2a6d84",
+                  "--good":  "#2f7a68"
+              },
+    "description":  "Sem descrição definida.",
+    "skillBonuses":  {
+
+                     },
+    "level0Bonuses":  {
+                          "life":  0,
+                          "sanity":  0,
+                          "mana":  0,
+                          "conviction":  0
+                      }
 }

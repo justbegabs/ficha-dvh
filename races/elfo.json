@@ -1,34 +1,27 @@
-{
-  "displayName": "Elfo",
-  "ageFactor": 5,
-  "theme": {
-    "--page-bg-start": "#dcfff7",
-    "--page-bg-mid": "#b8eee5",
-    "--page-bg-end": "#d7e7ff",
-    "--page-glow": "rgba(57, 188, 168, 0.18)",
-    "--panel-bg": "rgba(248, 255, 253, 0.9)",
-    "--panel-border": "#b7d9d5",
-    "--line": "#bedbd7",
-    "--ink": "#27323a",
-    "--ink-strong": "#17323a",
-    "--warn": "#2e6e67",
-    "--good": "#227151"
-  }
-}{
-  "id": "elfo",
-  "displayName": "Elfo",
-  "ageFactor": 5,
-  "theme": {
-    "--page-bg-start": "#dcfff7",
-    "--page-bg-mid": "#b8eee5",
-    "--page-bg-end": "#d7e7ff",
-    "--page-glow": "rgba(57, 188, 168, 0.18)",
-    "--panel-bg": "rgba(248, 255, 253, 0.9)",
-    "--panel-border": "#b7d9d5",
-    "--line": "#bedbd7",
-    "--ink": "#27323a",
-    "--ink-strong": "#17323a",
-    "--warn": "#2e6e67",
-    "--good": "#227151"
-  }
+﻿{
+    "displayName":  "Elfo",
+    "ageFactor":  5,
+    "theme":  {
+                  "--page-bg-start":  "#dcfff7",
+                  "--page-bg-mid":  "#b8eee5",
+                  "--page-bg-end":  "#d7e7ff",
+                  "--page-glow":  "rgba(57, 188, 168, 0.18)",
+                  "--panel-bg":  "rgba(248, 255, 253, 0.9)",
+                  "--panel-border":  "#b7d9d5",
+                  "--line":  "#bedbd7",
+                  "--ink":  "#27323a",
+                  "--ink-strong":  "#17323a",
+                  "--warn":  "#2e6e67",
+                  "--good":  "#227151"
+              },
+    "description":  "Sem descrição definida.",
+    "skillBonuses":  {
+
+                     },
+    "level0Bonuses":  {
+                          "life":  0,
+                          "sanity":  0,
+                          "mana":  0,
+                          "conviction":  0
+                      }
 }

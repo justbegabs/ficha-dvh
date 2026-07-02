@@ -1,17 +1,27 @@
-{
-  "displayName": "Sereia",
-  "ageFactor": 3,
-  "theme": {
-    "--page-bg-start": "#dbf7ff",
-    "--page-bg-mid": "#9ed8f2",
-    "--page-bg-end": "#4d7fa1",
-    "--page-glow": "rgba(90, 188, 236, 0.2)",
-    "--panel-bg": "rgba(247, 253, 255, 0.94)",
-    "--panel-border": "#aed6e8",
-    "--line": "#9dc9dc",
-    "--ink": "#22313a",
-    "--ink-strong": "#112028",
-    "--warn": "#4b7990",
-    "--good": "#327d7f"
-  }
+﻿{
+    "displayName":  "Sereia",
+    "ageFactor":  3,
+    "theme":  {
+                  "--page-bg-start":  "#dbf7ff",
+                  "--page-bg-mid":  "#9ed8f2",
+                  "--page-bg-end":  "#4d7fa1",
+                  "--page-glow":  "rgba(90, 188, 236, 0.2)",
+                  "--panel-bg":  "rgba(247, 253, 255, 0.94)",
+                  "--panel-border":  "#aed6e8",
+                  "--line":  "#9dc9dc",
+                  "--ink":  "#22313a",
+                  "--ink-strong":  "#112028",
+                  "--warn":  "#4b7990",
+                  "--good":  "#327d7f"
+              },
+    "description":  "Sem descrição definida.",
+    "skillBonuses":  {
+
+                     },
+    "level0Bonuses":  {
+                          "life":  0,
+                          "sanity":  0,
+                          "mana":  0,
+                          "conviction":  0
+                      }
 }

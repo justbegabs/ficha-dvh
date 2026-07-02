@@ -89,6 +89,20 @@ const RACE_AGE_FACTORS = {
 const raceCatalog = {};
 const originCatalog = {};
 const classCatalog = {};
+const ENABLE_DYNAMIC_APPEARANCE_BY_SELECTION = false;
+const CHARACTERS_STORAGE_KEY = "dvhCharacters";
+const SELECTED_CHARACTER_STORAGE_KEY = "dvhSelectedCharacterId";
+const VISUAL_DEMO_PRESET = {
+  classId: "carteado",
+  raceId: "semideus",
+  originId: ""
+};
+const LEVEL_ZERO_BASE_STATS = {
+  life: 10,
+  sanity: 10,
+  mana: 15,
+  conviction: 15
+};
 
 const CLASS_THEMES = {
   Guerreiro: {
@@ -327,10 +341,15 @@ const state = {
   skillProgress: {},
   characteristics: {},
   lastRollConfig: null,
-  lastAgeField: "real"
+  lastAgeField: "real",
+  raceLevelZeroApplied: false
 };
 
 const references = {
+  menuButton: document.querySelector(".icon-btn[aria-label='Menu']"),
+  menuClose: document.getElementById("menuClose"),
+  menuOverlay: document.getElementById("menuOverlay"),
+  sideMenu: document.getElementById("sideMenu"),
   rulesPanel: document.querySelector(".rules-panel"),
   rulesToggle: document.getElementById("rulesToggle"),
   rulesContent: document.getElementById("rulesContent"),
@@ -342,14 +361,26 @@ const references = {
   characterClassInfo: document.getElementById("characterClassInfo"),
   characterRaceInfo: document.getElementById("characterRaceInfo"),
   characterOriginInfo: document.getElementById("characterOriginInfo"),
+  raceDescription: document.getElementById("raceDescription"),
+  raceBonuses: document.getElementById("raceBonuses"),
   realAge: document.getElementById("realAge"),
   humanAge: document.getElementById("humanAge"),
   ageHint: document.getElementById("ageHint"),
+  lifeCurrent: document.getElementById("lifeCurrent"),
+  lifeMax: document.getElementById("lifeMax"),
+  sanityCurrent: document.getElementById("sanityCurrent"),
+  sanityMax: document.getElementById("sanityMax"),
+  manaCurrent: document.getElementById("manaCurrent"),
+  manaMax: document.getElementById("manaMax"),
+  soulCurrent: document.getElementById("soulCurrent"),
+  soulMax: document.getElementById("soulMax"),
   skillsList: document.getElementById("skillsList"),
   testAttribute: document.getElementById("testAttribute"),
   testSkill: document.getElementById("testSkill"),
   rollButton: document.getElementById("rollButton"),
   rollResult: document.getElementById("rollResult"),
+  saveCharacterButton: document.getElementById("saveCharacterButton"),
+  saveCharacterStatus: document.getElementById("saveCharacterStatus"),
   resultPopup: document.getElementById("resultPopup"),
   rerollButton: document.getElementById("rerollButton"),
   closeResultPopup: document.getElementById("closeResultPopup"),
@@ -367,10 +398,17 @@ async function initialize() {
   await loadOriginCatalog();
   await loadClassCatalog();
   initializeValues();
+  renderRaceSelectors();
   renderOriginSelectors();
   renderClassSelectors();
   syncOriginSelection();
   syncClassSelection();
+  const loadedFromStorage = loadStoredCharacterSelection();
+  if (!loadedFromStorage) {
+    applyVisualDemoPreset();
+    applyRaceLevelZeroBonuses();
+  }
+  renderRaceInfo();
   renderAttributeInputs();
   renderCharacteristicsInputs();
   renderSkillInputs();
@@ -380,6 +418,20 @@ async function initialize() {
   updateHumanAge();
   applyAppearanceTheme();
   bindEvents();
+}
+
+function applyVisualDemoPreset() {
+  if (references.characterClassInfo && classCatalog[VISUAL_DEMO_PRESET.classId]) {
+    references.characterClassInfo.value = VISUAL_DEMO_PRESET.classId;
+  }
+
+  if (references.characterRaceInfo && raceCatalog[VISUAL_DEMO_PRESET.raceId]) {
+    references.characterRaceInfo.value = VISUAL_DEMO_PRESET.raceId;
+  }
+
+  if (references.characterOriginInfo) {
+    references.characterOriginInfo.value = VISUAL_DEMO_PRESET.originId;
+  }
 }
 
 async function loadRaceCatalog() {
@@ -397,6 +449,11 @@ async function loadRaceCatalog() {
         id: raceId,
         displayName: data.displayName || displayName(raceId),
         ageFactor: Number.isFinite(Number(data.ageFactor)) ? Number(data.ageFactor) : (RACE_AGE_FACTORS[displayName(raceId)] || 1),
+        description: typeof data.description === "string" ? data.description : "",
+        skillBonuses: typeof data.skillBonuses === "object" && data.skillBonuses !== null ? data.skillBonuses : {},
+        level0Bonuses: typeof data.level0Bonuses === "object" && data.level0Bonuses !== null
+          ? data.level0Bonuses
+          : { life: 0, sanity: 0, mana: 0, conviction: 0 },
         theme: data.theme || {}
       };
     } catch {
@@ -404,6 +461,9 @@ async function loadRaceCatalog() {
         id: raceId,
         displayName: displayName(raceId),
         ageFactor: RACE_AGE_FACTORS[displayName(raceId)] || 1,
+        description: "",
+        skillBonuses: {},
+        level0Bonuses: { life: 0, sanity: 0, mana: 0, conviction: 0 },
         theme: {}
       };
     }
@@ -800,12 +860,17 @@ function createOption(value, label = value) {
 }
 
 function bindEvents() {
+  setupSideMenu();
+
   if (references.rulesToggle && references.rulesContent && references.rulesPanel) {
     references.rulesToggle.addEventListener("click", toggleRulesPanel);
   }
 
   if (references.rollButton) {
     references.rollButton.addEventListener("click", onRoll);
+  }
+  if (references.saveCharacterButton) {
+    references.saveCharacterButton.addEventListener("click", saveCharacterAsJson);
   }
   if (references.xpButton) {
     references.xpButton.addEventListener("click", onApplyXp);
@@ -856,6 +921,55 @@ function bindEvents() {
       const total = result.rolls.reduce((sum, value) => sum + value, 0);
       references.damageResult.innerHTML = `<strong>D${dieSize}</strong>: [${result.rolls.join(", ")}] = ${total}${result.rolls.length > 1 ? " <br>Explosão separada em novos dados." : ""}`;
     });
+  });
+}
+
+function setupSideMenu() {
+  if (!references.menuButton || !references.sideMenu || !references.menuOverlay) {
+    return;
+  }
+
+  const openMenu = () => {
+    references.menuOverlay.hidden = false;
+    references.menuOverlay.classList.add("is-open");
+    references.sideMenu.classList.add("is-open");
+    references.sideMenu.setAttribute("aria-hidden", "false");
+    references.menuButton.setAttribute("aria-expanded", "true");
+  };
+
+  const closeMenu = () => {
+    references.menuOverlay.classList.remove("is-open");
+    references.sideMenu.classList.remove("is-open");
+    references.sideMenu.setAttribute("aria-hidden", "true");
+    references.menuButton.setAttribute("aria-expanded", "false");
+    window.setTimeout(() => {
+      if (references.menuOverlay) {
+        references.menuOverlay.hidden = true;
+      }
+    }, 160);
+  };
+
+  references.menuButton.setAttribute("aria-expanded", "false");
+  references.menuOverlay.hidden = true;
+
+  references.menuButton.addEventListener("click", () => {
+    const isOpen = references.sideMenu?.classList.contains("is-open");
+    if (isOpen) {
+      closeMenu();
+      return;
+    }
+
+    openMenu();
+  });
+
+  if (references.menuClose) {
+    references.menuClose.addEventListener("click", closeMenu);
+  }
+
+  references.menuOverlay.addEventListener("click", closeMenu);
+
+  references.sideMenu.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", closeMenu);
   });
 }
 
@@ -923,7 +1037,138 @@ function updateAgeFields(sourceField = state.lastAgeField || "real") {
   }
 }
 
+function normalizeToken(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function resolveSkillKey(skillName) {
+  const normalizedTarget = normalizeToken(skillName);
+  if (!normalizedTarget) {
+    return "";
+  }
+
+  return Object.values(skillGroups)
+    .flat()
+    .find((skillKey) => {
+      return normalizeToken(skillKey) === normalizedTarget || normalizeToken(displayName(skillKey)) === normalizedTarget;
+    }) || "";
+}
+
+function getNormalizedRaceLevelZeroBonuses(raceData) {
+  const source = raceData?.level0Bonuses || {};
+  const life = Number(source.life ?? source.vida ?? 0);
+  const sanity = Number(source.sanity ?? source.sanidade ?? 0);
+  const mana = Number(source.mana ?? 0);
+  const conviction = Number(source.conviction ?? source.conviccao ?? source.conviccaoBase ?? source.alma ?? source.soul ?? 0);
+
+  return {
+    life: Number.isFinite(life) ? life : 0,
+    sanity: Number.isFinite(sanity) ? sanity : 0,
+    mana: Number.isFinite(mana) ? mana : 0,
+    conviction: Number.isFinite(conviction) ? conviction : 0
+  };
+}
+
+function getNormalizedRaceSkillBonuses(raceData) {
+  const source = raceData?.skillBonuses || {};
+  const bonuses = {};
+
+  Object.entries(source).forEach(([key, value]) => {
+    const skillKey = resolveSkillKey(key);
+    const bonusValue = Number(value);
+
+    if (!skillKey || !Number.isFinite(bonusValue) || bonusValue <= 0) {
+      return;
+    }
+
+    bonuses[skillKey] = Math.round(bonusValue);
+  });
+
+  return bonuses;
+}
+
+function applyRaceLevelZeroBonuses() {
+  const raceId = references.characterRaceInfo?.value || "";
+  const raceData = getRaceDefinition(raceId);
+  const statBonuses = getNormalizedRaceLevelZeroBonuses(raceData);
+  const skillBonuses = getNormalizedRaceSkillBonuses(raceData);
+
+  if (references.lifeCurrent && references.lifeMax) {
+    const nextLife = Math.max(0, LEVEL_ZERO_BASE_STATS.life + statBonuses.life);
+    references.lifeCurrent.value = String(nextLife);
+    references.lifeMax.value = String(nextLife);
+  }
+
+  if (references.sanityCurrent && references.sanityMax) {
+    const nextSanity = Math.max(0, LEVEL_ZERO_BASE_STATS.sanity + statBonuses.sanity);
+    references.sanityCurrent.value = String(nextSanity);
+    references.sanityMax.value = String(nextSanity);
+  }
+
+  if (references.manaCurrent && references.manaMax) {
+    const nextMana = Math.max(0, LEVEL_ZERO_BASE_STATS.mana + statBonuses.mana);
+    references.manaCurrent.value = String(nextMana);
+    references.manaMax.value = String(nextMana);
+  }
+
+  if (references.soulCurrent && references.soulMax) {
+    const nextConviction = Math.max(0, LEVEL_ZERO_BASE_STATS.conviction + statBonuses.conviction);
+    references.soulCurrent.value = String(nextConviction);
+    references.soulMax.value = String(nextConviction);
+  }
+
+  Object.values(skillGroups).flat().forEach((skillName) => {
+    const base = SKILL_MIN_VALUE;
+    const bonus = skillBonuses[skillName] || 0;
+    const levelWithBonus = clamp(base + bonus, SKILL_MIN_VALUE, SKILL_MAX_VALUE);
+    state.skills[skillName] = levelWithBonus;
+    state.skillCreationBase[skillName] = levelWithBonus;
+    state.skillProgress[skillName] = 0;
+  });
+
+  state.raceLevelZeroApplied = true;
+}
+
+function renderRaceInfo() {
+  if (!references.raceDescription || !references.raceBonuses) {
+    return;
+  }
+
+  const raceId = references.characterRaceInfo?.value || "";
+  if (!raceId) {
+    references.raceDescription.textContent = "Selecione uma raça para ver descrição e bônus de nível 0.";
+    references.raceBonuses.textContent = "Bônus de perícias e status ainda não definidos.";
+    return;
+  }
+
+  const raceData = getRaceDefinition(raceId);
+  const statBonuses = getNormalizedRaceLevelZeroBonuses(raceData);
+  const skillBonuses = getNormalizedRaceSkillBonuses(raceData);
+
+  references.raceDescription.textContent = raceData.description || "Sem descrição definida para esta raça.";
+
+  const skillText = Object.entries(skillBonuses).length
+    ? Object.entries(skillBonuses).map(([skill, bonus]) => `${displayName(skill)} +${bonus}`).join(" | ")
+    : "Sem bônus de perícias.";
+
+  references.raceBonuses.textContent = [
+    `Nível 0 - Vida: ${statBonuses.life >= 0 ? "+" : ""}${statBonuses.life}`,
+    `Sanidade: ${statBonuses.sanity >= 0 ? "+" : ""}${statBonuses.sanity}`,
+    `Mana: ${statBonuses.mana >= 0 ? "+" : ""}${statBonuses.mana}`,
+    `Convicção: ${statBonuses.conviction >= 0 ? "+" : ""}${statBonuses.conviction}`,
+    skillText
+  ].join(" | ");
+}
+
 function handleRaceThemeChange() {
+  applyRaceLevelZeroBonuses();
+  renderSkillInputs();
+  updatePools();
+  renderRaceInfo();
   updateAgeFields(state.lastAgeField);
   applyAppearanceTheme();
 }
@@ -935,6 +1180,13 @@ function syncBasicAndInfoRace() {
 }
 
 function applyAppearanceTheme() {
+  if (!ENABLE_DYNAMIC_APPEARANCE_BY_SELECTION) {
+    document.body.dataset.classTheme = "default";
+    document.body.dataset.raceTheme = "default";
+    document.body.dataset.originTheme = "default";
+    return;
+  }
+
   const activeClass = references.characterClassInfo?.value || "";
   const activeRace = references.characterRaceInfo?.value || "";
   const activeOrigin = references.characterOriginInfo?.value || "";
@@ -990,6 +1242,9 @@ function getRaceDefinition(raceId) {
     id: raceId,
     displayName: displayName(raceId),
     ageFactor: RACE_AGE_FACTORS[displayName(raceId)] || 1,
+    description: "",
+    skillBonuses: {},
+    level0Bonuses: { life: 0, sanity: 0, mana: 0, conviction: 0 },
     theme: RACE_THEMES.Humano
   };
 }
@@ -1262,6 +1517,193 @@ function onApplyXp() {
     ? "Acima do limite de criação (normal para evolução por XP)."
     : "Dentro do limite de criação.";
   showMessage(references.xpResult, `${displayName(skill)} subiu ${raised} nível(is). Nível atual: ${level}. XP restante: ${xp}. ${creationStatus}`);
+}
+
+function collectCharacterData() {
+  const raceId = references.characterRaceInfo?.value || "";
+  const classId = references.characterClassInfo?.value || "";
+  const originId = references.characterOriginInfo?.value || "";
+  const raceData = raceId ? getRaceDefinition(raceId) : null;
+  const classData = classId ? getClassDefinition(classId) : null;
+  const originData = originId ? getOriginDefinition(originId) : null;
+
+  return {
+    exportedAt: new Date().toISOString(),
+    basicInfo: {
+      name: document.getElementById("characterName")?.value || "",
+      realAge: Number.parseInt(references.realAge?.value || "", 10) || 0,
+      humanAge: Number.parseInt(references.humanAge?.value || "", 10) || 0,
+      birthDate: document.getElementById("birthDate")?.value || "",
+      height: document.getElementById("characterHeight")?.value || "",
+      sexuality: document.getElementById("characterSexuality")?.value || "",
+      bloodType: document.getElementById("bloodType")?.value || ""
+    },
+    characterInfo: {
+      class: {
+        id: classId,
+        name: classData?.displayName || ""
+      },
+      race: {
+        id: raceId,
+        name: raceData?.displayName || "",
+        description: raceData?.description || "",
+        level0Bonuses: raceData?.level0Bonuses || { life: 0, sanity: 0, mana: 0, conviction: 0 },
+        skillBonuses: raceData?.skillBonuses || {}
+      },
+      origin: {
+        id: originId,
+        name: originData?.displayName || ""
+      }
+    },
+    stats: {
+      life: {
+        current: Number.parseInt(references.lifeCurrent?.value || "", 10) || 0,
+        max: Number.parseInt(references.lifeMax?.value || "", 10) || 0
+      },
+      sanity: {
+        current: Number.parseInt(references.sanityCurrent?.value || "", 10) || 0,
+        max: Number.parseInt(references.sanityMax?.value || "", 10) || 0
+      },
+      mana: {
+        current: Number.parseInt(references.manaCurrent?.value || "", 10) || 0,
+        max: Number.parseInt(references.manaMax?.value || "", 10) || 0
+      },
+      conviction: {
+        current: Number.parseInt(references.soulCurrent?.value || "", 10) || 0,
+        max: Number.parseInt(references.soulMax?.value || "", 10) || 0
+      }
+    },
+    attributes: state.attributes,
+    skills: state.skills,
+    skillCreationBase: state.skillCreationBase,
+    skillProgress: state.skillProgress,
+    characteristics: state.characteristics
+  };
+}
+
+function readStoredCharacters() {
+  try {
+    const raw = localStorage.getItem(CHARACTERS_STORAGE_KEY);
+    if (!raw) {
+      return [];
+    }
+
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeStoredCharacters(characters) {
+  localStorage.setItem(CHARACTERS_STORAGE_KEY, JSON.stringify(characters));
+}
+
+function loadStoredCharacterSelection() {
+  const selectedId = localStorage.getItem(SELECTED_CHARACTER_STORAGE_KEY);
+  if (!selectedId) {
+    return false;
+  }
+
+  const selected = readStoredCharacters().find((entry) => entry.id === selectedId);
+  localStorage.removeItem(SELECTED_CHARACTER_STORAGE_KEY);
+
+  if (!selected?.data) {
+    return false;
+  }
+
+  applyStoredCharacterData(selected.data);
+  return true;
+}
+
+function applyStoredCharacterData(data) {
+  const basic = data.basicInfo || {};
+  const info = data.characterInfo || {};
+  const stats = data.stats || {};
+
+  const characterName = document.getElementById("characterName");
+  const birthDate = document.getElementById("birthDate");
+  const height = document.getElementById("characterHeight");
+  const sexuality = document.getElementById("characterSexuality");
+  const bloodType = document.getElementById("bloodType");
+
+  if (characterName) characterName.value = basic.name || "";
+  if (references.realAge) references.realAge.value = String(Number.isFinite(Number(basic.realAge)) ? Number(basic.realAge) : "");
+  if (references.humanAge) references.humanAge.value = String(Number.isFinite(Number(basic.humanAge)) ? Number(basic.humanAge) : "");
+  if (birthDate) birthDate.value = basic.birthDate || "";
+  if (height) height.value = basic.height || "";
+  if (sexuality) sexuality.value = basic.sexuality || "";
+  if (bloodType) bloodType.value = basic.bloodType || "";
+
+  if (references.characterClassInfo && info.class?.id && classCatalog[info.class.id]) {
+    references.characterClassInfo.value = info.class.id;
+  }
+
+  if (references.characterRaceInfo && info.race?.id && raceCatalog[info.race.id]) {
+    references.characterRaceInfo.value = info.race.id;
+  }
+
+  if (references.characterOriginInfo) {
+    const originId = info.origin?.id || "";
+    references.characterOriginInfo.value = originCatalog[originId] ? originId : "";
+  }
+
+  if (references.lifeCurrent) references.lifeCurrent.value = String(Number(stats.life?.current) || 0);
+  if (references.lifeMax) references.lifeMax.value = String(Number(stats.life?.max) || 0);
+  if (references.sanityCurrent) references.sanityCurrent.value = String(Number(stats.sanity?.current) || 0);
+  if (references.sanityMax) references.sanityMax.value = String(Number(stats.sanity?.max) || 0);
+  if (references.manaCurrent) references.manaCurrent.value = String(Number(stats.mana?.current) || 0);
+  if (references.manaMax) references.manaMax.value = String(Number(stats.mana?.max) || 0);
+  if (references.soulCurrent) references.soulCurrent.value = String(Number(stats.conviction?.current) || 0);
+  if (references.soulMax) references.soulMax.value = String(Number(stats.conviction?.max) || 0);
+
+  const flatSkills = Object.values(skillGroups).flat();
+  Object.keys(state.attributes).forEach((key) => {
+    if (Number.isFinite(Number(data.attributes?.[key]))) {
+      state.attributes[key] = clamp(Number(data.attributes[key]), ATTRIBUTE_MIN_VALUE, ATTRIBUTE_MAX_VALUE);
+    }
+  });
+
+  flatSkills.forEach((key) => {
+    if (Number.isFinite(Number(data.skills?.[key]))) {
+      state.skills[key] = clamp(Number(data.skills[key]), SKILL_MIN_VALUE, SKILL_MAX_VALUE);
+    }
+    if (Number.isFinite(Number(data.skillCreationBase?.[key]))) {
+      state.skillCreationBase[key] = clamp(Number(data.skillCreationBase[key]), SKILL_MIN_VALUE, SKILL_MAX_VALUE);
+    }
+    if (Number.isFinite(Number(data.skillProgress?.[key]))) {
+      state.skillProgress[key] = Math.max(0, Math.floor(Number(data.skillProgress[key])));
+    }
+  });
+
+  Object.keys(state.characteristics).forEach((key) => {
+    if (Number.isFinite(Number(data.characteristics?.[key]))) {
+      state.characteristics[key] = clamp(Number(data.characteristics[key]), 0, CHARACTERISTIC_SLOTS);
+    }
+  });
+}
+
+function saveCharacterAsJson() {
+  const payload = collectCharacterData();
+  const id = `char-${Date.now()}`;
+  const savedAt = new Date().toISOString();
+  const entry = {
+    id,
+    name: payload.basicInfo.name || "Personagem sem nome",
+    className: payload.characterInfo.class.name || "",
+    raceName: payload.characterInfo.race.name || "",
+    originName: payload.characterInfo.origin.name || "",
+    savedAt,
+    data: payload
+  };
+
+  const current = readStoredCharacters();
+  current.push(entry);
+  writeStoredCharacters(current);
+
+  if (references.saveCharacterStatus) {
+    references.saveCharacterStatus.textContent = `Personagem salvo no site. Veja em Index > Personagens.`;
+  }
 }
 
 function updatePools() {

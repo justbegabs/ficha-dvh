@@ -1,100 +1,66 @@
-const raceFiles = [
-  "alien.json",
-  "anao.json",
-  "anjo.json",
-  "anjocaido.json",
-  "banshee.json",
-  "bruxa.json",
-  "ciborgue.json",
-  "demonio.json",
-  "elfo.json",
-  "esqueleto.json",
-  "fae.json",
-  "humano.json",
-  "kanima.json",
-  "kitsune.json",
-  "lobisomem.json",
-  "metamorfo.json",
-  "neko.json",
-  "ninfa.json",
-  "nogitsune.json",
-  "satiro.json",
-  "semideus.json",
-  "sereia.json",
-  "subuco.json",
-  "vampiro.json",
-  "veliria.json"
-];
-
-const raceGrid = document.getElementById("raceGrid");
-const raceCount = document.getElementById("raceCount");
-const raceStatus = document.getElementById("raceStatus");
-const charactersGrid = document.getElementById("charactersGrid");
-const charactersStatus = document.getElementById("charactersStatus");
 const CHARACTERS_STORAGE_KEY = "dvhCharacters";
 const SELECTED_CHARACTER_STORAGE_KEY = "dvhSelectedCharacterId";
 
-async function loadRaces() {
-  if (!raceGrid) {
+const charactersGrid = document.getElementById("charactersGrid");
+const charactersStatus = document.getElementById("charactersStatus");
+const menuButton = document.querySelector(".icon-btn[aria-label='Menu']");
+const menuClose = document.getElementById("menuClose");
+const menuOverlay = document.getElementById("menuOverlay");
+const sideMenu = document.getElementById("sideMenu");
+
+function openMenu() {
+  if (!menuOverlay || !sideMenu || !menuButton) {
     return;
   }
 
-  raceGrid.innerHTML = "";
-  raceStatus.textContent = "Carregando raças...";
+  menuOverlay.hidden = false;
+  menuOverlay.classList.add("is-open");
+  sideMenu.classList.add("is-open");
+  sideMenu.setAttribute("aria-hidden", "false");
+  menuButton.setAttribute("aria-expanded", "true");
+}
 
-  const races = await Promise.all(
-    raceFiles.map(async (fileName) => {
-      try {
-        const response = await fetch(`races/${fileName}`, { cache: "no-store" });
-        if (!response.ok) {
-          throw new Error(fileName);
-        }
-        const data = await response.json();
-        return {
-          id: fileName.replace(/\.json$/i, ""),
-          ...data
-        };
-      } catch {
-        return null;
-      }
-    })
-  );
-
-  const validRaces = races.filter(Boolean);
-  if (raceCount) {
-    raceCount.textContent = `${validRaces.length} raças carregadas`;
+function closeMenu() {
+  if (!menuOverlay || !sideMenu || !menuButton) {
+    return;
   }
-  raceStatus.textContent = validRaces.length ? "Selecione uma raça para entrar na ficha." : "Não foi possível carregar as raças.";
 
-  validRaces.forEach((race) => {
-    const theme = race.theme || {};
-    const card = document.createElement("button");
-    card.type = "button";
-    card.className = "race-card";
-    card.style.setProperty("--card-start", theme["--page-bg-start"] || "#11294a");
-    card.style.setProperty("--card-mid", theme["--page-bg-mid"] || "#1b3b68");
-    card.style.setProperty("--card-end", theme["--page-bg-end"] || "#08101d");
-    card.style.setProperty("--card-glow", theme["--page-glow"] || "rgba(0, 213, 255, 0.18)");
-    card.style.setProperty("--card-accent", theme["--accent-soft"] || "#ffc14f");
+  menuOverlay.classList.remove("is-open");
+  sideMenu.classList.remove("is-open");
+  sideMenu.setAttribute("aria-hidden", "true");
+  menuButton.setAttribute("aria-expanded", "false");
+  window.setTimeout(() => {
+    menuOverlay.hidden = true;
+  }, 160);
+}
 
-    card.innerHTML = `
-      <span class="race-card__tag">Raça</span>
-      <strong>${race.displayName || race.id}</strong>
-      <span class="race-card__meta">Fator de idade: ${race.ageFactor ?? "-"}</span>
-      <span class="race-card__meta">Tema visual carregado do JSON</span>
-      <span class="race-card__action">Abrir na ficha</span>
-    `;
+if (menuButton) {
+  menuButton.setAttribute("aria-expanded", "false");
+  menuButton.addEventListener("click", () => {
+    const isOpen = sideMenu?.classList.contains("is-open");
+    if (isOpen) {
+      closeMenu();
+      return;
+    }
 
-    card.addEventListener("click", () => {
-      localStorage.setItem("selectedRace", race.id);
-      window.location.href = "ficha.html";
-    });
-
-    raceGrid.appendChild(card);
+    openMenu();
   });
 }
 
-loadRaces();
+if (menuClose) {
+  menuClose.addEventListener("click", closeMenu);
+}
+
+if (menuOverlay) {
+  menuOverlay.hidden = true;
+  menuOverlay.addEventListener("click", closeMenu);
+}
+
+if (sideMenu) {
+  sideMenu.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", closeMenu);
+  });
+}
 
 function readStoredCharacters() {
   try {

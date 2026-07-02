@@ -95,6 +95,93 @@
       box-shadow: 0 0 20px rgba(0, 213, 255, 0.28);
     }
 
+    .characters-section {
+      margin: 1rem auto 0;
+      max-width: 860px;
+      border: 2px solid rgba(255, 193, 79, 0.45);
+      border-radius: 14px;
+      background: rgba(8, 24, 44, 0.82);
+      padding: 1rem;
+      box-shadow: 0 0 18px rgba(255, 193, 79, 0.18);
+      text-align: left;
+    }
+
+    .characters-section__header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.8rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .characters-section__header h2 {
+      margin: 0;
+      font-family: "Teko", sans-serif;
+      letter-spacing: 0.02em;
+      font-size: clamp(1.7rem, 3vw, 2.1rem);
+      color: #ffe6b0;
+    }
+
+    .characters-status {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .characters-grid {
+      display: grid;
+      gap: 0.65rem;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    }
+
+    .character-card {
+      border: 1px solid rgba(255, 193, 79, 0.35);
+      border-radius: 12px;
+      background: rgba(11, 31, 56, 0.9);
+      padding: 0.7rem;
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .character-card strong {
+      font-family: "Teko", sans-serif;
+      font-size: 1.45rem;
+      letter-spacing: 0.02em;
+      color: #ffe6b0;
+      line-height: 1;
+    }
+
+    .character-meta {
+      color: #d4e1f3;
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .character-actions {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .character-action {
+      flex: 1 1 0;
+      border: 1px solid rgba(0, 213, 255, 0.45);
+      border-radius: 8px;
+      background: rgba(20, 56, 88, 0.88);
+      color: #eaf2ff;
+      min-height: 34px;
+      font-family: "Raleway", sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .character-action.is-danger {
+      border-color: rgba(255, 106, 106, 0.42);
+      color: #ffd6d6;
+      background: rgba(91, 26, 26, 0.78);
+    }
+
     .dock {
       border-top: 1px solid rgba(0, 213, 255, 0.55);
       background: var(--dock-bg);
@@ -293,12 +380,14 @@
             A ficha é automatizada, os temas mudam conforme classe, raça e origem, e as raças estão organizadas por JSON para facilitar manutenção e expansão.
           </p>
         </section>
+
       </section>
     </main>
 
     <nav class="dock" aria-label="Atalhos do sistema">
       <div class="dock-grid">
         <a class="dock-link primary" href="ficha.html">Ficha</a>
+        <a class="dock-link" href="personagens.html">Personagens</a>
         <a class="dock-link" href="races.html">Raças</a>
         <a class="dock-link" href="#">Atributos</a>
         <a class="dock-link" href="origens.html">Origens</a>

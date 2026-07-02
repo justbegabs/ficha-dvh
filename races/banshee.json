@@ -1,17 +1,27 @@
-{
-  "displayName": "Banshee",
-  "ageFactor": 1.1,
-  "theme": {
-    "--page-bg-start": "#e7e0ff",
-    "--page-bg-mid": "#c0b4ff",
-    "--page-bg-end": "#76739e",
-    "--page-glow": "rgba(150, 134, 255, 0.2)",
-    "--panel-bg": "rgba(250, 248, 255, 0.94)",
-    "--panel-border": "#c8c0ea",
-    "--line": "#bcb5dd",
-    "--ink": "#2c2a35",
-    "--ink-strong": "#191822",
-    "--warn": "#6f63aa",
-    "--good": "#52758a"
-  }
+﻿{
+    "displayName":  "Banshee",
+    "ageFactor":  1.1,
+    "theme":  {
+                  "--page-bg-start":  "#e7e0ff",
+                  "--page-bg-mid":  "#c0b4ff",
+                  "--page-bg-end":  "#76739e",
+                  "--page-glow":  "rgba(150, 134, 255, 0.2)",
+                  "--panel-bg":  "rgba(250, 248, 255, 0.94)",
+                  "--panel-border":  "#c8c0ea",
+                  "--line":  "#bcb5dd",
+                  "--ink":  "#2c2a35",
+                  "--ink-strong":  "#191822",
+                  "--warn":  "#6f63aa",
+                  "--good":  "#52758a"
+              },
+    "description":  "Sem descrição definida.",
+    "skillBonuses":  {
+
+                     },
+    "level0Bonuses":  {
+                          "life":  0,
+                          "sanity":  0,
+                          "mana":  0,
+                          "conviction":  0
+                      }
 }

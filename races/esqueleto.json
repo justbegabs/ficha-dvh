@@ -1,17 +1,27 @@
-{
-  "displayName": "Esqueleto",
-  "ageFactor": 0,
-  "theme": {
-    "--page-bg-start": "#edf0f2",
-    "--page-bg-mid": "#c9d0d5",
-    "--page-bg-end": "#7c8791",
-    "--page-glow": "rgba(180, 190, 200, 0.18)",
-    "--panel-bg": "rgba(250, 252, 253, 0.95)",
-    "--panel-border": "#c5ced5",
-    "--line": "#b6c1c8",
-    "--ink": "#30363d",
-    "--ink-strong": "#1a1e22",
-    "--warn": "#65727f",
-    "--good": "#4f6d59"
-  }
+﻿{
+    "displayName":  "Esqueleto",
+    "ageFactor":  0,
+    "theme":  {
+                  "--page-bg-start":  "#edf0f2",
+                  "--page-bg-mid":  "#c9d0d5",
+                  "--page-bg-end":  "#7c8791",
+                  "--page-glow":  "rgba(180, 190, 200, 0.18)",
+                  "--panel-bg":  "rgba(250, 252, 253, 0.95)",
+                  "--panel-border":  "#c5ced5",
+                  "--line":  "#b6c1c8",
+                  "--ink":  "#30363d",
+                  "--ink-strong":  "#1a1e22",
+                  "--warn":  "#65727f",
+                  "--good":  "#4f6d59"
+              },
+    "description":  "Sem descrição definida.",
+    "skillBonuses":  {
+
+                     },
+    "level0Bonuses":  {
+                          "life":  0,
+                          "sanity":  0,
+                          "mana":  0,
+                          "conviction":  0
+                      }
 }

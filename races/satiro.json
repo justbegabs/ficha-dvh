@@ -1,17 +1,27 @@
-{
-  "displayName": "Sátiro",
-  "ageFactor": 1.7,
-  "theme": {
-    "--page-bg-start": "#f3edd1",
-    "--page-bg-mid": "#c6ba7a",
-    "--page-bg-end": "#6d7e43",
-    "--page-glow": "rgba(194, 176, 92, 0.2)",
-    "--panel-bg": "rgba(255, 252, 240, 0.94)",
-    "--panel-border": "#d6c58e",
-    "--line": "#c3b377",
-    "--ink": "#342f23",
-    "--ink-strong": "#1d1a13",
-    "--warn": "#7d6f35",
-    "--good": "#59704a"
-  }
+﻿{
+    "displayName":  "SÃ¡tiro",
+    "ageFactor":  1.7,
+    "theme":  {
+                  "--page-bg-start":  "#f3edd1",
+                  "--page-bg-mid":  "#c6ba7a",
+                  "--page-bg-end":  "#6d7e43",
+                  "--page-glow":  "rgba(194, 176, 92, 0.2)",
+                  "--panel-bg":  "rgba(255, 252, 240, 0.94)",
+                  "--panel-border":  "#d6c58e",
+                  "--line":  "#c3b377",
+                  "--ink":  "#342f23",
+                  "--ink-strong":  "#1d1a13",
+                  "--warn":  "#7d6f35",
+                  "--good":  "#59704a"
+              },
+    "description":  "Sem descrição definida.",
+    "skillBonuses":  {
+
+                     },
+    "level0Bonuses":  {
+                          "life":  0,
+                          "sanity":  0,
+                          "mana":  0,
+                          "conviction":  0
+                      }
 }

@@ -1,17 +1,27 @@
-{
-  "displayName": "Ninfa",
-  "ageFactor": 4.2,
-  "theme": {
-    "--page-bg-start": "#e4fff7",
-    "--page-bg-mid": "#9fe9dd",
-    "--page-bg-end": "#8bc1ff",
-    "--page-glow": "rgba(126, 220, 205, 0.2)",
-    "--panel-bg": "rgba(248, 255, 252, 0.94)",
-    "--panel-border": "#b2dfd4",
-    "--line": "#a7d3c9",
-    "--ink": "#233338",
-    "--ink-strong": "#102127",
-    "--warn": "#4f8b82",
-    "--good": "#2f8d70"
-  }
+﻿{
+    "displayName":  "Ninfa",
+    "ageFactor":  4.2,
+    "theme":  {
+                  "--page-bg-start":  "#e4fff7",
+                  "--page-bg-mid":  "#9fe9dd",
+                  "--page-bg-end":  "#8bc1ff",
+                  "--page-glow":  "rgba(126, 220, 205, 0.2)",
+                  "--panel-bg":  "rgba(248, 255, 252, 0.94)",
+                  "--panel-border":  "#b2dfd4",
+                  "--line":  "#a7d3c9",
+                  "--ink":  "#233338",
+                  "--ink-strong":  "#102127",
+                  "--warn":  "#4f8b82",
+                  "--good":  "#2f8d70"
+              },
+    "description":  "Sem descrição definida.",
+    "skillBonuses":  {
+
+                     },
+    "level0Bonuses":  {
+                          "life":  0,
+                          "sanity":  0,
+                          "mana":  0,
+                          "conviction":  0
+                      }
 }

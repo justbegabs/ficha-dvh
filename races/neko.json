@@ -1,17 +1,27 @@
-{
-  "displayName": "Neko",
-  "ageFactor": 1.4,
-  "theme": {
-    "--page-bg-start": "#ffe3f1",
-    "--page-bg-mid": "#f0b3cc",
-    "--page-bg-end": "#7f6d90",
-    "--page-glow": "rgba(235, 159, 200, 0.22)",
-    "--panel-bg": "rgba(255, 249, 252, 0.94)",
-    "--panel-border": "#e3bfd0",
-    "--line": "#d5aeca",
-    "--ink": "#352735",
-    "--ink-strong": "#231823",
-    "--warn": "#9a5b82",
-    "--good": "#5c6f93"
-  }
+﻿{
+    "displayName":  "Neko",
+    "ageFactor":  1.4,
+    "theme":  {
+                  "--page-bg-start":  "#ffe3f1",
+                  "--page-bg-mid":  "#f0b3cc",
+                  "--page-bg-end":  "#7f6d90",
+                  "--page-glow":  "rgba(235, 159, 200, 0.22)",
+                  "--panel-bg":  "rgba(255, 249, 252, 0.94)",
+                  "--panel-border":  "#e3bfd0",
+                  "--line":  "#d5aeca",
+                  "--ink":  "#352735",
+                  "--ink-strong":  "#231823",
+                  "--warn":  "#9a5b82",
+                  "--good":  "#5c6f93"
+              },
+    "description":  "Sem descrição definida.",
+    "skillBonuses":  {
+
+                     },
+    "level0Bonuses":  {
+                          "life":  0,
+                          "sanity":  0,
+                          "mana":  0,
+                          "conviction":  0
+                      }
 }

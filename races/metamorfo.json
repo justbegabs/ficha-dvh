@@ -1,17 +1,27 @@
-{
-  "displayName": "Metamorfo",
-  "ageFactor": 1.1,
-  "theme": {
-    "--page-bg-start": "#dff8ff",
-    "--page-bg-mid": "#a7d2ff",
-    "--page-bg-end": "#8c7dcb",
-    "--page-glow": "rgba(127, 199, 255, 0.2)",
-    "--panel-bg": "rgba(247, 251, 255, 0.94)",
-    "--panel-border": "#b1d2f0",
-    "--line": "#a4c2df",
-    "--ink": "#26313a",
-    "--ink-strong": "#151d23",
-    "--warn": "#4d79a8",
-    "--good": "#38737a"
-  }
+﻿{
+    "displayName":  "Metamorfo",
+    "ageFactor":  1.1,
+    "theme":  {
+                  "--page-bg-start":  "#dff8ff",
+                  "--page-bg-mid":  "#a7d2ff",
+                  "--page-bg-end":  "#8c7dcb",
+                  "--page-glow":  "rgba(127, 199, 255, 0.2)",
+                  "--panel-bg":  "rgba(247, 251, 255, 0.94)",
+                  "--panel-border":  "#b1d2f0",
+                  "--line":  "#a4c2df",
+                  "--ink":  "#26313a",
+                  "--ink-strong":  "#151d23",
+                  "--warn":  "#4d79a8",
+                  "--good":  "#38737a"
+              },
+    "description":  "Sem descrição definida.",
+    "skillBonuses":  {
+
+                     },
+    "level0Bonuses":  {
+                          "life":  0,
+                          "sanity":  0,
+                          "mana":  0,
+                          "conviction":  0
+                      }
 }

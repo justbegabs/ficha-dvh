@@ -1,0 +1,12 @@
+{
+  "displayName": "Psicólogo",
+  "theme": {
+    "--page-bg-start": "#f0f2ea",
+    "--page-bg-mid": "#c7d2b2",
+    "--page-bg-end": "#74816b",
+    "--page-glow": "rgba(181, 204, 160, 0.2)",
+    "--panel-border": "#d0dac0",
+    "--accent-soft": "#d8e3c8"
+  },
+  "summary": "Observador da mente, emoções e contradições humanas."
+}

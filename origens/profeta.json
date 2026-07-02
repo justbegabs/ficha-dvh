@@ -1,0 +1,12 @@
+{
+  "displayName": "Profeta",
+  "theme": {
+    "--page-bg-start": "#f2e5ff",
+    "--page-bg-mid": "#bca8e8",
+    "--page-bg-end": "#756b9e",
+    "--page-glow": "rgba(187, 160, 230, 0.2)",
+    "--panel-border": "#cbbbe9",
+    "--accent-soft": "#dccdf6"
+  },
+  "summary": "Vê sinais, presságios e caminhos antes dos outros perceberem."
+}

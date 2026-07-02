@@ -1,0 +1,12 @@
+{
+  "displayName": "Artista",
+  "theme": {
+    "--page-bg-start": "#ffe9ef",
+    "--page-bg-mid": "#ffb7cf",
+    "--page-bg-end": "#9c6ab0",
+    "--page-glow": "rgba(255, 170, 208, 0.22)",
+    "--panel-border": "#e2b3cc",
+    "--accent-soft": "#f4b7d1"
+  },
+  "summary": "Criativo, expressivo e guiado por percepção estética."
+}

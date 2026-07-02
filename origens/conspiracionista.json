@@ -1,0 +1,12 @@
+{
+  "displayName": "Conspiracionista",
+  "theme": {
+    "--page-bg-start": "#ece4d8",
+    "--page-bg-mid": "#c6b08d",
+    "--page-bg-end": "#74634f",
+    "--page-glow": "rgba(180, 155, 120, 0.2)",
+    "--panel-border": "#d3c0a7",
+    "--accent-soft": "#d8c4a3"
+  },
+  "summary": "Sempre vê padrões, segredos e intenções ocultas."
+}

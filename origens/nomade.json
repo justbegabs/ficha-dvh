@@ -1,0 +1,12 @@
+{
+  "displayName": "Nômade",
+  "theme": {
+    "--page-bg-start": "#f7ecd1",
+    "--page-bg-mid": "#d5b78c",
+    "--page-bg-end": "#8a6d53",
+    "--page-glow": "rgba(218, 182, 130, 0.2)",
+    "--panel-border": "#d9c39d",
+    "--accent-soft": "#ecd29a"
+  },
+  "summary": "Aprendeu com a estrada, mudança e sobrevivência constante."
+}

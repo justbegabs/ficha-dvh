@@ -1,0 +1,11 @@
+{
+  "displayName": "Arsenal Humano",
+  "theme": {
+    "--page-bg-start": "#eef3f4",
+    "--page-bg-mid": "#bcc9cd",
+    "--page-bg-end": "#6d7b82",
+    "--page-glow": "rgba(184, 200, 206, 0.2)",
+    "--panel-border": "#d1dade",
+    "--accent-soft": "#dbe4e8"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "displayName": "Mago",
+  "theme": {
+    "--page-bg-start": "#f3e4ff",
+    "--page-bg-mid": "#bda7ff",
+    "--page-bg-end": "#6f5bd1",
+    "--page-glow": "rgba(178, 140, 255, 0.22)",
+    "--panel-border": "#cab8f5",
+    "--accent-soft": "#bca7ff"
+  }
+}

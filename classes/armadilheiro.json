@@ -1,0 +1,11 @@
+{
+  "displayName": "Armadilheiro",
+  "theme": {
+    "--page-bg-start": "#f6eadf",
+    "--page-bg-mid": "#d3b08d",
+    "--page-bg-end": "#8c6a4f",
+    "--page-glow": "rgba(206, 162, 111, 0.2)",
+    "--panel-border": "#dec0a0",
+    "--accent-soft": "#e6c49d"
+  }
+}

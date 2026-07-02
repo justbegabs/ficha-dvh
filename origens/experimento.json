@@ -1,0 +1,12 @@
+{
+  "displayName": "Experimento",
+  "theme": {
+    "--page-bg-start": "#e0f5ff",
+    "--page-bg-mid": "#9cd2ef",
+    "--page-bg-end": "#5d7087",
+    "--page-glow": "rgba(133, 208, 240, 0.2)",
+    "--panel-border": "#b7d9e9",
+    "--accent-soft": "#bedfee"
+  },
+  "summary": "Resultado de testes, manipulações ou tentativas de criação."
+}

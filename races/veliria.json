@@ -1,0 +1,17 @@
+{
+  "displayName": "Velíria",
+  "ageFactor": 1.8,
+  "theme": {
+    "--page-bg-start": "#ece6ff",
+    "--page-bg-mid": "#c2b0ff",
+    "--page-bg-end": "#6f7cd4",
+    "--page-glow": "rgba(154, 137, 255, 0.22)",
+    "--panel-bg": "rgba(250, 248, 255, 0.94)",
+    "--panel-border": "#c7bbe8",
+    "--line": "#b8aed6",
+    "--ink": "#2c2a38",
+    "--ink-strong": "#181722",
+    "--warn": "#6f5ca9",
+    "--good": "#4d6d8d"
+  }
+}

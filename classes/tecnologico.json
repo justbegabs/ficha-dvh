@@ -1,0 +1,11 @@
+{
+  "displayName": "Tecnológico",
+  "theme": {
+    "--page-bg-start": "#e8f0ff",
+    "--page-bg-mid": "#a8b7f0",
+    "--page-bg-end": "#6674a9",
+    "--page-glow": "rgba(149, 176, 240, 0.2)",
+    "--panel-border": "#c0caec",
+    "--accent-soft": "#cad5f7"
+  }
+}

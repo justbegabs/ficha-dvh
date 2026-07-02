@@ -1,0 +1,11 @@
+{
+  "displayName": "Curandeiro",
+  "theme": {
+    "--page-bg-start": "#e4ffe9",
+    "--page-bg-mid": "#9dd5a7",
+    "--page-bg-end": "#5f8b69",
+    "--page-glow": "rgba(129, 214, 143, 0.2)",
+    "--panel-border": "#b8dcc1",
+    "--accent-soft": "#c9ead0"
+  }
+}

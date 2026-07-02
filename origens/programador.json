@@ -1,0 +1,12 @@
+{
+  "displayName": "Programador",
+  "theme": {
+    "--page-bg-start": "#e5f0ff",
+    "--page-bg-mid": "#a6bced",
+    "--page-bg-end": "#6476a3",
+    "--page-glow": "rgba(147, 176, 235, 0.2)",
+    "--panel-border": "#bcccec",
+    "--accent-soft": "#cad8f5"
+  },
+  "summary": "Analítico, sistemático e fascinado por lógica aplicada."
+}

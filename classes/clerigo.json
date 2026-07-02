@@ -1,0 +1,11 @@
+{
+  "displayName": "Clérigo",
+  "theme": {
+    "--page-bg-start": "#fff2d4",
+    "--page-bg-mid": "#e1c37f",
+    "--page-bg-end": "#91744d",
+    "--page-glow": "rgba(238, 210, 126, 0.2)",
+    "--panel-border": "#e0d1a6",
+    "--accent-soft": "#f1dfb6"
+  }
+}

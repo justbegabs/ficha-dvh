@@ -1,0 +1,17 @@
+{
+  "displayName": "Fae",
+  "ageFactor": 4,
+  "theme": {
+    "--page-bg-start": "#ffe4ff",
+    "--page-bg-mid": "#f0c4ff",
+    "--page-bg-end": "#95baff",
+    "--page-glow": "rgba(212, 146, 255, 0.2)",
+    "--panel-bg": "rgba(255, 250, 255, 0.94)",
+    "--panel-border": "#e0c5f4",
+    "--line": "#d3b8e9",
+    "--ink": "#32263b",
+    "--ink-strong": "#22172c",
+    "--warn": "#8d56a8",
+    "--good": "#4f7cab"
+  }
+}

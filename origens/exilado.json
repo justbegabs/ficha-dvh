@@ -1,0 +1,12 @@
+{
+  "displayName": "Exilado",
+  "theme": {
+    "--page-bg-start": "#eef1f7",
+    "--page-bg-mid": "#c0c8d8",
+    "--page-bg-end": "#69748a",
+    "--page-glow": "rgba(188, 200, 220, 0.2)",
+    "--panel-border": "#ccd4df",
+    "--accent-soft": "#d8e0ea"
+  },
+  "summary": "Banido ou afastado, aprendeu a sobreviver fora do lar."
+}

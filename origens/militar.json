@@ -1,0 +1,12 @@
+{
+  "displayName": "Militar",
+  "theme": {
+    "--page-bg-start": "#e2ebe3",
+    "--page-bg-mid": "#a8b7a6",
+    "--page-bg-end": "#5d685d",
+    "--page-glow": "rgba(150, 176, 150, 0.2)",
+    "--panel-border": "#c0ccb8",
+    "--accent-soft": "#d0dbc8"
+  },
+  "summary": "Estruturado por hierarquia, tática, treino e disciplina."
+}

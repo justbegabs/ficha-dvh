@@ -1,0 +1,17 @@
+{
+  "displayName": "Kanima",
+  "ageFactor": 1.2,
+  "theme": {
+    "--page-bg-start": "#e8f2dc",
+    "--page-bg-mid": "#b7cf8f",
+    "--page-bg-end": "#5f7c44",
+    "--page-glow": "rgba(145, 183, 91, 0.22)",
+    "--panel-bg": "rgba(250, 253, 245, 0.94)",
+    "--panel-border": "#bcd2a1",
+    "--line": "#afc18f",
+    "--ink": "#2c3425",
+    "--ink-strong": "#181f14",
+    "--warn": "#6f8750",
+    "--good": "#4d724d"
+  }
+}

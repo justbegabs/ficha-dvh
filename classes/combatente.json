@@ -1,0 +1,11 @@
+{
+  "displayName": "Combatente",
+  "theme": {
+    "--page-bg-start": "#ffe2db",
+    "--page-bg-mid": "#e08f74",
+    "--page-bg-end": "#7d3f32",
+    "--page-glow": "rgba(227, 128, 100, 0.22)",
+    "--panel-border": "#e0b5a8",
+    "--accent-soft": "#f0b19c"
+  }
+}

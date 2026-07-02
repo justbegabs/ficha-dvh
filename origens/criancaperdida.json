@@ -1,0 +1,12 @@
+{
+  "displayName": "Criança Perdida",
+  "theme": {
+    "--page-bg-start": "#f6f0d9",
+    "--page-bg-mid": "#e4c97a",
+    "--page-bg-end": "#8a7f4f",
+    "--page-glow": "rgba(233, 207, 120, 0.2)",
+    "--panel-border": "#e0d2a2",
+    "--accent-soft": "#edd993"
+  },
+  "summary": "Cresceu cedo demais ou nunca deixou completamente a infância."
+}

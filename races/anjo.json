@@ -1,0 +1,17 @@
+{
+  "displayName": "Anjo",
+  "ageFactor": 2.8,
+  "theme": {
+    "--page-bg-start": "#fff4e8",
+    "--page-bg-mid": "#f1d3b5",
+    "--page-bg-end": "#97b6e3",
+    "--page-glow": "rgba(240, 199, 147, 0.22)",
+    "--panel-bg": "rgba(255, 250, 245, 0.94)",
+    "--panel-border": "#e4c8a8",
+    "--line": "#d9bea0",
+    "--ink": "#322c28",
+    "--ink-strong": "#1f1713",
+    "--warn": "#92704d",
+    "--good": "#4d7396"
+  }
+}

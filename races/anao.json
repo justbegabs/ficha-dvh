@@ -1,0 +1,17 @@
+{
+  "displayName": "Anão",
+  "ageFactor": 3,
+  "theme": {
+    "--page-bg-start": "#f5e2c8",
+    "--page-bg-mid": "#dcb98a",
+    "--page-bg-end": "#9d744f",
+    "--page-glow": "rgba(164, 110, 54, 0.22)",
+    "--panel-bg": "rgba(255, 248, 240, 0.92)",
+    "--panel-border": "#d4b18a",
+    "--line": "#c89f72",
+    "--ink": "#35281e",
+    "--ink-strong": "#221712",
+    "--warn": "#8d5729",
+    "--good": "#4a694c"
+  }
+}

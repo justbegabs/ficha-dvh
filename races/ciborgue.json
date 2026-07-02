@@ -1,0 +1,17 @@
+{
+  "displayName": "Ciborgue",
+  "ageFactor": 0.7,
+  "theme": {
+    "--page-bg-start": "#dbe8ee",
+    "--page-bg-mid": "#9db7c7",
+    "--page-bg-end": "#5d6f82",
+    "--page-glow": "rgba(136, 186, 206, 0.2)",
+    "--panel-bg": "rgba(246, 250, 252, 0.95)",
+    "--panel-border": "#b3c6d1",
+    "--line": "#a5b5c0",
+    "--ink": "#24313a",
+    "--ink-strong": "#141d24",
+    "--warn": "#4b6b7d",
+    "--good": "#2b7b73"
+  }
+}

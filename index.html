@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -17,6 +16,7 @@
       --cyan: #00d5ff;
       --panel: rgba(11, 31, 56, 0.8);
       --line: rgba(0, 213, 255, 0.7);
+      --dock-bg: rgba(8, 24, 44, 0.88);
     }
 
     * {
@@ -32,17 +32,23 @@
         radial-gradient(circle at 20% 10%, rgba(94, 196, 255, 0.2), transparent 30%),
         radial-gradient(circle at 90% 0%, rgba(8, 255, 206, 0.15), transparent 22%),
         linear-gradient(180deg, var(--bg-1), var(--bg-2));
+    }
+
+    .shell {
+      min-height: 100vh;
       display: grid;
-      grid-template-rows: 1fr auto;
+      grid-template-rows: auto 1fr auto;
     }
 
     .top-bar {
-      position: fixed;
-      inset: 0 0 auto 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
       padding: 0.65rem;
       display: flex;
       justify-content: space-between;
       pointer-events: none;
+      backdrop-filter: blur(10px);
     }
 
     .icon-btn {
@@ -58,15 +64,15 @@
     }
 
     .hero {
-      max-width: 980px;
+      max-width: 1040px;
       margin: 0 auto;
-      padding: 5rem 1rem 10rem;
+      padding: 4.5rem 1rem 2rem;
       text-align: center;
     }
 
     .hero h1 {
-      margin: 0 0 0.8rem;
-      font-size: clamp(2.1rem, 5vw, 3.4rem);
+      margin: 0 0 0.75rem;
+      font-size: clamp(2.2rem, 5vw, 4rem);
       font-weight: 800;
       color: #ffd8ff;
       text-shadow: 0 0 8px #ff4ff3, 0 0 22px #b000ff;
@@ -91,8 +97,9 @@
 
     .dock {
       border-top: 1px solid rgba(0, 213, 255, 0.55);
-      background: rgba(8, 24, 44, 0.88);
-      padding: 0.8rem 0.7rem;
+      background: var(--dock-bg);
+      padding: 0.8rem 0.7rem 1rem;
+      position: relative;
     }
 
     .dock-grid {
@@ -101,9 +108,16 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
       gap: 0.55rem;
+      align-items: start;
     }
 
-    .dock-link {
+    .dock-item {
+      position: relative;
+    }
+
+    .dock-link,
+    .dock-button {
+      width: 100%;
       text-decoration: none;
       color: #dbecff;
       background: rgba(20, 56, 88, 0.9);
@@ -116,10 +130,12 @@
       font-family: "Teko", sans-serif;
       font-size: 1.33rem;
       letter-spacing: 0.03em;
-      transition: transform 120ms ease, background-color 120ms ease;
+      transition: transform 120ms ease, background-color 120ms ease, border-color 120ms ease;
+      cursor: pointer;
     }
 
-    .dock-link:hover {
+    .dock-link:hover,
+    .dock-button:hover {
       transform: translateY(-2px);
       background: rgba(29, 75, 116, 0.95);
     }
@@ -129,47 +145,174 @@
       color: #ffe6b0;
       box-shadow: 0 0 12px rgba(255, 193, 79, 0.35);
     }
+
+    .race-panel {
+      max-width: 1040px;
+      margin: 0.85rem auto 0;
+      padding: 0.9rem;
+      border-radius: 18px;
+      border: 1px solid rgba(0, 213, 255, 0.45);
+      background: rgba(9, 28, 50, 0.92);
+      box-shadow: 0 18px 28px rgba(0, 0, 0, 0.25);
+      display: none;
+    }
+
+    .race-panel.is-open {
+      display: block;
+      animation: reveal 180ms ease-out both;
+    }
+
+    .race-panel__header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .race-panel__header h2 {
+      margin: 0;
+      font-family: "Teko", sans-serif;
+      font-size: clamp(1.7rem, 2.8vw, 2.4rem);
+      color: #ffe6b0;
+    }
+
+    .race-panel__header span,
+    .race-panel__status {
+      color: var(--muted);
+    }
+
+    .race-grid {
+      display: grid;
+      gap: 0.9rem;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    }
+
+    .race-card {
+      border: 0;
+      text-align: left;
+      color: #f8fbff;
+      padding: 1rem;
+      border-radius: 18px;
+      min-height: 170px;
+      display: grid;
+      align-content: start;
+      gap: 0.35rem;
+      cursor: pointer;
+      background:
+        radial-gradient(circle at top right, var(--card-glow), transparent 55%),
+        linear-gradient(160deg, var(--card-start), var(--card-mid) 55%, var(--card-end));
+      box-shadow: 0 18px 28px rgba(0, 0, 0, 0.28);
+      position: relative;
+      overflow: hidden;
+      transition: transform 140ms ease, box-shadow 140ms ease;
+    }
+
+    .race-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 24px 36px rgba(0, 0, 0, 0.35);
+    }
+
+    .race-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -20% -35% auto;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--card-accent) 65%, transparent);
+      filter: blur(18px);
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    .race-card__tag {
+      display: inline-flex;
+      width: fit-content;
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .race-card strong {
+      font-family: "Teko", sans-serif;
+      font-size: 2rem;
+      line-height: 1;
+      margin-top: 0.15rem;
+    }
+
+    .race-card__meta {
+      font-size: 0.94rem;
+      color: rgba(255, 255, 255, 0.86);
+    }
+
+    .race-card__action {
+      margin-top: 0.35rem;
+      padding-top: 0.55rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.22);
+      font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+
+    @keyframes reveal {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .race-panel__header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
   </style>
 </head>
 <body>
-  <header class="top-bar">
-    <button class="icon-btn" type="button" aria-label="Menu">☰</button>
-    <button class="icon-btn" type="button" aria-label="Modo">🌙</button>
-  </header>
+  <div class="shell">
+    <header class="top-bar">
+      <button class="icon-btn" type="button" aria-label="Menu">☰</button>
+      <button class="icon-btn" type="button" aria-label="Modo">🌙</button>
+    </header>
 
-  <main class="hero">
-    <h1>Bem-vindo ao Sistema dos Deuses</h1>
-    <p>Escolha uma das opções abaixo para navegar pelo sistema.</p>
-    <section class="intro" aria-label="Resumo da aplicação">
-      <p>
-        A ficha é completamente automatizada e calcula rolagens, críticos e evolução.
-        Para ver mais detalhes das regras, abra a página da ficha principal.
-      </p>
-    </section>
-  </main>
+    <main>
+      <section class="hero">
+        <h1>Bem-vindo ao Sistema dos Deuses</h1>
+        <p>Escolha uma raça, entre na ficha e carregue o visual do seu personagem.</p>
+        <section class="intro" aria-label="Resumo da aplicação">
+          <p>
+            A ficha é automatizada, os temas mudam conforme classe, raça e origem, e as raças estão organizadas por JSON para facilitar manutenção e expansão.
+          </p>
+        </section>
+      </section>
+    </main>
 
-  <nav class="dock" aria-label="Atalhos do sistema">
-    <div class="dock-grid">
-      <a class="dock-link primary" href="ficha.html">Ficha</a>
-      <a class="dock-link" href="#">Atributos</a>
-      <a class="dock-link" href="#">Raças</a>
-      <a class="dock-link" href="#">Origens</a>
-      <a class="dock-link" href="#">Classes</a>
-      <a class="dock-link" href="#">Itens</a>
-      <a class="dock-link" href="#">Armas</a>
-      <a class="dock-link" href="#">Criação</a>
-      <a class="dock-link" href="#">Mapas</a>
-      <a class="dock-link" href="#">Músicas</a>
-      <a class="dock-link" href="#">Jogos</a>
-      <a class="dock-link" href="#">Mecânicas</a>
-      <a class="dock-link" href="#">Efeitos</a>
-      <a class="dock-link" href="#">Perícias</a>
-      <a class="dock-link" href="#">Bestiário</a>
-      <a class="dock-link" href="#">Materiais</a>
-    </div>
-  </nav>
-</body>
-</html>
-  <script src="script.js?v=20260702-crit"></script>
+    <nav class="dock" aria-label="Atalhos do sistema">
+      <div class="dock-grid">
+        <a class="dock-link primary" href="ficha.html">Ficha</a>
+        <a class="dock-link" href="races.html">Raças</a>
+        <a class="dock-link" href="#">Atributos</a>
+        <a class="dock-link" href="origens.html">Origens</a>
+        <a class="dock-link" href="classes.html">Classes</a>
+        <a class="dock-link" href="#">Itens</a>
+        <a class="dock-link" href="#">Armas</a>
+        <a class="dock-link" href="#">Perícias</a>
+        <a class="dock-link" href="#">Bestiário</a>
+        <a class="dock-link" href="#">Materiais</a>
+      </div>
+
+    </nav>
+  </div>
+
+  <script src="home.js"></script>
 </body>
 </html>

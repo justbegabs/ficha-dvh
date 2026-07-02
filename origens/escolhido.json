@@ -1,0 +1,12 @@
+{
+  "displayName": "Escolhido",
+  "theme": {
+    "--page-bg-start": "#fff2cc",
+    "--page-bg-mid": "#e1b95d",
+    "--page-bg-end": "#675f8a",
+    "--page-glow": "rgba(245, 208, 118, 0.24)",
+    "--panel-border": "#dfcc8a",
+    "--accent-soft": "#f0d67a"
+  },
+  "summary": "Carrega um destino raro, marcado por presságios e missão."
+}

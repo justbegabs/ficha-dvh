@@ -1,0 +1,17 @@
+{
+  "displayName": "Subúco",
+  "ageFactor": 1.2,
+  "theme": {
+    "--page-bg-start": "#e4f1c4",
+    "--page-bg-mid": "#a3b66a",
+    "--page-bg-end": "#5a6a3f",
+    "--page-glow": "rgba(157, 192, 87, 0.2)",
+    "--panel-bg": "rgba(250, 252, 242, 0.94)",
+    "--panel-border": "#c6d7a4",
+    "--line": "#b8c88f",
+    "--ink": "#2a3121",
+    "--ink-strong": "#171b13",
+    "--warn": "#748a45",
+    "--good": "#4f7648"
+  }
+}

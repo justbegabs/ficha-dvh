@@ -1,0 +1,11 @@
+{
+  "displayName": "Domador",
+  "theme": {
+    "--page-bg-start": "#e8f6de",
+    "--page-bg-mid": "#b9d27b",
+    "--page-bg-end": "#6d8248",
+    "--page-glow": "rgba(171, 204, 124, 0.2)",
+    "--panel-border": "#c8d9a5",
+    "--accent-soft": "#dbe9b7"
+  }
+}

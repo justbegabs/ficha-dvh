@@ -1,0 +1,12 @@
+{
+  "displayName": "Servente",
+  "theme": {
+    "--page-bg-start": "#f0e3d3",
+    "--page-bg-mid": "#c7aa8b",
+    "--page-bg-end": "#785f4f",
+    "--page-glow": "rgba(204, 178, 146, 0.2)",
+    "--panel-border": "#dcc3aa",
+    "--accent-soft": "#e2c5a3"
+  },
+  "summary": "Aprendeu com o trabalho diário, serviço e obrigação."
+}

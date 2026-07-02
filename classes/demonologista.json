@@ -1,0 +1,11 @@
+{
+  "displayName": "Demonologista",
+  "theme": {
+    "--page-bg-start": "#f7dee2",
+    "--page-bg-mid": "#cb8ea0",
+    "--page-bg-end": "#6b2f46",
+    "--page-glow": "rgba(218, 140, 164, 0.2)",
+    "--panel-border": "#e0b5c0",
+    "--accent-soft": "#efb5c6"
+  }
+}

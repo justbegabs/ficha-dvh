@@ -8,6 +8,15 @@
   --line: #d6c7b0;
   --good: #266c4f;
   --warn: #874322;
+  --page-bg-start: #f8dcb4;
+  --page-bg-mid: #e0b18f;
+  --page-bg-end: #dccdb6;
+  --page-glow: rgba(180, 74, 47, 0.22);
+  --panel-bg: rgba(255, 251, 245, 0.86);
+  --panel-border: var(--line);
+  --button-start: #c95f3f;
+  --button-end: #a63f24;
+  --hero-glow: rgba(180, 74, 47, 0.34);
 }
 
 * {
@@ -19,9 +28,9 @@ body {
   min-height: 100vh;
   color: var(--ink);
   background:
-    radial-gradient(circle at 12% 10%, #f8dcb4 0 16%, transparent 36%),
-    radial-gradient(circle at 92% 24%, #e0b18f 0 14%, transparent 32%),
-    linear-gradient(135deg, #ece5d7 0%, #e4d7c2 40%, #dccdb6 100%);
+    radial-gradient(circle at 12% 10%, var(--page-bg-start) 0 16%, transparent 36%),
+    radial-gradient(circle at 92% 24%, var(--page-bg-mid) 0 14%, transparent 32%),
+    linear-gradient(135deg, var(--page-bg-start) 0%, var(--page-bg-mid) 40%, var(--page-bg-end) 100%);
   font-family: "Source Sans 3", sans-serif;
 }
 
@@ -31,7 +40,7 @@ body {
   pointer-events: none;
   background:
     repeating-linear-gradient(120deg, transparent 0 28px, rgba(255, 255, 255, 0.12) 29px 31px),
-    radial-gradient(circle at 50% 120%, rgba(180, 74, 47, 0.22), transparent 58%);
+    radial-gradient(circle at 50% 120%, var(--page-glow), transparent 58%);
   mix-blend-mode: multiply;
 }
 
@@ -66,6 +75,8 @@ h3 {
 h1 {
   margin: 0.25rem 0 0.5rem;
   font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  color: var(--accent);
+  text-shadow: 0 0 14px var(--hero-glow);
 }
 
 h2 {
@@ -107,8 +118,8 @@ h2 {
 }
 
 .panel {
-  background: rgba(255, 251, 245, 0.86);
-  border: 1px solid var(--line);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
   border-radius: 16px;
   padding: 1rem;
   margin-top: 1rem;
@@ -132,6 +143,18 @@ h2 {
   display: grid;
   gap: 0.7rem;
   grid-template-columns: 1fr;
+}
+
+.age-pair {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 720px) {
+  .age-pair {
+    grid-template-columns: 1fr;
+  }
 }
 
 .field {
@@ -341,7 +364,7 @@ input[type="number"],
 input[type="text"] {
   min-height: 2.25rem;
   border-radius: 10px;
-  border: 1px solid #cbb99d;
+  border: 1px solid var(--line);
   background: #fff8ef;
   color: var(--ink-strong);
   padding: 0.35rem 0.55rem;
@@ -349,7 +372,7 @@ input[type="text"] {
 
 button {
   font-weight: 700;
-  background: linear-gradient(135deg, #c95f3f, #a63f24);
+  background: linear-gradient(135deg, var(--button-start), var(--button-end));
   color: #fff8f2;
   border: none;
   cursor: pointer;

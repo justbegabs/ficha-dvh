@@ -7,6 +7,75 @@ const SKILL_MIN_VALUE = 1;
 const SKILL_MAX_VALUE = 3;
 const CHARACTERISTIC_SLOTS = 5;
 const CHARACTERISTIC_NAMES = ["Crenca", "Fortuna", "Legado", "Improviso", "Perseveranca"];
+const RACE_FILE_NAMES = [
+  "alien.json",
+  "anao.json",
+  "anjo.json",
+  "anjocaido.json",
+  "banshee.json",
+  "bruxa.json",
+  "ciborgue.json",
+  "demonio.json",
+  "elfo.json",
+  "esqueleto.json",
+  "fae.json",
+  "humano.json",
+  "kanima.json",
+  "kitsune.json",
+  "lobisomem.json",
+  "metamorfo.json",
+  "neko.json",
+  "ninfa.json",
+  "nogitsune.json",
+  "satiro.json",
+  "semideus.json",
+  "sereia.json",
+  "subuco.json",
+  "vampiro.json",
+  "veliria.json"
+];
+const ORIGIN_FILE_NAMES = [
+  "amnesico.json",
+  "artista.json",
+  "conspiracionista.json",
+  "criancaperdida.json",
+  "eremita.json",
+  "escolhido.json",
+  "exilado.json",
+  "experimento.json",
+  "forasteiro.json",
+  "ginasta.json",
+  "guerreiro.json",
+  "herdeiro.json",
+  "inventor.json",
+  "jornalista.json",
+  "militar.json",
+  "motorista.json",
+  "nomade.json",
+  "profeta.json",
+  "programador.json",
+  "psicologo.json",
+  "religioso.json",
+  "servente.json",
+  "universitario.json",
+  "vingativo.json"
+];
+const CLASS_FILE_NAMES = [
+  "mago.json",
+  "atirador.json",
+  "armadilheiro.json",
+  "combatente.json",
+  "investigador.json",
+  "curandeiro.json",
+  "suporte.json",
+  "tecnologico.json",
+  "clerigo.json",
+  "demonologista.json",
+  "domador.json",
+  "espiao.json",
+  "carteado.json",
+  "arsenalhumano.json"
+];
 const RACE_AGE_FACTORS = {
   Humano: 1,
   Elfo: 5,
@@ -15,6 +84,175 @@ const RACE_AGE_FACTORS = {
   Draconico: 1.6,
   Fada: 3.5,
   Goblin: 0.7
+};
+
+const raceCatalog = {};
+const originCatalog = {};
+const classCatalog = {};
+
+const CLASS_THEMES = {
+  Guerreiro: {
+    "--accent": "#d85c37",
+    "--accent-soft": "#f0b16c",
+    "--button-start": "#d85c37",
+    "--button-end": "#a33d24",
+    "--hero-glow": "rgba(216, 92, 55, 0.42)"
+  },
+  Arqueiro: {
+    "--accent": "#2f9b68",
+    "--accent-soft": "#95d58d",
+    "--button-start": "#2f9b68",
+    "--button-end": "#206b49",
+    "--hero-glow": "rgba(47, 155, 104, 0.42)"
+  },
+  Mago: {
+    "--accent": "#655cf0",
+    "--accent-soft": "#b3aaff",
+    "--button-start": "#655cf0",
+    "--button-end": "#4337b8",
+    "--hero-glow": "rgba(101, 92, 240, 0.42)"
+  },
+  Clerigo: {
+    "--accent": "#c79d2c",
+    "--accent-soft": "#f0d27a",
+    "--button-start": "#c79d2c",
+    "--button-end": "#97731b",
+    "--hero-glow": "rgba(199, 157, 44, 0.42)"
+  },
+  Ladino: {
+    "--accent": "#8f59db",
+    "--accent-soft": "#d0a9ff",
+    "--button-start": "#8f59db",
+    "--button-end": "#643aa8",
+    "--hero-glow": "rgba(143, 89, 219, 0.42)"
+  }
+};
+
+const RACE_THEMES = {
+  Humano: {
+    "--page-bg-start": "#f8dcb4",
+    "--page-bg-mid": "#e0b18f",
+    "--page-bg-end": "#dccdb6",
+    "--page-glow": "rgba(180, 74, 47, 0.22)",
+    "--panel-bg": "rgba(255, 251, 245, 0.86)",
+    "--panel-border": "#d6c7b0",
+    "--line": "#d6c7b0",
+    "--ink": "#2f3440",
+    "--ink-strong": "#1d2430",
+    "--warn": "#874322",
+    "--good": "#266c4f"
+  },
+  Elfo: {
+    "--page-bg-start": "#dcfff7",
+    "--page-bg-mid": "#b8eee5",
+    "--page-bg-end": "#d7e7ff",
+    "--page-glow": "rgba(57, 188, 168, 0.18)",
+    "--panel-bg": "rgba(248, 255, 253, 0.9)",
+    "--panel-border": "#b7d9d5",
+    "--line": "#bedbd7",
+    "--ink": "#27323a",
+    "--ink-strong": "#17323a",
+    "--warn": "#2e6e67",
+    "--good": "#227151"
+  },
+  Anao: {
+    "--page-bg-start": "#f4e3cc",
+    "--page-bg-mid": "#dfc19b",
+    "--page-bg-end": "#cfa982",
+    "--page-glow": "rgba(148, 92, 42, 0.2)",
+    "--panel-bg": "rgba(255, 247, 237, 0.92)",
+    "--panel-border": "#d2b18d",
+    "--line": "#cda57d",
+    "--ink": "#32261d",
+    "--ink-strong": "#20160f",
+    "--warn": "#90552a",
+    "--good": "#3e6a4a"
+  },
+  Orc: {
+    "--page-bg-start": "#dbe7d6",
+    "--page-bg-mid": "#b8d0b2",
+    "--page-bg-end": "#7f9b73",
+    "--page-glow": "rgba(76, 119, 61, 0.2)",
+    "--panel-bg": "rgba(242, 250, 239, 0.9)",
+    "--panel-border": "#a9c49d",
+    "--line": "#a7bf96",
+    "--ink": "#253026",
+    "--ink-strong": "#162019",
+    "--warn": "#6b7d3d",
+    "--good": "#2d6a46"
+  },
+  Draconico: {
+    "--page-bg-start": "#f9e1d2",
+    "--page-bg-mid": "#efb89a",
+    "--page-bg-end": "#c67c68",
+    "--page-glow": "rgba(233, 112, 70, 0.24)",
+    "--panel-bg": "rgba(255, 247, 242, 0.9)",
+    "--panel-border": "#e0a589",
+    "--line": "#d89075",
+    "--ink": "#3a2420",
+    "--ink-strong": "#261512",
+    "--warn": "#ac4b31",
+    "--good": "#6d5940"
+  },
+  Fada: {
+    "--page-bg-start": "#fde7ff",
+    "--page-bg-mid": "#efd1ff",
+    "--page-bg-end": "#d8e7ff",
+    "--page-glow": "rgba(194, 127, 241, 0.2)",
+    "--panel-bg": "rgba(255, 250, 255, 0.92)",
+    "--panel-border": "#e0c9ff",
+    "--line": "#d8c0f1",
+    "--ink": "#322a38",
+    "--ink-strong": "#241a2d",
+    "--warn": "#7d4aa1",
+    "--good": "#4e6f9d"
+  },
+  Goblin: {
+    "--page-bg-start": "#f1f5cf",
+    "--page-bg-mid": "#d8e09b",
+    "--page-bg-end": "#aebc6b",
+    "--page-glow": "rgba(126, 142, 49, 0.2)",
+    "--panel-bg": "rgba(250, 252, 235, 0.92)",
+    "--panel-border": "#cdd392",
+    "--line": "#bcc575",
+    "--ink": "#2c3120",
+    "--ink-strong": "#1c2014",
+    "--warn": "#7c812d",
+    "--good": "#47644a"
+  }
+};
+
+const ORIGIN_THEMES = {
+  Nobreza: {
+    "--accent-soft": "#f2d36c",
+    "--panel-border": "#d7bc7a",
+    "--page-glow": "rgba(242, 211, 108, 0.2)",
+    "--hero-glow": "rgba(242, 211, 108, 0.42)"
+  },
+  Povoado: {
+    "--accent-soft": "#e7b36e",
+    "--panel-border": "#d6aa6b",
+    "--page-glow": "rgba(231, 179, 110, 0.18)",
+    "--hero-glow": "rgba(231, 179, 110, 0.36)"
+  },
+  Exilio: {
+    "--accent-soft": "#9ca4b0",
+    "--panel-border": "#aab0bb",
+    "--page-glow": "rgba(156, 164, 176, 0.18)",
+    "--hero-glow": "rgba(156, 164, 176, 0.34)"
+  },
+  Santuario: {
+    "--accent-soft": "#92e0d5",
+    "--panel-border": "#8dcfca",
+    "--page-glow": "rgba(146, 224, 213, 0.18)",
+    "--hero-glow": "rgba(146, 224, 213, 0.36)"
+  },
+  Fronteira: {
+    "--accent-soft": "#e08d5f",
+    "--panel-border": "#cf8a63",
+    "--page-glow": "rgba(224, 141, 95, 0.18)",
+    "--hero-glow": "rgba(224, 141, 95, 0.36)"
+  }
 };
 
 const attributeGroups = {
@@ -88,7 +326,8 @@ const state = {
   skillCreationBase: {},
   skillProgress: {},
   characteristics: {},
-  lastRollConfig: null
+  lastRollConfig: null,
+  lastAgeField: "real"
 };
 
 const references = {
@@ -100,7 +339,10 @@ const references = {
   skillsPool: document.getElementById("skillsPool"),
   attributesList: document.getElementById("attributesList"),
   characteristicsList: document.getElementById("characteristicsList"),
+  characterClassInfo: document.getElementById("characterClassInfo"),
   characterRace: document.getElementById("characterRace"),
+  characterRaceInfo: document.getElementById("characterRaceInfo"),
+  characterOriginInfo: document.getElementById("characterOriginInfo"),
   realAge: document.getElementById("realAge"),
   humanAge: document.getElementById("humanAge"),
   ageHint: document.getElementById("ageHint"),
@@ -119,10 +361,17 @@ const references = {
   damageResult: document.getElementById("damageResult")
 };
 
-initialize();
+void initialize();
 
-function initialize() {
+async function initialize() {
+  await loadRaceCatalog();
+  await loadOriginCatalog();
+  await loadClassCatalog();
   initializeValues();
+  renderOriginSelectors();
+  renderClassSelectors();
+  syncOriginSelection();
+  syncClassSelection();
   renderAttributeInputs();
   renderCharacteristicsInputs();
   renderSkillInputs();
@@ -130,7 +379,102 @@ function initialize() {
   updatePools();
   updateCharacteristicsCount();
   updateHumanAge();
+  applyAppearanceTheme();
   bindEvents();
+}
+
+async function loadRaceCatalog() {
+  const loadedRaces = await Promise.all(RACE_FILE_NAMES.map(async (fileName) => {
+    const raceId = fileName.replace(/\.json$/i, "");
+
+    try {
+      const response = await fetch(`races/${fileName}`, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`Failed to load ${fileName}`);
+      }
+
+      const data = await response.json();
+      return {
+        id: raceId,
+        displayName: data.displayName || displayName(raceId),
+        ageFactor: Number.isFinite(Number(data.ageFactor)) ? Number(data.ageFactor) : (RACE_AGE_FACTORS[displayName(raceId)] || 1),
+        theme: data.theme || {}
+      };
+    } catch {
+      return {
+        id: raceId,
+        displayName: displayName(raceId),
+        ageFactor: RACE_AGE_FACTORS[displayName(raceId)] || 1,
+        theme: {}
+      };
+    }
+  }));
+
+  loadedRaces.forEach((race) => {
+    raceCatalog[race.id] = race;
+  });
+}
+
+async function loadOriginCatalog() {
+  const loadedOrigins = await Promise.all(ORIGIN_FILE_NAMES.map(async (fileName) => {
+    const originId = fileName.replace(/\.json$/i, "");
+
+    try {
+      const response = await fetch(`origens/${fileName}`, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`Failed to load ${fileName}`);
+      }
+
+      const data = await response.json();
+      return {
+        id: originId,
+        displayName: data.displayName || displayName(originId),
+        theme: data.theme || {},
+        summary: data.summary || ""
+      };
+    } catch {
+      return {
+        id: originId,
+        displayName: displayName(originId),
+        theme: {},
+        summary: ""
+      };
+    }
+  }));
+
+  loadedOrigins.forEach((origin) => {
+    originCatalog[origin.id] = origin;
+  });
+}
+
+async function loadClassCatalog() {
+  const loadedClasses = await Promise.all(CLASS_FILE_NAMES.map(async (fileName) => {
+    const classId = fileName.replace(/\.json$/i, "");
+
+    try {
+      const response = await fetch(`classes/${fileName}`, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`Failed to load ${fileName}`);
+      }
+
+      const data = await response.json();
+      return {
+        id: classId,
+        displayName: data.displayName || displayName(classId),
+        theme: data.theme || {}
+      };
+    } catch {
+      return {
+        id: classId,
+        displayName: displayName(classId),
+        theme: {}
+      };
+    }
+  }));
+
+  loadedClasses.forEach((entry) => {
+    classCatalog[entry.id] = entry;
+  });
 }
 
 function initializeValues() {
@@ -385,6 +729,70 @@ function renderSelectors() {
   });
 }
 
+function renderOriginSelectors() {
+  if (!references.characterOriginInfo) {
+    return;
+  }
+
+  const selectedOrigin = localStorage.getItem("selectedOrigin") || references.characterOriginInfo.value || "";
+  references.characterOriginInfo.innerHTML = "";
+
+  references.characterOriginInfo.appendChild(createOption("", "Selecione..."));
+  Object.values(originCatalog).forEach((origin) => {
+    references.characterOriginInfo.appendChild(createOption(origin.id, origin.displayName));
+  });
+
+  if (selectedOrigin && originCatalog[selectedOrigin]) {
+    references.characterOriginInfo.value = selectedOrigin;
+    localStorage.removeItem("selectedOrigin");
+  }
+}
+
+function renderClassSelectors() {
+  if (!references.characterClassInfo) {
+    return;
+  }
+
+  const selectedClass = localStorage.getItem("selectedClass") || references.characterClassInfo.value || "";
+  references.characterClassInfo.innerHTML = "";
+  references.characterClassInfo.appendChild(createOption("", "Selecione..."));
+
+  Object.values(classCatalog).forEach((entry) => {
+    references.characterClassInfo.appendChild(createOption(entry.id, entry.displayName));
+  });
+
+  if (selectedClass && classCatalog[selectedClass]) {
+    references.characterClassInfo.value = selectedClass;
+    localStorage.removeItem("selectedClass");
+  }
+}
+
+function renderRaceSelectors() {
+  if (!references.characterRaceInfo) {
+    return;
+  }
+
+  const storedRace = localStorage.getItem("selectedRace") || "";
+  const currentRace = storedRace && raceCatalog[storedRace]
+    ? storedRace
+    : (references.characterRaceInfo.value && raceCatalog[references.characterRaceInfo.value] ? references.characterRaceInfo.value : "");
+
+  references.characterRaceInfo.innerHTML = "";
+  references.characterRaceInfo.appendChild(createOption("", "Selecione..."));
+
+  Object.values(raceCatalog).forEach((race) => {
+    references.characterRaceInfo.appendChild(createOption(race.id, race.displayName));
+  });
+
+  if (!references.characterRaceInfo.value) {
+    references.characterRaceInfo.value = currentRace in raceCatalog ? currentRace : "";
+  }
+
+  if (storedRace) {
+    localStorage.removeItem("selectedRace");
+  }
+}
+
 function createOption(value, label = value) {
   const option = document.createElement("option");
   option.value = value;
@@ -421,10 +829,28 @@ function bindEvents() {
   }
 
   if (references.characterRace) {
-    references.characterRace.addEventListener("change", updateHumanAge);
+    references.characterRace.addEventListener("change", handleRaceThemeChange);
   }
   if (references.realAge) {
-    references.realAge.addEventListener("input", updateHumanAge);
+    references.realAge.addEventListener("input", () => {
+      state.lastAgeField = "real";
+      updateAgeFields("real");
+    });
+  }
+  if (references.humanAge) {
+    references.humanAge.addEventListener("input", () => {
+      state.lastAgeField = "human";
+      updateAgeFields("human");
+    });
+  }
+  if (references.characterClassInfo) {
+    references.characterClassInfo.addEventListener("change", applyAppearanceTheme);
+  }
+  if (references.characterRaceInfo) {
+    references.characterRaceInfo.addEventListener("change", handleRaceThemeChange);
+  }
+  if (references.characterOriginInfo) {
+    references.characterOriginInfo.addEventListener("change", handleOriginThemeChange);
   }
 
   document.querySelectorAll(".damage").forEach((button) => {
@@ -438,28 +864,154 @@ function bindEvents() {
 }
 
 function updateHumanAge() {
-  if (!references.realAge || !references.humanAge || !references.characterRace) {
+  const realHasValue = Boolean(references.realAge?.value?.trim());
+  const humanHasValue = Boolean(references.humanAge?.value?.trim());
+
+  if (humanHasValue && !realHasValue) {
+    updateAgeFields("human");
     return;
   }
 
-  const realAgeValue = Number.parseInt(references.realAge.value, 10);
-  const race = references.characterRace.value || "Humano";
-  const factor = RACE_AGE_FACTORS[race] || 1;
+  if (realHasValue && !humanHasValue) {
+    updateAgeFields("real");
+    return;
+  }
 
-  if (Number.isNaN(realAgeValue) || realAgeValue < 0) {
+  updateAgeFields(state.lastAgeField || "real");
+}
+
+function updateAgeFields(sourceField = state.lastAgeField || "real") {
+  if (!references.realAge || !references.humanAge || !references.characterRaceInfo) {
+    return;
+  }
+
+  const race = references.characterRaceInfo.value || "";
+
+  if (!race) {
     references.humanAge.value = "";
     if (references.ageHint) {
-      references.ageHint.textContent = "Idade humana = idade real ajustada pelo fator da raça selecionada.";
+      references.ageHint.textContent = "Digite uma raça para converter idade real e idade humana entre si.";
     }
     return;
   }
 
-  const humanEquivalentAge = Math.max(0, Math.round(realAgeValue / factor));
-  references.humanAge.value = String(humanEquivalentAge);
+  const raceData = getRaceDefinition(race);
+  const factor = raceData.ageFactor || 1;
+  const realAgeValue = Number.parseInt(references.realAge.value, 10);
+  const humanAgeValue = Number.parseInt(references.humanAge.value, 10);
+
+  if (sourceField === "human") {
+    if (Number.isNaN(humanAgeValue) || humanAgeValue < 0) {
+      references.realAge.value = "";
+      if (references.ageHint) {
+        references.ageHint.textContent = `Fator de ${raceData.displayName}: ${factor}. Idade humana = idade real ajustada pela raça.`;
+      }
+      return;
+    }
+
+    references.realAge.value = String(Math.max(0, Math.round(humanAgeValue * factor)));
+  } else {
+    if (Number.isNaN(realAgeValue) || realAgeValue < 0) {
+      references.humanAge.value = "";
+      if (references.ageHint) {
+        references.ageHint.textContent = `Fator de ${raceData.displayName}: ${factor}. Idade humana = idade real ajustada pela raça.`;
+      }
+      return;
+    }
+
+    references.humanAge.value = String(Math.max(0, Math.round(realAgeValue / factor)));
+  }
 
   if (references.ageHint) {
-    references.ageHint.textContent = `Fator de ${displayName(race)}: ${factor}. Idade humana equivalente calculada automaticamente.`;
+    references.ageHint.textContent = `Fator de ${raceData.displayName}: ${factor}. Edite a idade real ou humana para converter entre as duas.`;
   }
+}
+
+function handleRaceThemeChange() {
+  updateAgeFields(state.lastAgeField);
+  applyAppearanceTheme();
+}
+
+function syncBasicAndInfoRace() {
+  if (!references.characterRaceInfo) {
+    return;
+  }
+}
+
+function applyAppearanceTheme() {
+  const activeClass = references.characterClassInfo?.value || "";
+  const activeRace = references.characterRaceInfo?.value || "";
+  const activeOrigin = references.characterOriginInfo?.value || "";
+  const raceData = getRaceDefinition(activeRace);
+  const originData = getOriginDefinition(activeOrigin);
+  const classData = getClassDefinition(activeClass);
+
+  const theme = {
+    ...RACE_THEMES.Humano,
+    ...(raceData.theme || {}),
+    ...(originData.theme || {}),
+    ...(classData.theme || {}),
+    ...(CLASS_THEMES[activeClass] || {})
+  };
+
+  Object.entries(theme).forEach(([name, value]) => {
+    document.documentElement.style.setProperty(name, value);
+  });
+
+  document.body.dataset.classTheme = activeClass || "default";
+  document.body.dataset.raceTheme = activeRace || "default";
+  document.body.dataset.originTheme = activeOrigin || "default";
+}
+
+function handleOriginThemeChange() {
+  applyAppearanceTheme();
+}
+
+function syncClassSelection() {
+  if (!references.characterClassInfo) {
+    return;
+  }
+
+  const storedClass = localStorage.getItem("selectedClass");
+  if (storedClass && classCatalog[storedClass]) {
+    references.characterClassInfo.value = storedClass;
+  }
+}
+
+function syncOriginSelection() {
+  if (!references.characterOriginInfo) {
+    return;
+  }
+
+  const storedOrigin = localStorage.getItem("selectedOrigin");
+  if (storedOrigin && originCatalog[storedOrigin]) {
+    references.characterOriginInfo.value = storedOrigin;
+  }
+}
+
+function getRaceDefinition(raceId) {
+  return raceCatalog[raceId] || {
+    id: raceId,
+    displayName: displayName(raceId),
+    ageFactor: RACE_AGE_FACTORS[displayName(raceId)] || 1,
+    theme: RACE_THEMES.Humano
+  };
+}
+
+function getOriginDefinition(originId) {
+  return originCatalog[originId] || {
+    id: originId,
+    displayName: displayName(originId),
+    theme: ORIGIN_THEMES[originId] || {}
+  };
+}
+
+function getClassDefinition(classId) {
+  return classCatalog[classId] || {
+    id: classId,
+    displayName: displayName(classId),
+    theme: CLASS_THEMES[classId] || {}
+  };
 }
 
 function toggleRulesPanel() {

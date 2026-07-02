@@ -1,0 +1,11 @@
+{
+  "displayName": "Atirador",
+  "theme": {
+    "--page-bg-start": "#e8f4ff",
+    "--page-bg-mid": "#9bc1f0",
+    "--page-bg-end": "#4d6d9a",
+    "--page-glow": "rgba(126, 184, 240, 0.2)",
+    "--panel-border": "#bdd2eb",
+    "--accent-soft": "#c8def6"
+  }
+}

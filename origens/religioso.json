@@ -1,0 +1,12 @@
+{
+  "displayName": "Religioso",
+  "theme": {
+    "--page-bg-start": "#fff4df",
+    "--page-bg-mid": "#e6c98a",
+    "--page-bg-end": "#92734f",
+    "--page-glow": "rgba(238, 206, 130, 0.2)",
+    "--panel-border": "#e2cfaa",
+    "--accent-soft": "#f1dfb3"
+  },
+  "summary": "Guiado por fé, dogma, devoção ou missão espiritual."
+}

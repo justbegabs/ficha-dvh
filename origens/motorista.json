@@ -1,0 +1,12 @@
+{
+  "displayName": "Motorista",
+  "theme": {
+    "--page-bg-start": "#ffeecf",
+    "--page-bg-mid": "#e0a86b",
+    "--page-bg-end": "#6f5741",
+    "--page-glow": "rgba(220, 170, 96, 0.2)",
+    "--panel-border": "#e2c08e",
+    "--accent-soft": "#efca8d"
+  },
+  "summary": "Conhece caminhos, velocidade, rotas e o preço de chegar longe."
+}

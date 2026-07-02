@@ -1,0 +1,11 @@
+{
+  "displayName": "Espião",
+  "theme": {
+    "--page-bg-start": "#f1ecff",
+    "--page-bg-mid": "#c0b0f1",
+    "--page-bg-end": "#7566a8",
+    "--page-glow": "rgba(188, 166, 242, 0.2)",
+    "--panel-border": "#d0c2ee",
+    "--accent-soft": "#dcccf7"
+  }
+}

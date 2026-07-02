@@ -1,0 +1,12 @@
+{
+  "displayName": "Eremita",
+  "theme": {
+    "--page-bg-start": "#e7f3ea",
+    "--page-bg-mid": "#b7d0be",
+    "--page-bg-end": "#6e8777",
+    "--page-glow": "rgba(167, 204, 178, 0.2)",
+    "--panel-border": "#bfd2c4",
+    "--accent-soft": "#cfe4d6"
+  },
+  "summary": "Vive à margem, guiado por silêncio, autonomia e observação."
+}

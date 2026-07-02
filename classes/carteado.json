@@ -1,0 +1,11 @@
+{
+  "displayName": "Carteado - NÃO FINALIZADO",
+  "theme": {
+    "--page-bg-start": "#efe7db",
+    "--page-bg-mid": "#d2b59a",
+    "--page-bg-end": "#7a5c49",
+    "--page-glow": "rgba(210, 181, 154, 0.2)",
+    "--panel-border": "#dbc3ae",
+    "--accent-soft": "#e5c9af"
+  }
+}

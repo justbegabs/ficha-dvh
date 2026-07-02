@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Origens - Sistema dos Deuses</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;700;800&family=Teko:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-1: #07192f;
+      --bg-2: #153a62;
+      --ink: #eaf2ff;
+      --muted: #b6c8df;
+      --line: rgba(0, 213, 255, 0.7);
+      --panel: rgba(11, 31, 56, 0.8);
+      --dock-bg: rgba(8, 24, 44, 0.88);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Raleway", sans-serif;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(94, 196, 255, 0.2), transparent 30%),
+        radial-gradient(circle at 90% 0%, rgba(8, 255, 206, 0.15), transparent 22%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-2));
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 0.65rem;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+      backdrop-filter: blur(10px);
+    }
+
+    .icon-btn {
+      pointer-events: auto;
+      width: 46px;
+      height: 46px;
+      border: 0;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffe17a;
+      font-size: 1.35rem;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 3.5rem 1rem 1.5rem;
+      text-align: center;
+    }
+
+    .hero h1 {
+      margin: 0 0 0.75rem;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 800;
+      color: #ffd8ff;
+      text-shadow: 0 0 8px #ff4ff3, 0 0 22px #b000ff;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2.2vw, 1.2rem);
+      line-height: 1.45;
+    }
+
+    .controls {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.65rem;
+    }
+
+    .search {
+      min-height: 2.7rem;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 213, 255, 0.45);
+      background: rgba(255, 255, 255, 0.1);
+      color: #f6fbff;
+      padding: 0.4rem 0.7rem;
+      font-size: 1rem;
+    }
+
+    .search::placeholder { color: rgba(234, 242, 255, 0.72); }
+
+    .stats {
+      min-height: 2.7rem;
+      padding: 0 0.9rem;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 213, 255, 0.45);
+      background: rgba(255, 255, 255, 0.08);
+      display: inline-flex;
+      align-items: center;
+      color: #dce9f9;
+      font-weight: 700;
+    }
+
+    .race-grid {
+      max-width: 1040px;
+      margin: 1rem auto 0;
+      padding: 0 1rem 1rem;
+      display: grid;
+      gap: 0.9rem;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    }
+
+    .race-card {
+      border: 0;
+      text-align: left;
+      color: #f8fbff;
+      padding: 1rem;
+      border-radius: 18px;
+      min-height: 190px;
+      display: grid;
+      align-content: start;
+      gap: 0.35rem;
+      cursor: pointer;
+      background:
+        radial-gradient(circle at top right, var(--card-glow), transparent 55%),
+        linear-gradient(160deg, var(--card-start), var(--card-mid) 55%, var(--card-end));
+      box-shadow: 0 18px 28px rgba(0, 0, 0, 0.28);
+      position: relative;
+      overflow: hidden;
+      transition: transform 140ms ease, box-shadow 140ms ease;
+    }
+
+    .race-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 24px 36px rgba(0, 0, 0, 0.35);
+    }
+
+    .race-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -20% -35% auto;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--card-accent) 65%, transparent);
+      filter: blur(18px);
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    .race-card__tag {
+      display: inline-flex;
+      width: fit-content;
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .race-card strong {
+      font-family: "Teko", sans-serif;
+      font-size: 2rem;
+      line-height: 1;
+      margin-top: 0.15rem;
+    }
+
+    .race-card__meta,
+    .race-card__detail {
+      font-size: 0.94rem;
+      color: rgba(255, 255, 255, 0.86);
+    }
+
+    .race-card__action {
+      margin-top: 0.35rem;
+      padding-top: 0.55rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.22);
+      font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+
+    .menu-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 160ms ease;
+      z-index: 18;
+    }
+
+    .menu-overlay.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: min(88vw, 320px);
+      padding: 1rem;
+      background: rgba(7, 22, 39, 0.98);
+      border-right: 1px solid rgba(0, 213, 255, 0.35);
+      box-shadow: 18px 0 36px rgba(0, 0, 0, 0.35);
+      transform: translateX(-102%);
+      transition: transform 180ms ease;
+      z-index: 20;
+      overflow-y: auto;
+    }
+
+    .side-menu.is-open {
+      transform: translateX(0);
+    }
+
+    .side-menu__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .side-menu__header h2 {
+      margin: 0;
+      font-family: "Teko", sans-serif;
+      font-size: 2rem;
+      color: #ffe6b0;
+    }
+
+    .side-menu__close {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      border: 0;
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+
+    .side-menu__links {
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .side-menu__link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #dbecff;
+      background: rgba(20, 56, 88, 0.88);
+      border: 1px solid rgba(0, 213, 255, 0.35);
+      border-radius: 12px;
+      padding: 0.8rem 0.9rem;
+      font-family: "Teko", sans-serif;
+      font-size: 1.25rem;
+      letter-spacing: 0.03em;
+    }
+
+    .side-menu__link small {
+      font-family: "Raleway", sans-serif;
+      font-size: 0.82rem;
+      color: rgba(234, 242, 255, 0.72);
+    }
+
+    @media (max-width: 640px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="top-bar">
+      <button class="icon-btn" type="button" aria-label="Menu">☰</button>
+      <button class="icon-btn" type="button" aria-label="Modo">🌙</button>
+    </header>
+
+    <main>
+      <section class="hero">
+        <h1>Origens Disponíveis</h1>
+        <p>Veja os detalhes carregados dos arquivos JSON e escolha uma origem para abrir a ficha.</p>
+      </section>
+
+      <section class="controls" aria-label="Ferramentas de busca">
+        <input id="originSearch" class="search" type="search" placeholder="Pesquisar origem..." autocomplete="off" />
+        <div id="originStats" class="stats">Carregando...</div>
+      </section>
+
+      <section id="originGrid" class="race-grid" aria-label="Lista de origens"></section>
+    </main>
+
+    <div id="menuOverlay" class="menu-overlay" hidden></div>
+    <aside id="sideMenu" class="side-menu" aria-label="Menu lateral" aria-hidden="true">
+      <div class="side-menu__header">
+        <h2>Menu</h2>
+        <button id="menuClose" class="side-menu__close" type="button" aria-label="Fechar menu">✕</button>
+      </div>
+      <div class="side-menu__links">
+        <a class="side-menu__link" href="ficha.html"><span>Ficha</span><small>Abrir personagem</small></a>
+        <a class="side-menu__link" href="index.html"><span>Home</span><small>Página inicial</small></a>
+        <a class="side-menu__link" href="races.html"><span>Raças</span><small>Detalhes</small></a>
+        <a class="side-menu__link" href="#originGrid"><span>Origens</span><small>Lista de detalhes</small></a>
+        <a class="side-menu__link" href="classes.html"><span>Classes</span><small>Ver detalhes</small></a>
+      </div>
+    </aside>
+  </div>
+
+  <script src="origens.js"></script>
+</body>
+</html>

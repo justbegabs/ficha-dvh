@@ -1,0 +1,11 @@
+{
+  "displayName": "Investigador",
+  "theme": {
+    "--page-bg-start": "#eef1f8",
+    "--page-bg-mid": "#b8c3d9",
+    "--page-bg-end": "#6e7a92",
+    "--page-glow": "rgba(175, 191, 221, 0.2)",
+    "--panel-border": "#c7d0df",
+    "--accent-soft": "#d7dfec"
+  }
+}

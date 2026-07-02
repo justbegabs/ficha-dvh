@@ -1,0 +1,12 @@
+{
+  "displayName": "Amnésico",
+  "theme": {
+    "--page-bg-start": "#e8eef4",
+    "--page-bg-mid": "#bcc7d3",
+    "--page-bg-end": "#7b8794",
+    "--page-glow": "rgba(170, 185, 200, 0.2)",
+    "--panel-border": "#c7d2dc",
+    "--accent-soft": "#d4dde6"
+  },
+  "summary": "Sem memórias claras, carrega fragmentos e ecos do passado."
+}

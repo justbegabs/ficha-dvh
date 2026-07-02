@@ -1,0 +1,12 @@
+{
+  "displayName": "Guerreiro",
+  "theme": {
+    "--page-bg-start": "#ffe0d5",
+    "--page-bg-mid": "#e08b67",
+    "--page-bg-end": "#813c2c",
+    "--page-glow": "rgba(226, 126, 96, 0.22)",
+    "--panel-border": "#e0b5a4",
+    "--accent-soft": "#f0b08d"
+  },
+  "summary": "Treinado para conflito, honra, proteção e confrontos diretos."
+}

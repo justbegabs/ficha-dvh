@@ -51,27 +51,16 @@
           <input id="characterName" type="text" placeholder="Digite o nome" autocomplete="off" />
         </div>
 
-        <div class="field">
-          <label for="characterRace">Raça</label>
-          <select id="characterRace">
-            <option value="Humano">Humano</option>
-            <option value="Elfo">Elfo</option>
-            <option value="Anao">Anão</option>
-            <option value="Orc">Orc</option>
-            <option value="Draconico">Dracônico</option>
-            <option value="Fada">Fada</option>
-            <option value="Goblin">Goblin</option>
-          </select>
-        </div>
+        <div class="field field-wide age-pair">
+          <div class="field">
+            <label for="realAge">Idade real</label>
+            <input id="realAge" type="number" min="0" step="1" placeholder="Ex.: 120" />
+          </div>
 
-        <div class="field">
-          <label for="realAge">Idade real</label>
-          <input id="realAge" type="number" min="0" step="1" placeholder="Ex.: 120" />
-        </div>
-
-        <div class="field">
-          <label for="humanAge">Idade humana (automática)</label>
-          <input id="humanAge" type="text" readonly aria-readonly="true" placeholder="Calculada pela raça" />
+          <div class="field">
+            <label for="humanAge">Idade humana</label>
+            <input id="humanAge" type="number" min="0" step="1" placeholder="Ex.: 35" />
+          </div>
         </div>
 
         <div class="field">
@@ -94,7 +83,7 @@
           <input id="bloodType" type="text" placeholder="Ex.: O+, AB-" autocomplete="off" />
         </div>
       </div>
-      <p id="ageHint" class="basic-info-hint">Idade humana = idade real ajustada pelo fator da raça selecionada.</p>
+      <p id="ageHint" class="basic-info-hint">Edite a idade real ou humana para converter entre as duas conforme a raça selecionada.</p>
     </section>
 
     <section class="grid info-dual-grid">

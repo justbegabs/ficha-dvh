@@ -1,0 +1,17 @@
+{
+  "displayName": "Bruxa",
+  "ageFactor": 1.0,
+  "theme": {
+    "--page-bg-start": "#f2def0",
+    "--page-bg-mid": "#caa8d5",
+    "--page-bg-end": "#6e5b86",
+    "--page-glow": "rgba(182, 96, 194, 0.2)",
+    "--panel-bg": "rgba(255, 250, 255, 0.93)",
+    "--panel-border": "#d1b7e0",
+    "--line": "#c1a9d4",
+    "--ink": "#32263a",
+    "--ink-strong": "#23162a",
+    "--warn": "#7a4a97",
+    "--good": "#4c6f7b"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "displayName": "Universitário",
+  "theme": {
+    "--page-bg-start": "#ecf7ff",
+    "--page-bg-mid": "#b6d4ee",
+    "--page-bg-end": "#6e84a0",
+    "--page-glow": "rgba(150, 194, 230, 0.2)",
+    "--panel-border": "#bfd6eb",
+    "--accent-soft": "#d0e4f7"
+  },
+  "summary": "Movido por estudo, teoria, pesquisa e especialização."
+}

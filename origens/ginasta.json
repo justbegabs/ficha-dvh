@@ -1,0 +1,12 @@
+{
+  "displayName": "Ginasta",
+  "theme": {
+    "--page-bg-start": "#e6fff3",
+    "--page-bg-mid": "#98d8b1",
+    "--page-bg-end": "#5b8672",
+    "--page-glow": "rgba(130, 218, 180, 0.2)",
+    "--panel-border": "#b7dcc5",
+    "--accent-soft": "#c1ead0"
+  },
+  "summary": "Movimento, equilíbrio e disciplina moldam o corpo e a mente."
+}

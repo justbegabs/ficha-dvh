@@ -1,0 +1,12 @@
+{
+  "displayName": "Inventor",
+  "theme": {
+    "--page-bg-start": "#edf0ff",
+    "--page-bg-mid": "#afb8eb",
+    "--page-bg-end": "#6b78a8",
+    "--page-glow": "rgba(158, 173, 235, 0.2)",
+    "--panel-border": "#c0c7ee",
+    "--accent-soft": "#c3caf4"
+  },
+  "summary": "Vive de curiosidade aplicada, ferramenta, cálculo e criação."
+}

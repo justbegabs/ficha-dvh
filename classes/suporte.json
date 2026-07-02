@@ -1,0 +1,11 @@
+{
+  "displayName": "Suporte",
+  "theme": {
+    "--page-bg-start": "#e2f7ff",
+    "--page-bg-mid": "#96d7f1",
+    "--page-bg-end": "#5d7f97",
+    "--page-glow": "rgba(130, 212, 237, 0.2)",
+    "--panel-border": "#b7dceb",
+    "--accent-soft": "#c2e7f4"
+  }
+}

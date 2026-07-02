@@ -1,0 +1,12 @@
+{
+  "displayName": "Jornalista",
+  "theme": {
+    "--page-bg-start": "#ecf6ff",
+    "--page-bg-mid": "#a8d0f0",
+    "--page-bg-end": "#6b8297",
+    "--page-glow": "rgba(145, 200, 235, 0.2)",
+    "--panel-border": "#bdd8eb",
+    "--accent-soft": "#c6e0f4"
+  },
+  "summary": "Busca verdade, registra fatos e transforma informação em narrativa."
+}

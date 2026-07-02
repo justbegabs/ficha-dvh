@@ -1,0 +1,12 @@
+{
+  "displayName": "Forasteiro",
+  "theme": {
+    "--page-bg-start": "#f5e0cf",
+    "--page-bg-mid": "#d19a73",
+    "--page-bg-end": "#765241",
+    "--page-glow": "rgba(219, 158, 117, 0.22)",
+    "--panel-border": "#d9b094",
+    "--accent-soft": "#e1b28d"
+  },
+  "summary": "Veio de longe e conhece o peso de não pertencer."
+}

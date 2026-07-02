@@ -1,0 +1,12 @@
+{
+  "displayName": "Vingativo",
+  "theme": {
+    "--page-bg-start": "#ffe2de",
+    "--page-bg-mid": "#de8b84",
+    "--page-bg-end": "#6f2f34",
+    "--page-glow": "rgba(214, 107, 101, 0.22)",
+    "--panel-border": "#e2b4b0",
+    "--accent-soft": "#f0a7a0"
+  },
+  "summary": "Conduzido por dívida, rancor ou a necessidade de acerto final."
+}

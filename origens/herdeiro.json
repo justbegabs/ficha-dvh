@@ -1,0 +1,12 @@
+{
+  "displayName": "Herdeiro",
+  "theme": {
+    "--page-bg-start": "#fff2d6",
+    "--page-bg-mid": "#d9c088",
+    "--page-bg-end": "#7f6b49",
+    "--page-glow": "rgba(237, 206, 130, 0.22)",
+    "--panel-border": "#dfcf9f",
+    "--accent-soft": "#f0da9c"
+  },
+  "summary": "Recebeu legado, responsabilidade ou expectativas de sangue e nome."
+}

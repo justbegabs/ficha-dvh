@@ -337,6 +337,7 @@ const displayNames = {
 const state = {
   attributes: {},
   skills: {},
+  favoriteSkills: {},
   skillCreationBase: {},
   skillProgress: {},
   characteristics: {},
@@ -346,6 +347,7 @@ const state = {
 };
 
 const references = {
+  mobileViewSwitcher: document.getElementById("mobileViewSwitcher"),
   menuButton: document.querySelector(".icon-btn[aria-label='Menu']"),
   menuClose: document.getElementById("menuClose"),
   menuOverlay: document.getElementById("menuOverlay"),
@@ -358,6 +360,7 @@ const references = {
   skillsPool: document.getElementById("skillsPool"),
   attributesList: document.getElementById("attributesList"),
   characteristicsList: document.getElementById("characteristicsList"),
+  favoriteSkillsList: document.getElementById("favoriteSkillsList"),
   characterClassInfo: document.getElementById("characterClassInfo"),
   characterRaceInfo: document.getElementById("characterRaceInfo"),
   characterOriginInfo: document.getElementById("characterOriginInfo"),
@@ -545,6 +548,7 @@ function initializeValues() {
 
   Object.values(skillGroups).flat().forEach((name) => {
     state.skills[name] = SKILL_MIN_VALUE;
+    state.favoriteSkills[name] = false;
     state.skillCreationBase[name] = SKILL_MIN_VALUE;
     state.skillProgress[name] = 0;
   });
@@ -621,6 +625,8 @@ function renderAttributeInputs() {
 
 function renderSkillInputs() {
   references.skillsList.innerHTML = "";
+
+  renderFavoriteSkills();
 
   Object.entries(skillGroups).forEach(([groupName, names]) => {
     const title = document.createElement("h3");
@@ -700,11 +706,58 @@ function createSkillInputRow(skillName) {
   input.dataset.type = "skill";
   input.addEventListener("change", onInputChange);
 
-  row.append(label, input);
+  const labelWrap = document.createElement("div");
+  labelWrap.className = "skill-label-wrap";
+
+  const favoriteButton = document.createElement("button");
+  favoriteButton.type = "button";
+  favoriteButton.className = `skill-favorite-toggle ${state.favoriteSkills[skillName] ? "is-active" : ""}`.trim();
+  favoriteButton.textContent = "★";
+  favoriteButton.setAttribute("aria-label", `${state.favoriteSkills[skillName] ? "Remover" : "Adicionar"} ${displayName(skillName)} das favoritas`);
+  favoriteButton.setAttribute("aria-pressed", state.favoriteSkills[skillName] ? "true" : "false");
+  favoriteButton.addEventListener("click", () => {
+    state.favoriteSkills[skillName] = !state.favoriteSkills[skillName];
+    renderSkillInputs();
+  });
+
+  labelWrap.append(label, favoriteButton);
+  row.append(labelWrap, input);
 
   const progressBox = createSkillProgressBox(skillName);
   wrapper.append(row, progressBox);
   return wrapper;
+}
+
+function renderFavoriteSkills() {
+  if (!references.favoriteSkillsList) {
+    return;
+  }
+
+  references.favoriteSkillsList.innerHTML = "";
+
+  const favorites = Object.entries(state.favoriteSkills)
+    .filter(([, isFavorite]) => Boolean(isFavorite))
+    .map(([skillName]) => skillName)
+    .sort((a, b) => displayName(a).localeCompare(displayName(b), "pt-BR"));
+
+  if (!favorites.length) {
+    const empty = document.createElement("span");
+    empty.className = "favorite-empty";
+    empty.textContent = "Nenhuma perícia favorita marcada.";
+    references.favoriteSkillsList.appendChild(empty);
+    return;
+  }
+
+  favorites.forEach((skillName) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "favorite-skill-chip";
+    chip.textContent = `★ ${displayName(skillName)}`;
+    chip.addEventListener("click", () => {
+      rollSkillTest(skillName);
+    });
+    references.favoriteSkillsList.appendChild(chip);
+  });
 }
 
 function createSkillProgressBox(skillName) {
@@ -862,6 +915,8 @@ function createOption(value, label = value) {
 }
 
 function bindEvents() {
+  setupMobileViewSwitcher();
+
   setupSideMenu();
 
   if (references.rulesToggle && references.rulesContent && references.rulesPanel) {
@@ -924,6 +979,44 @@ function bindEvents() {
       references.damageResult.innerHTML = `<strong>D${dieSize}</strong>: [${result.rolls.join(", ")}] = ${total}${result.rolls.length > 1 ? " <br>Explosão separada em novos dados." : ""}`;
     });
   });
+}
+
+function setupMobileViewSwitcher() {
+  if (!references.mobileViewSwitcher) {
+    return;
+  }
+
+  const buttons = Array.from(references.mobileViewSwitcher.querySelectorAll(".mobile-view-switcher__btn"));
+  const panels = Array.from(document.querySelectorAll(".mobile-panel[data-mobile-panel]"));
+  const mobileQuery = window.matchMedia("(max-width: 939px)");
+  let activePanel = buttons[0]?.dataset.mobileTarget || "";
+
+  const updatePanels = () => {
+    if (!mobileQuery.matches) {
+      panels.forEach((panel) => {
+        panel.hidden = false;
+      });
+      return;
+    }
+
+    panels.forEach((panel) => {
+      panel.hidden = panel.dataset.mobilePanel !== activePanel;
+    });
+  };
+
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      activePanel = button.dataset.mobileTarget || activePanel;
+      buttons.forEach((entry) => {
+        entry.classList.toggle("is-active", entry === button);
+      });
+      updatePanels();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  mobileQuery.addEventListener("change", updatePanels);
+  updatePanels();
 }
 
 function setupSideMenu() {
@@ -1693,6 +1786,7 @@ function collectCharacterData() {
     },
     attributes: state.attributes,
     skills: state.skills,
+    favoriteSkills: state.favoriteSkills,
     skillCreationBase: state.skillCreationBase,
     skillProgress: state.skillProgress,
     characteristics: state.characteristics
@@ -1786,6 +1880,7 @@ function applyStoredCharacterData(data) {
     if (Number.isFinite(Number(data.skills?.[key]))) {
       state.skills[key] = clamp(Number(data.skills[key]), SKILL_MIN_VALUE, SKILL_MAX_VALUE);
     }
+    state.favoriteSkills[key] = Boolean(data.favoriteSkills?.[key]);
     if (Number.isFinite(Number(data.skillCreationBase?.[key]))) {
       state.skillCreationBase[key] = clamp(Number(data.skillCreationBase[key]), SKILL_MIN_VALUE, SKILL_MAX_VALUE);
     }

@@ -35,7 +35,14 @@
       <a href="#sec-dano">Dano</a>
     </nav>
 
-    <section id="sec-regras" class="panel rules-panel is-collapsed anchor-target">
+    <nav id="mobileViewSwitcher" class="mobile-view-switcher" aria-label="Modo de visualização no celular">
+      <button type="button" class="mobile-view-switcher__btn is-active" data-mobile-target="basicas">Básicas</button>
+      <button type="button" class="mobile-view-switcher__btn" data-mobile-target="personagem">Personagem + Estatísticas</button>
+      <button type="button" class="mobile-view-switcher__btn" data-mobile-target="atributos">Atributos + Características</button>
+      <button type="button" class="mobile-view-switcher__btn" data-mobile-target="pericias">Perícias</button>
+    </nav>
+
+    <section id="sec-regras" class="panel rules-panel is-collapsed anchor-target mobile-desktop-only">
       <h2>
         <button id="rulesToggle" class="rules-toggle" type="button" aria-expanded="false" aria-controls="rulesContent">
           Resumo das Regras
@@ -62,7 +69,7 @@
       </ul>
     </section>
 
-    <section id="sec-basicas" class="panel anchor-target">
+    <section id="sec-basicas" class="panel anchor-target mobile-panel" data-mobile-panel="basicas">
       <h2>Informações Básicas</h2>
       <div class="basic-info-grid">
         <div class="field field-wide">
@@ -125,7 +132,7 @@
       <p id="ageHint" class="basic-info-hint">Edite a idade real ou humana para converter entre as duas conforme a raça selecionada.</p>
     </section>
 
-    <section class="grid info-dual-grid">
+    <section class="grid info-dual-grid mobile-panel" data-mobile-panel="personagem">
       <section id="sec-personagem" class="panel anchor-target">
         <h2>Informações do Personagem</h2>
         <div class="basic-info-grid">
@@ -215,7 +222,7 @@
       </section>
     </section>
 
-    <section class="grid top-grid">
+    <section class="grid top-grid mobile-panel" data-mobile-panel="atributos">
       <section id="sec-atributos" class="panel anchor-target">
         <h2>Atributos</h2>
         <p class="pool" id="attributesPool"></p>
@@ -229,9 +236,13 @@
       </section>
     </section>
 
-    <section id="sec-pericias" class="panel anchor-target">
+    <section id="sec-pericias" class="panel anchor-target mobile-panel" data-mobile-panel="pericias">
       <h2>Perícias</h2>
       <p class="pool" id="skillsPool"></p>
+      <div class="favorite-skills-panel" aria-label="Perícias favoritas">
+        <h3>Perícias favoritas</h3>
+        <div id="favoriteSkillsList" class="favorite-skills-list"></div>
+      </div>
       <div id="skillsList" class="list skills"></div>
     </section>
 
@@ -250,7 +261,7 @@
       </div>
     </div>
 
-    <section id="sec-dano" class="panel anchor-target">
+    <section id="sec-dano" class="panel anchor-target mobile-desktop-only">
       <h2>Dados de Dano</h2>
       <p>D8/D6 para crítico, D4/D3 para dano base.</p>
       <div class="damage-buttons">
@@ -280,6 +291,6 @@
     </div>
   </aside>
 
-  <script src="script.js?v=20260702-race-bonus"></script>
+  <script src="script.js?v=20260709-mobile-panels"></script>
 </body>
 </html>

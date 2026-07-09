@@ -131,6 +131,27 @@ html {
   border-color: transparent;
 }
 
+.mobile-view-switcher {
+  display: none;
+}
+
+.mobile-view-switcher__btn {
+  min-height: 2.15rem;
+  border-radius: 9px;
+  border: 1px solid #cdbca2;
+  background: #fff8ef;
+  color: #4c3e31;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.35rem 0.5rem;
+}
+
+.mobile-view-switcher__btn.is-active {
+  color: #fff8f2;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--button-start), var(--button-end));
+}
+
 .menu-overlay {
   position: fixed;
   inset: 0;
@@ -388,6 +409,47 @@ h2 {
   grid-template-columns: 1fr;
 }
 
+.favorite-skills-panel {
+  margin: 0 0 0.85rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid #d9ccb7;
+  background: rgba(255, 250, 243, 0.86);
+}
+
+.favorite-skills-panel h3 {
+  margin: 0 0 0.45rem;
+  font-size: 1rem;
+}
+
+.favorite-skills-list {
+  min-height: 1.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.favorite-skill-chip {
+  border: 1px solid #cdbca2;
+  border-radius: 999px;
+  background: #fff7eb;
+  padding: 0.28rem 0.62rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #4c3e31;
+  cursor: pointer;
+}
+
+.favorite-skill-chip:hover {
+  border-color: #b8873f;
+  color: #6a3e19;
+}
+
+.favorite-empty {
+  color: #7b6753;
+  font-size: 0.84rem;
+}
+
 .skills .group-title {
   grid-column: 1 / -1;
 }
@@ -403,6 +465,30 @@ h2 {
 
 .row label {
   font-weight: 600;
+}
+
+.skill-label-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.skill-favorite-toggle {
+  min-height: 1.55rem;
+  width: 1.75rem;
+  border: 1px solid #ccb390;
+  border-radius: 8px;
+  background: #fff5e6;
+  color: #8d6a3f;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.skill-favorite-toggle.is-active {
+  border-color: #b78530;
+  background: linear-gradient(135deg, #ffe6a3, #f2c66c);
+  color: #654104;
 }
 
 .roll-trigger {
@@ -790,6 +876,33 @@ button:hover {
 }
 
 @media (max-width: 939px) {
+  .quick-nav {
+    display: none;
+  }
+
+  .mobile-view-switcher {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+    margin-bottom: 0.65rem;
+    position: sticky;
+    top: 0.45rem;
+    z-index: 31;
+    background: rgba(255, 248, 239, 0.92);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 0.5rem;
+    box-shadow: 0 8px 18px rgba(39, 22, 14, 0.12);
+  }
+
+  .mobile-desktop-only {
+    display: none;
+  }
+
+  .mobile-panel[hidden] {
+    display: none !important;
+  }
+
   .quick-nav {
     position: sticky;
     top: 0.45rem;

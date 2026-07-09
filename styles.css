@@ -568,6 +568,99 @@ button:hover {
   border: 0;
   background: transparent;
   padding: 0;
+  margin-top: 0.7rem;
+  color: #4b3f34;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.roll-visual {
+  min-height: 132px;
+  border-radius: 14px;
+  border: 1px solid #d8c7ac;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.45), transparent 28%),
+    linear-gradient(160deg, rgba(244, 231, 210, 0.9), rgba(236, 219, 191, 0.82));
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem;
+  overflow: hidden;
+}
+
+.roll-highlights {
+  margin-top: 0.6rem;
+  display: grid;
+  gap: 0.45rem;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.roll-badge {
+  border-radius: 10px;
+  border: 1px solid #ccb390;
+  background: rgba(255, 249, 240, 0.92);
+  color: #3f342a;
+  padding: 0.38rem 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.die-token {
+  width: 2.15rem;
+  min-height: 2.15rem;
+  border-radius: 0.55rem;
+  border: 1px solid #7f6b54;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: #2f251d;
+  background: linear-gradient(160deg, #fff5e8, #e9d7c0);
+  box-shadow: 0 8px 14px rgba(59, 36, 18, 0.2);
+  opacity: 0;
+  transform: translate(var(--from-x, 0), var(--travel-y, -90px)) rotate(var(--spin, 0deg)) scale(0.58);
+  animation: die-roll-in 760ms cubic-bezier(0.2, 0.85, 0.28, 1) forwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+.die-token.is-kept {
+  border-color: #3e7d56;
+  background: linear-gradient(160deg, #e7ffef, #bfe8ca);
+}
+
+.die-token.is-bonus {
+  border-color: #9a6c1f;
+  background: linear-gradient(160deg, #fff2cf, #f2d68a);
+}
+
+.die-token.is-kept.is-bonus {
+  border-color: #2c7b57;
+  background: linear-gradient(160deg, #e8ffdc, #cfe89a);
+}
+
+.die-token.is-explosion {
+  border-style: dashed;
+  border-color: #6d4db5;
+  background: linear-gradient(160deg, #f1e5ff, #d9c4ff);
+}
+
+@keyframes die-roll-in {
+  0% {
+    opacity: 0;
+    transform: translate(var(--from-x, 0), var(--travel-y, -90px)) rotate(var(--spin, 0deg)) scale(0.58);
+  }
+
+  70% {
+    opacity: 1;
+    transform: translate(0, 4px) rotate(calc(var(--spin, 0deg) * 0.1)) scale(1.06);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
 }
 
 .result-popup {

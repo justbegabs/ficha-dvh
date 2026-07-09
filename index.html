@@ -6,17 +6,19 @@
   <title>Sistema dos Deuses</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;700;800&family=Teko:wght@500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg-1: #07192f;
-      --bg-2: #153a62;
-      --ink: #eaf2ff;
-      --muted: #b6c8df;
-      --cyan: #00d5ff;
-      --panel: rgba(11, 31, 56, 0.8);
-      --line: rgba(0, 213, 255, 0.7);
-      --dock-bg: rgba(8, 24, 44, 0.88);
+      --bg-1: #01070f;
+      --bg-2: #042a4f;
+      --bg-3: #0b4f7f;
+      --ink: #dff7ff;
+      --muted: #b8d9e8;
+      --cyan: #32f0ff;
+      --cyan-soft: rgba(50, 240, 255, 0.45);
+      --panel: rgba(4, 41, 74, 0.72);
+      --line: rgba(50, 240, 255, 0.58);
+      --dock-bg: rgba(0, 17, 33, 0.42);
     }
 
     * {
@@ -27,11 +29,11 @@
       margin: 0;
       min-height: 100vh;
       color: var(--ink);
-      font-family: "Raleway", sans-serif;
+      font-family: "Montserrat", sans-serif;
       background:
-        radial-gradient(circle at 20% 10%, rgba(94, 196, 255, 0.2), transparent 30%),
-        radial-gradient(circle at 90% 0%, rgba(8, 255, 206, 0.15), transparent 22%),
-        linear-gradient(180deg, var(--bg-1), var(--bg-2));
+        radial-gradient(circle at 20% 8%, rgba(50, 240, 255, 0.26), transparent 30%),
+        radial-gradient(circle at 80% 0%, rgba(59, 160, 255, 0.26), transparent 24%),
+        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 58%, var(--bg-3) 100%);
     }
 
     .shell {
@@ -48,7 +50,7 @@
       display: flex;
       justify-content: space-between;
       pointer-events: none;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(8px);
     }
 
     .icon-btn {
@@ -56,43 +58,53 @@
       width: 46px;
       height: 46px;
       border: 0;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.12);
-      color: #ffe17a;
+      border-radius: 12px;
+      background: rgba(11, 47, 77, 0.72);
+      color: #9ef7ff;
       font-size: 1.35rem;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 0 12px rgba(50, 240, 255, 0.25);
     }
 
     .hero {
-      max-width: 1040px;
+      max-width: 720px;
       margin: 0 auto;
-      padding: 4.5rem 1rem 2rem;
+      padding: 4.1rem 1rem 1.1rem;
       text-align: center;
     }
 
     .hero h1 {
-      margin: 0 0 0.75rem;
-      font-size: clamp(2.2rem, 5vw, 4rem);
-      font-weight: 800;
-      color: #ffd8ff;
-      text-shadow: 0 0 8px #ff4ff3, 0 0 22px #b000ff;
+      margin: 0 0 1rem;
+      font-family: "Dancing Script", cursive;
+      font-size: clamp(2.8rem, 8vw, 5.6rem);
+      font-weight: 700;
+      color: #6dffff;
+      text-shadow:
+        0 0 8px rgba(50, 240, 255, 0.95),
+        0 0 22px rgba(50, 240, 255, 0.75),
+        0 0 42px rgba(15, 190, 255, 0.55);
     }
 
     .hero p {
       margin: 0;
       color: var(--muted);
-      font-size: clamp(1rem, 2.2vw, 1.3rem);
-      line-height: 1.45;
+      font-size: clamp(0.98rem, 2.7vw, 1.18rem);
+      line-height: 1.7;
+      font-weight: 700;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
     }
 
     .intro {
-      margin: 2rem auto 0;
-      max-width: 860px;
-      border: 2px solid var(--line);
-      border-radius: 14px;
-      background: var(--panel);
-      padding: 1.4rem;
-      box-shadow: 0 0 20px rgba(0, 213, 255, 0.28);
+      margin: 1.4rem auto 0;
+      max-width: 640px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background:
+        linear-gradient(160deg, rgba(6, 57, 98, 0.72), rgba(7, 39, 71, 0.7)),
+        var(--panel);
+      padding: 1.35rem;
+      box-shadow:
+        inset 0 0 0 1px rgba(154, 247, 255, 0.17),
+        0 0 24px rgba(11, 196, 255, 0.24);
     }
 
     .characters-section {
@@ -183,54 +195,74 @@
     }
 
     .dock {
-      border-top: 1px solid rgba(0, 213, 255, 0.55);
-      background: var(--dock-bg);
-      padding: 0.8rem 0.7rem 1rem;
-      position: relative;
+      background: transparent;
+      padding: 0.2rem 1rem 1.6rem;
+    }
+
+    .home-layout {
+      max-width: 1020px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+      gap: 1.2rem;
+      align-items: center;
     }
 
     .dock-grid {
-      max-width: 1040px;
-      margin: 0 auto;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 0.55rem;
-      align-items: start;
-    }
-
-    .dock-item {
-      position: relative;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.95rem;
     }
 
     .dock-link,
     .dock-button {
       width: 100%;
       text-decoration: none;
-      color: #dbecff;
-      background: rgba(20, 56, 88, 0.9);
-      border: 2px solid rgba(0, 213, 255, 0.55);
+      color: #d6ffff;
+      background: linear-gradient(180deg, rgba(54, 202, 238, 0.88), rgba(27, 149, 188, 0.78));
+      border: 1px solid rgba(176, 255, 255, 0.72);
       border-radius: 10px;
-      min-height: 42px;
+      min-height: 54px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: "Teko", sans-serif;
-      font-size: 1.33rem;
-      letter-spacing: 0.03em;
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
       transition: transform 120ms ease, background-color 120ms ease, border-color 120ms ease;
       cursor: pointer;
+      box-shadow:
+        inset 0 0 0 1px rgba(212, 255, 255, 0.26),
+        0 0 16px rgba(87, 234, 255, 0.35);
     }
 
     .dock-link:hover,
     .dock-button:hover {
       transform: translateY(-2px);
-      background: rgba(29, 75, 116, 0.95);
+      background: linear-gradient(180deg, rgba(66, 216, 248, 0.94), rgba(35, 164, 203, 0.84));
     }
 
     .dock-link.primary {
-      border-color: #ffc14f;
-      color: #ffe6b0;
-      box-shadow: 0 0 12px rgba(255, 193, 79, 0.35);
+      border-color: rgba(190, 255, 255, 0.95);
+    }
+
+    .summary-card {
+      border-radius: 28px;
+      border: 1px solid rgba(187, 255, 227, 0.6);
+      background: linear-gradient(170deg, rgba(112, 219, 190, 0.82), rgba(64, 165, 147, 0.84));
+      padding: 1.2rem 1.05rem;
+      color: #e9fff8;
+      line-height: 1.52;
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow:
+        inset 0 0 0 1px rgba(220, 255, 245, 0.2),
+        0 0 20px rgba(103, 238, 198, 0.34);
+    }
+
+    .summary-card p {
+      margin: 0;
     }
 
     .race-panel {
@@ -357,6 +389,22 @@
     }
 
     @media (max-width: 640px) {
+      .hero {
+        padding-top: 3.25rem;
+      }
+
+      .home-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .dock-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .summary-card {
+        order: -1;
+      }
+
       .race-panel__header {
         flex-direction: column;
         align-items: flex-start;
@@ -373,11 +421,15 @@
 
     <main>
       <section class="hero">
-        <h1>Bem-vindo ao Sistema dos Deuses</h1>
-        <p>Escolha uma raça, entre na ficha e carregue o visual do seu personagem.</p>
+        <h1>Sistema dos Deuses</h1>
         <section class="intro" aria-label="Resumo da aplicação">
           <p>
-            A ficha é automatizada, os temas mudam conforme classe, raça e origem, e as raças estão organizadas por JSON para facilitar manutenção e expansão.
+            Existem raças de todos os tipos nos multiversos.<br>
+            Os deuses andam entre os humanos.<br>
+            Tudo pode acontecer.<br>
+            Tudo é possível e nada e possível ao mesmo tempo.<br>
+            Cabe a voce decidir o destino. O seu próprio e o dos Universos ao seu redor.<br>
+            Tenha cuidado, e se divirta.
           </p>
         </section>
 
@@ -385,18 +437,29 @@
     </main>
 
     <nav class="dock" aria-label="Atalhos do sistema">
-      <div class="dock-grid">
-        <a class="dock-link primary" href="ficha.html">Ficha</a>
-        <a class="dock-link" href="personagens.html">Personagens</a>
-        <a class="dock-link" href="races.html">Raças</a>
-        <a class="dock-link" href="#">Atributos</a>
-        <a class="dock-link" href="origens.html">Origens</a>
-        <a class="dock-link" href="classes.html">Classes</a>
-        <a class="dock-link" href="#">Itens</a>
-        <a class="dock-link" href="#">Armas</a>
-        <a class="dock-link" href="#">Perícias</a>
-        <a class="dock-link" href="#">Bestiário</a>
-        <a class="dock-link" href="#">Materiais</a>
+      <div class="home-layout">
+        <div class="dock-grid">
+          <a class="dock-link primary" href="ficha.html">Ficha</a>
+          <a class="dock-link" href="races.html">Raças</a>
+          <a class="dock-link" href="origens.html">Origens</a>
+          <a class="dock-link" href="#">Atributos</a>
+          <a class="dock-link" href="classes.html">Classe</a>
+          <a class="dock-link" href="#">Atributos Raça</a>
+          <a class="dock-link" href="#">Perícias</a>
+          <a class="dock-link" href="#">Habilidades</a>
+          <a class="dock-link" href="#">Magias</a>
+          <a class="dock-link" href="#">Armas</a>
+          <a class="dock-link" href="#">Itens</a>
+          <a class="dock-link" href="personagens.html">Personagens</a>
+        </div>
+
+        <aside class="summary-card" aria-label="Resumo rápido">
+          <p>
+            A ficha é completamente automatizada, então ela se auto-completa.<br>
+            Para procurar e ver mais informações sobre alguma coisa, entre na página desejada.<br>
+            Aqui a tela principal apresenta apenas um pequeno resumo.
+          </p>
+        </aside>
       </div>
 
     </nav>

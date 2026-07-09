@@ -100,8 +100,8 @@ const VISUAL_DEMO_PRESET = {
 const LEVEL_ZERO_BASE_STATS = {
   life: 10,
   sanity: 10,
-  mana: 15,
-  conviction: 15
+  mana: 10,
+  conviction: 10
 };
 
 const CLASS_THEMES = {
@@ -382,6 +382,8 @@ const references = {
   saveCharacterButton: document.getElementById("saveCharacterButton"),
   saveCharacterStatus: document.getElementById("saveCharacterStatus"),
   resultPopup: document.getElementById("resultPopup"),
+  rollVisual: document.getElementById("rollVisual"),
+  rollHighlights: document.getElementById("rollHighlights"),
   rerollButton: document.getElementById("rerollButton"),
   closeResultPopup: document.getElementById("closeResultPopup"),
   xpSkill: document.getElementById("xpSkill"),
@@ -1405,6 +1407,19 @@ function rollTest(attributeName, selectedSkill) {
     summary.push(criticalStatus);
   }
 
+  renderRollVisual({
+    baseRolls: rollData.baseRolls,
+    explosionRolls: rollData.explosionRolls,
+    allRolls: rolls,
+    keptValues,
+    maxBonusValues,
+    total,
+    compactCount,
+    criticalFail,
+    criticalSuccess,
+    context: selectedSkill ? `Perícia: ${displayName(selectedSkill)}` : `Atributo: ${displayName(attributeName)}`
+  });
+
   references.rollResult.innerHTML = summary.join("<br>");
   openResultPopup();
 }
@@ -1452,8 +1467,111 @@ function rollCharacteristicTest(characteristicName) {
     summary.push(criticalStatus);
   }
 
+  renderRollVisual({
+    baseRolls: rollData.baseRolls,
+    explosionRolls: rollData.explosionRolls,
+    allRolls: rolls,
+    keptValues,
+    maxBonusValues,
+    total,
+    compactCount,
+    criticalFail,
+    criticalSuccess,
+    context: `Característica: ${displayName(characteristicName)}`
+  });
+
   references.rollResult.innerHTML = summary.join("<br>");
   openResultPopup();
+}
+
+function renderRollVisual({
+  baseRolls,
+  explosionRolls,
+  allRolls,
+  keptValues,
+  maxBonusValues,
+  total,
+  compactCount,
+  criticalFail,
+  criticalSuccess,
+  context
+}) {
+  if (!references.rollVisual || !references.rollHighlights) {
+    return;
+  }
+
+  references.rollVisual.innerHTML = "";
+  references.rollHighlights.innerHTML = "";
+
+  const keptCounter = createCounterMap(keptValues);
+  const tokenSpecs = [
+    ...baseRolls.map((value) => ({ value, isExplosion: false })),
+    ...explosionRolls.map((value) => ({ value, isExplosion: true }))
+  ];
+
+  tokenSpecs.forEach((spec, index) => {
+    const value = spec.value;
+    const token = document.createElement("span");
+    token.className = "die-token";
+    token.textContent = String(value);
+    token.style.setProperty("--delay", `${index * 70}ms`);
+    token.style.setProperty("--from-x", `${Math.round(Math.random() * 260 - 130)}px`);
+    token.style.setProperty("--travel-y", `${-80 - Math.round(Math.random() * 120)}px`);
+    token.style.setProperty("--spin", `${Math.round(Math.random() * 760 - 380)}deg`);
+
+    if (value === 10) {
+      token.classList.add("is-bonus");
+    }
+
+    if (spec.isExplosion) {
+      token.classList.add("is-explosion");
+    }
+
+    if (consumeCounterValue(keptCounter, value)) {
+      token.classList.add("is-kept");
+    }
+
+    references.rollVisual.appendChild(token);
+  });
+
+  const badges = [
+    `Resultado total: ${total}`,
+    context,
+    `Dados base: ${baseRolls.length}`,
+    `Dados extras: ${explosionRolls.length}`,
+    `Mantidos: [${keptValues.join(", ") || "-"}]`,
+    `Bônus de 10: ${maxBonusValues.length}`,
+    `Compactação: ${compactCount}`
+  ];
+
+  if (criticalFail) {
+    badges.push("Falha crítica");
+  } else if (criticalSuccess) {
+    badges.push("Sucesso crítico");
+  }
+
+  badges.forEach((text) => {
+    const badge = document.createElement("div");
+    badge.className = "roll-badge";
+    badge.textContent = text;
+    references.rollHighlights.appendChild(badge);
+  });
+}
+
+function createCounterMap(values) {
+  return values.reduce((counter, value) => {
+    counter[value] = (counter[value] || 0) + 1;
+    return counter;
+  }, {});
+}
+
+function consumeCounterValue(counter, value) {
+  if (!counter[value]) {
+    return false;
+  }
+
+  counter[value] -= 1;
+  return true;
 }
 
 function onReroll() {

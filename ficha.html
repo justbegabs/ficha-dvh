@@ -197,18 +197,18 @@
           <div class="field">
             <label for="manaCurrent">Mana</label>
             <div class="stat-pair">
-              <input id="manaCurrent" type="number" min="0" step="1" value="15" />
+              <input id="manaCurrent" type="number" min="0" step="1" value="10" />
               <span>/</span>
-              <input id="manaMax" type="number" min="0" step="1" value="15" />
+              <input id="manaMax" type="number" min="0" step="1" value="10" />
             </div>
           </div>
 
           <div class="field">
             <label for="soulCurrent">Alma</label>
             <div class="stat-pair">
-              <input id="soulCurrent" type="number" min="0" step="1" value="15" />
+              <input id="soulCurrent" type="number" min="0" step="1" value="10" />
               <span>/</span>
-              <input id="soulMax" type="number" min="0" step="1" value="15" />
+              <input id="soulMax" type="number" min="0" step="1" value="10" />
             </div>
           </div>
         </div>
@@ -244,6 +244,8 @@
             <button id="closeResultPopup" type="button" aria-label="Fechar resultado">Fechar</button>
           </div>
         </div>
+        <div id="rollVisual" class="roll-visual" aria-hidden="true"></div>
+        <div id="rollHighlights" class="roll-highlights" aria-live="polite"></div>
         <div id="rollResult" class="result result--popup"></div>
       </div>
     </div>

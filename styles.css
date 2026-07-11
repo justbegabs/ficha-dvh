@@ -838,7 +838,7 @@ button:hover {
   }
 }
 
-@media (min-width: 940px) {
+@media (min-width: 940px) and (min-aspect-ratio: 16/9) {
   .app {
     padding-left: 11.5rem;
   }
@@ -875,7 +875,7 @@ button:hover {
   }
 }
 
-@media (max-width: 939px) {
+@media (max-aspect-ratio: 16/9) {
   .quick-nav {
     display: none;
   }

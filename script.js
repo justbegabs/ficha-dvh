@@ -399,6 +399,8 @@ const references = {
 void initialize();
 
 async function initialize() {
+  setupMobileViewSwitcher();
+
   await loadRaceCatalog();
   await loadOriginCatalog();
   await loadClassCatalog();
@@ -915,8 +917,6 @@ function createOption(value, label = value) {
 }
 
 function bindEvents() {
-  setupMobileViewSwitcher();
-
   setupSideMenu();
 
   if (references.rulesToggle && references.rulesContent && references.rulesPanel) {
@@ -988,8 +988,12 @@ function setupMobileViewSwitcher() {
 
   const buttons = Array.from(references.mobileViewSwitcher.querySelectorAll(".mobile-view-switcher__btn"));
   const panels = Array.from(document.querySelectorAll(".mobile-panel[data-mobile-panel]"));
-  const mobileQuery = window.matchMedia("(max-width: 939px)");
-  let activePanel = buttons[0]?.dataset.mobileTarget || "";
+  const mobileQuery = window.matchMedia("(max-aspect-ratio: 16/9)");
+  let activePanel =
+    references.mobileViewSwitcher.dataset.activePanel ||
+    buttons.find((button) => button.classList.contains("is-active"))?.dataset.mobileTarget ||
+    buttons[0]?.dataset.mobileTarget ||
+    "";
 
   const updatePanels = () => {
     if (!mobileQuery.matches) {
@@ -1002,7 +1006,16 @@ function setupMobileViewSwitcher() {
     panels.forEach((panel) => {
       panel.hidden = panel.dataset.mobilePanel !== activePanel;
     });
+
+    references.mobileViewSwitcher.dataset.activePanel = activePanel;
   };
+
+  if (references.mobileViewSwitcher.dataset.bound === "true") {
+    updatePanels();
+    return;
+  }
+
+  references.mobileViewSwitcher.dataset.bound = "true";
 
   buttons.forEach((button) => {
     button.addEventListener("click", () => {

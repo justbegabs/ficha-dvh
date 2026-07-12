@@ -92,11 +92,6 @@ const classCatalog = {};
 const ENABLE_DYNAMIC_APPEARANCE_BY_SELECTION = false;
 const CHARACTERS_STORAGE_KEY = "dvhCharacters";
 const SELECTED_CHARACTER_STORAGE_KEY = "dvhSelectedCharacterId";
-const VISUAL_DEMO_PRESET = {
-  classId: "carteado",
-  raceId: "semideus",
-  originId: ""
-};
 const LEVEL_ZERO_BASE_STATS = {
   life: 10,
   sanity: 10,
@@ -410,9 +405,9 @@ async function initialize() {
   renderClassSelectors();
   syncOriginSelection();
   syncClassSelection();
+  syncRaceSelection();
   const loadedFromStorage = loadStoredCharacterSelection();
   if (!loadedFromStorage) {
-    applyVisualDemoPreset();
     applyRaceLevelZeroBonuses();
   }
   renderRaceInfo();
@@ -425,20 +420,6 @@ async function initialize() {
   updateHumanAge();
   applyAppearanceTheme();
   bindEvents();
-}
-
-function applyVisualDemoPreset() {
-  if (references.characterClassInfo && classCatalog[VISUAL_DEMO_PRESET.classId]) {
-    references.characterClassInfo.value = VISUAL_DEMO_PRESET.classId;
-  }
-
-  if (references.characterRaceInfo && raceCatalog[VISUAL_DEMO_PRESET.raceId]) {
-    references.characterRaceInfo.value = VISUAL_DEMO_PRESET.raceId;
-  }
-
-  if (references.characterOriginInfo) {
-    references.characterOriginInfo.value = VISUAL_DEMO_PRESET.originId;
-  }
 }
 
 async function loadRaceCatalog() {
@@ -869,7 +850,7 @@ function renderClassSelectors() {
     return;
   }
 
-  const selectedClass = localStorage.getItem("selectedClass") || references.characterClassInfo.value || "";
+  const selectedClass = localStorage.getItem("selectedClass") || "";
   references.characterClassInfo.innerHTML = "";
   references.characterClassInfo.appendChild(createOption("", "Selecione..."));
 
@@ -891,7 +872,7 @@ function renderRaceSelectors() {
   const storedRace = localStorage.getItem("selectedRace") || "";
   const currentRace = storedRace && raceCatalog[storedRace]
     ? storedRace
-    : (references.characterRaceInfo.value && raceCatalog[references.characterRaceInfo.value] ? references.characterRaceInfo.value : "");
+    : "";
 
   references.characterRaceInfo.innerHTML = "";
   references.characterRaceInfo.appendChild(createOption("", "Selecione..."));
@@ -1331,6 +1312,17 @@ function syncClassSelection() {
   const storedClass = localStorage.getItem("selectedClass");
   if (storedClass && classCatalog[storedClass]) {
     references.characterClassInfo.value = storedClass;
+  }
+}
+
+function syncRaceSelection() {
+  if (!references.characterRaceInfo) {
+    return;
+  }
+
+  const storedRace = localStorage.getItem("selectedRace");
+  if (storedRace && raceCatalog[storedRace]) {
+    references.characterRaceInfo.value = storedRace;
   }
 }
 

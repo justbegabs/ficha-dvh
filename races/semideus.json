@@ -1,6 +1,6 @@
 ﻿{
     "displayName":  "Semideus",
-    "ageFactor":  2.2,
+    "ageFactor":  1.0,
     "theme":  {
                   "--page-bg-start":  "#fff4c8",
                   "--page-bg-mid":  "#e0c15f",

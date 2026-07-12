@@ -1,6 +1,6 @@
 ﻿{
     "displayName":  "Anjo",
-    "ageFactor":  2.8,
+    "ageFactor":  5.8,
     "theme":  {
                   "--page-bg-start":  "#fff4e8",
                   "--page-bg-mid":  "#f1d3b5",

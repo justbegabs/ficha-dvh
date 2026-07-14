@@ -1,5 +1,6 @@
 const CHARACTERS_STORAGE_KEY = "dvhCharacters";
 const SELECTED_CHARACTER_STORAGE_KEY = "dvhSelectedCharacterId";
+const MAX_CHARACTERS_PER_ACCOUNT = 20;
 
 const charactersGrid = document.getElementById("charactersGrid");
 const charactersStatus = document.getElementById("charactersStatus");
@@ -62,7 +63,7 @@ if (sideMenu) {
   });
 }
 
-function readStoredCharacters() {
+function readLocalCharacters() {
   try {
     const raw = localStorage.getItem(CHARACTERS_STORAGE_KEY);
     if (!raw) {
@@ -76,8 +77,33 @@ function readStoredCharacters() {
   }
 }
 
-function writeStoredCharacters(characters) {
+function writeLocalCharacters(characters) {
   localStorage.setItem(CHARACTERS_STORAGE_KEY, JSON.stringify(characters));
+}
+
+async function readStoredCharacters() {
+  if (window.DVHAuth?.waitForAuthReady) {
+    await window.DVHAuth.waitForAuthReady();
+  }
+
+  if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
+    return window.DVHAuth.listCharacters();
+  }
+
+  return readLocalCharacters();
+}
+
+async function persistStoredCharacters(characters) {
+  if (window.DVHAuth?.waitForAuthReady) {
+    await window.DVHAuth.waitForAuthReady();
+  }
+
+  if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
+    await window.DVHAuth.replaceAllCharacters(characters);
+    return;
+  }
+
+  writeLocalCharacters(characters);
 }
 
 function formatSavedAt(value) {
@@ -96,26 +122,42 @@ function formatSavedAt(value) {
   }).format(date);
 }
 
-function renderStoredCharacters() {
+async function renderStoredCharacters() {
   if (!charactersGrid || !charactersStatus) {
     return;
   }
 
-  const characters = readStoredCharacters();
-  charactersGrid.innerHTML = "";
+  try {
+    if (window.DVHAuth?.waitForAuthReady) {
+      await window.DVHAuth.waitForAuthReady();
+    }
 
-  if (!characters.length) {
-    charactersStatus.textContent = "Nenhum personagem salvo ainda.";
-    return;
-  }
+    const authEnabled = window.DVHAuth?.isConfigured?.();
+    const loggedIn = window.DVHAuth?.isLoggedIn?.();
 
-  charactersStatus.textContent = `${characters.length} personagem(ns) salvo(s)`;
+    if (authEnabled && !loggedIn) {
+      charactersGrid.innerHTML = "";
+      charactersStatus.textContent = "Faça login com Google para carregar suas fichas salvas.";
+      return;
+    }
 
-  [...characters]
-    .sort((a, b) => new Date(b.savedAt || 0).getTime() - new Date(a.savedAt || 0).getTime())
-    .forEach((character) => {
-      const card = document.createElement("article");
-      card.className = "character-card";
+    const characters = await readStoredCharacters();
+    charactersGrid.innerHTML = "";
+
+    if (!characters.length) {
+      charactersStatus.textContent = authEnabled
+        ? `Nenhum personagem salvo ainda. Limite por conta: ${MAX_CHARACTERS_PER_ACCOUNT}.`
+        : "Nenhum personagem salvo ainda.";
+      return;
+    }
+
+    charactersStatus.textContent = `${characters.length}/${MAX_CHARACTERS_PER_ACCOUNT} personagem(ns) salvo(s)`;
+
+    [...characters]
+      .sort((a, b) => new Date(b.savedAt || 0).getTime() - new Date(a.savedAt || 0).getTime())
+      .forEach((character) => {
+        const card = document.createElement("article");
+        card.className = "character-card";
 
       const title = document.createElement("strong");
       title.textContent = character.name || "Personagem sem nome";
@@ -145,16 +187,26 @@ function renderStoredCharacters() {
       deleteButton.type = "button";
       deleteButton.className = "character-action is-danger";
       deleteButton.textContent = "Remover";
-      deleteButton.addEventListener("click", () => {
-        const next = readStoredCharacters().filter((entry) => entry.id !== character.id);
-        writeStoredCharacters(next);
-        renderStoredCharacters();
+      deleteButton.addEventListener("click", async () => {
+        const next = (await readStoredCharacters()).filter((entry) => entry.id !== character.id);
+        await persistStoredCharacters(next);
+        await renderStoredCharacters();
       });
 
-      actions.append(openButton, deleteButton);
-      card.append(title, meta, actions);
-      charactersGrid.appendChild(card);
-    });
+        actions.append(openButton, deleteButton);
+        card.append(title, meta, actions);
+        charactersGrid.appendChild(card);
+      });
+  } catch {
+    charactersGrid.innerHTML = "";
+    charactersStatus.textContent = "Não foi possível carregar seus personagens agora.";
+  }
 }
 
-renderStoredCharacters();
+void renderStoredCharacters();
+
+if (window.DVHAuth?.onAuthStateChanged) {
+  window.DVHAuth.onAuthStateChanged(() => {
+    void renderStoredCharacters();
+  });
+}

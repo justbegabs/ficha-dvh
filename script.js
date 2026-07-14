@@ -92,6 +92,7 @@ const classCatalog = {};
 const ENABLE_DYNAMIC_APPEARANCE_BY_SELECTION = false;
 const CHARACTERS_STORAGE_KEY = "dvhCharacters";
 const SELECTED_CHARACTER_STORAGE_KEY = "dvhSelectedCharacterId";
+const MAX_CHARACTERS_PER_ACCOUNT = 20;
 const LEVEL_ZERO_BASE_STATS = {
   life: 10,
   sanity: 10,
@@ -396,6 +397,10 @@ void initialize();
 async function initialize() {
   setupMobileViewSwitcher();
 
+  if (window.DVHAuth?.waitForAuthReady) {
+    await window.DVHAuth.waitForAuthReady();
+  }
+
   await loadRaceCatalog();
   await loadOriginCatalog();
   await loadClassCatalog();
@@ -406,7 +411,7 @@ async function initialize() {
   syncOriginSelection();
   syncClassSelection();
   syncRaceSelection();
-  const loadedFromStorage = loadStoredCharacterSelection();
+  const loadedFromStorage = await loadStoredCharacterSelection();
   if (!loadedFromStorage) {
     applyRaceLevelZeroBonuses();
   }
@@ -1798,7 +1803,7 @@ function collectCharacterData() {
   };
 }
 
-function readStoredCharacters() {
+function readLocalCharacters() {
   try {
     const raw = localStorage.getItem(CHARACTERS_STORAGE_KEY);
     if (!raw) {
@@ -1812,17 +1817,42 @@ function readStoredCharacters() {
   }
 }
 
-function writeStoredCharacters(characters) {
+function writeLocalCharacters(characters) {
   localStorage.setItem(CHARACTERS_STORAGE_KEY, JSON.stringify(characters));
 }
 
-function loadStoredCharacterSelection() {
+async function readStoredCharacters() {
+  if (window.DVHAuth?.waitForAuthReady) {
+    await window.DVHAuth.waitForAuthReady();
+  }
+
+  if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
+    return window.DVHAuth.listCharacters();
+  }
+
+  return readLocalCharacters();
+}
+
+async function persistStoredCharacters(characters) {
+  if (window.DVHAuth?.waitForAuthReady) {
+    await window.DVHAuth.waitForAuthReady();
+  }
+
+  if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
+    await window.DVHAuth.replaceAllCharacters(characters);
+    return;
+  }
+
+  writeLocalCharacters(characters);
+}
+
+async function loadStoredCharacterSelection() {
   const selectedId = localStorage.getItem(SELECTED_CHARACTER_STORAGE_KEY);
   if (!selectedId) {
     return false;
   }
 
-  const selected = readStoredCharacters().find((entry) => entry.id === selectedId);
+  const selected = (await readStoredCharacters()).find((entry) => entry.id === selectedId);
   localStorage.removeItem(SELECTED_CHARACTER_STORAGE_KEY);
 
   if (!selected?.data) {
@@ -1901,26 +1931,46 @@ function applyStoredCharacterData(data) {
   });
 }
 
-function saveCharacterAsJson() {
-  const payload = collectCharacterData();
-  const id = `char-${Date.now()}`;
-  const savedAt = new Date().toISOString();
-  const entry = {
-    id,
-    name: payload.basicInfo.name || "Personagem sem nome",
-    className: payload.characterInfo.class.name || "",
-    raceName: payload.characterInfo.race.name || "",
-    originName: payload.characterInfo.origin.name || "",
-    savedAt,
-    data: payload
-  };
+async function saveCharacterAsJson() {
+  if (window.DVHAuth?.isConfigured?.() && !window.DVHAuth?.isLoggedIn?.()) {
+    if (references.saveCharacterStatus) {
+      references.saveCharacterStatus.textContent = "Faça login com Google para salvar fichas na sua conta.";
+    }
+    return;
+  }
 
-  const current = readStoredCharacters();
-  current.push(entry);
-  writeStoredCharacters(current);
+  try {
+    const payload = collectCharacterData();
+    const id = `char-${Date.now()}`;
+    const savedAt = new Date().toISOString();
+    const entry = {
+      id,
+      name: payload.basicInfo.name || "Personagem sem nome",
+      className: payload.characterInfo.class.name || "",
+      raceName: payload.characterInfo.race.name || "",
+      originName: payload.characterInfo.origin.name || "",
+      savedAt,
+      data: payload
+    };
 
-  if (references.saveCharacterStatus) {
-    references.saveCharacterStatus.textContent = `Personagem salvo no site. Veja em Index > Personagens.`;
+    const current = await readStoredCharacters();
+    if (current.length >= MAX_CHARACTERS_PER_ACCOUNT) {
+      if (references.saveCharacterStatus) {
+        references.saveCharacterStatus.textContent = `Limite de ${MAX_CHARACTERS_PER_ACCOUNT} fichas por conta atingido.`;
+      }
+      return;
+    }
+
+    current.push(entry);
+    await persistStoredCharacters(current);
+
+    if (references.saveCharacterStatus) {
+      references.saveCharacterStatus.textContent = `Personagem salvo. Total: ${current.length}/${MAX_CHARACTERS_PER_ACCOUNT}.`;
+    }
+  } catch {
+    if (references.saveCharacterStatus) {
+      references.saveCharacterStatus.textContent = "Não foi possível salvar agora. Verifique sua conexão e tente novamente.";
+    }
   }
 }
 

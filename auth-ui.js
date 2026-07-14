@@ -17,6 +17,28 @@
     document.head.appendChild(style);
   }
 
+  function formatAuthError(error) {
+    const code = error?.code || "";
+
+    if (code === "auth/unauthorized-domain") {
+      return "Domínio não autorizado no Firebase";
+    }
+
+    if (code === "auth/popup-closed-by-user") {
+      return "Login cancelado";
+    }
+
+    if (code === "auth/operation-not-allowed") {
+      return "Login Google não habilitado no Firebase";
+    }
+
+    if (code === "auth/network-request-failed") {
+      return "Sem conexão. Tente novamente";
+    }
+
+    return code ? `Não foi possível entrar (${code})` : "Não foi possível entrar";
+  }
+
   function buildWidget() {
     const topBar = document.querySelector(".top-bar");
     if (!topBar || document.getElementById("authWidget")) {
@@ -90,11 +112,17 @@
     window.DVHAuth.onAuthStateChanged(update);
 
     refs.loginButton.addEventListener("click", async () => {
+      const previousLabel = refs.loginButton.textContent;
+      refs.loginButton.disabled = true;
+      refs.loginButton.textContent = "Entrando...";
+
       try {
         await window.DVHAuth.signInWithGoogle();
       } catch (error) {
-        const code = error?.code ? ` (${error.code})` : "";
-        refs.email.textContent = `Não foi possível entrar${code}`;
+        refs.email.textContent = formatAuthError(error);
+      } finally {
+        refs.loginButton.disabled = false;
+        refs.loginButton.textContent = previousLabel;
       }
     });
 

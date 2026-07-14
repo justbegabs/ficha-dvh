@@ -1932,14 +1932,8 @@ function applyStoredCharacterData(data) {
 }
 
 async function saveCharacterAsJson() {
-  if (window.DVHAuth?.isConfigured?.() && !window.DVHAuth?.isLoggedIn?.()) {
-    if (references.saveCharacterStatus) {
-      references.saveCharacterStatus.textContent = "Faça login com Google para salvar fichas na sua conta.";
-    }
-    return;
-  }
-
   try {
+    const savingToCloud = Boolean(window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.());
     const payload = collectCharacterData();
     const id = `char-${Date.now()}`;
     const savedAt = new Date().toISOString();
@@ -1965,7 +1959,9 @@ async function saveCharacterAsJson() {
     await persistStoredCharacters(current);
 
     if (references.saveCharacterStatus) {
-      references.saveCharacterStatus.textContent = `Personagem salvo. Total: ${current.length}/${MAX_CHARACTERS_PER_ACCOUNT}.`;
+      references.saveCharacterStatus.textContent = savingToCloud
+        ? `Personagem salvo na conta Google. Total: ${current.length}/${MAX_CHARACTERS_PER_ACCOUNT}.`
+        : `Personagem salvo localmente. Faça login para salvar na conta Google.`;
     }
   } catch {
     if (references.saveCharacterStatus) {

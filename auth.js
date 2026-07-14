@@ -2,12 +2,20 @@
   const state = {
     initialized: false,
     authReady: false,
+    signingIn: false,
     currentUser: null,
     auth: null,
     db: null,
     subscribers: [],
     waiters: []
   };
+
+  const REDIRECT_FALLBACK_CODES = new Set([
+    "auth/popup-blocked",
+    "auth/cancelled-popup-request",
+    "auth/operation-not-supported-in-this-environment",
+    "auth/web-storage-unsupported"
+  ]);
 
   const REQUIRED_CONFIG_KEYS = ["apiKey", "authDomain", "projectId", "appId"];
   const MAX_CHARACTERS = 20;
@@ -117,10 +125,18 @@
       state.auth = window.firebase.auth();
       state.db = window.firebase.firestore();
 
+      try {
+        await state.auth.getRedirectResult();
+      } catch {
+        // Ignore redirect parsing errors on normal page loads.
+      }
+
       state.auth.onAuthStateChanged((user) => {
         state.currentUser = user || null;
-        state.authReady = true;
-        resolveWaiters();
+        if (!state.authReady) {
+          state.authReady = true;
+          resolveWaiters();
+        }
         notifySubscribers();
       });
     } catch {
@@ -173,17 +189,28 @@
         throw new Error("Firebase não configurado para login.");
       }
 
+      if (state.signingIn) {
+        return;
+      }
+
+      state.signingIn = true;
+
       const provider = new window.firebase.auth.GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
-      try {
-        await state.auth.signInWithPopup(provider);
-      } catch (error) {
-        if (error?.code === "auth/popup-blocked" || error?.code === "auth/cancelled-popup-request") {
-          await state.auth.signInWithRedirect(provider);
-          return;
-        }
 
-        throw error;
+      try {
+        try {
+          await state.auth.signInWithPopup(provider);
+        } catch (error) {
+          if (REDIRECT_FALLBACK_CODES.has(error?.code)) {
+            await state.auth.signInWithRedirect(provider);
+            return;
+          }
+
+          throw error;
+        }
+      } finally {
+        state.signingIn = false;
       }
     },
 

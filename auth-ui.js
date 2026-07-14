@@ -56,6 +56,14 @@
       return;
     }
 
+    const isSupportedProtocol = window.location.protocol === "http:" || window.location.protocol === "https:";
+    if (!isSupportedProtocol) {
+      refs.email.textContent = "Abra em http/https para usar login Google";
+      refs.loginButton.hidden = true;
+      refs.logoutButton.hidden = true;
+      return;
+    }
+
     if (!window.DVHAuth) {
       refs.email.textContent = "Login indisponível";
       refs.loginButton.hidden = true;
@@ -84,8 +92,9 @@
     refs.loginButton.addEventListener("click", async () => {
       try {
         await window.DVHAuth.signInWithGoogle();
-      } catch {
-        refs.email.textContent = "Não foi possível entrar agora";
+      } catch (error) {
+        const code = error?.code ? ` (${error.code})` : "";
+        refs.email.textContent = `Não foi possível entrar${code}`;
       }
     });
 

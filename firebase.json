@@ -16,12 +16,14 @@
         "authorizedRedirectUris": [
           "https://sistema-dvh.web.app",
           "https://sistema-dvh.firebaseapp.com",
+          "https://justbegabs.github.io",
           "http://localhost"
         ]
       }
     },
     "authorizedDomains": [
       "localhost",
+      "justbegabs.github.io",
       "sistema-dvh.web.app",
       "sistema-dvh.firebaseapp.com"
     ]

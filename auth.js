@@ -175,7 +175,16 @@
 
       const provider = new window.firebase.auth.GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
-      await state.auth.signInWithPopup(provider);
+      try {
+        await state.auth.signInWithPopup(provider);
+      } catch (error) {
+        if (error?.code === "auth/popup-blocked" || error?.code === "auth/cancelled-popup-request") {
+          await state.auth.signInWithRedirect(provider);
+          return;
+        }
+
+        throw error;
+      }
     },
 
     async signOut() {

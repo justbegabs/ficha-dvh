@@ -1848,11 +1848,11 @@ function shouldSaveCharactersLocally() {
 }
 
 function hasUserSessionForCloud() {
-  if (typeof window.DVHAuth?.hasCloudSession === "function") {
-    return Boolean(window.DVHAuth.hasCloudSession());
-  }
-
-  return Boolean(window.DVHAuth?.getCurrentUser?.()?.uid);
+  const hasCloudSession = typeof window.DVHAuth?.hasCloudSession === "function"
+    ? Boolean(window.DVHAuth.hasCloudSession())
+    : false;
+  const hasLocalUser = Boolean(window.DVHAuth?.getCurrentUser?.()?.uid);
+  return hasCloudSession || hasLocalUser;
 }
 
 async function canUseCloudNow() {

@@ -145,7 +145,7 @@
         ? ` (${diagnostics.lastCompatibilityIssue})`
         : "";
       if (loggedIn && !hasCloudSession) {
-        refs.email.textContent = `Sessão desconectada no Opera. Clique em Entrar para reconectar${compatibilityNote}`;
+        refs.email.textContent = `Conectado no Opera. Reconectando sessão da nuvem...${compatibilityNote}`;
 
         if (operaDetected && shouldRunOperaAutoRecovery() && typeof window.DVHAuth?.reauthenticateCloudSession === "function") {
           markOperaAutoRecoveryAttempted();

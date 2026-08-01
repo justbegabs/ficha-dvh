@@ -13,11 +13,11 @@ const menuOverlay = document.getElementById("menuOverlay");
 const sideMenu = document.getElementById("sideMenu");
 
 function hasUserSessionForCloud() {
-  if (typeof window.DVHAuth?.hasCloudSession === "function") {
-    return Boolean(window.DVHAuth.hasCloudSession());
-  }
-
-  return Boolean(window.DVHAuth?.getCurrentUser?.()?.uid);
+  const hasCloudSession = typeof window.DVHAuth?.hasCloudSession === "function"
+    ? Boolean(window.DVHAuth.hasCloudSession())
+    : false;
+  const hasLocalUser = Boolean(window.DVHAuth?.getCurrentUser?.()?.uid);
+  return hasCloudSession || hasLocalUser;
 }
 
 function withTimeout(promise, timeoutMs, timeoutMessage) {

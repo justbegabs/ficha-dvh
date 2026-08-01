@@ -66,16 +66,32 @@ async function ensureCloudSessionOnUserAction() {
     return true;
   }
 
-  if (!hasUserSessionForCloud() || typeof window.DVHAuth?.signInWithGoogle !== "function") {
+  if (!hasUserSessionForCloud()) {
     return false;
   }
 
   charactersStatus.textContent = "Reconectando sessão Google no navegador...";
 
   try {
+    if (typeof window.DVHAuth?.reauthenticateCloudSession === "function") {
+      const recovered = await withTimeout(
+        window.DVHAuth.reauthenticateCloudSession(),
+        45000,
+        "Tempo de reconexão excedido"
+      );
+      if (recovered && window.DVHAuth?.hasCloudSession?.()) {
+        return true;
+      }
+      return canUseCloudNow();
+    }
+
+    if (typeof window.DVHAuth?.signInWithGoogle !== "function") {
+      return false;
+    }
+
     await withTimeout(
       window.DVHAuth.signInWithGoogle(),
-      30000,
+      45000,
       "Tempo de reconexão excedido"
     );
   } catch {
@@ -307,7 +323,7 @@ async function renderStoredCharacters() {
 
     if (!characters.length) {
       if (authEnabled && hasUiSession && !loggedIn) {
-        charactersStatus.textContent = "Sessão parcial detectada no navegador. Clique em Entrar com Google para reconectar a nuvem.";
+        charactersStatus.textContent = "Sessão parcial detectada no Opera. Clique em Entrar com Google para reconectar a nuvem.";
       } else if (authEnabled && !loggedIn) {
         charactersStatus.textContent = "Nenhum personagem salvo localmente. Faça login com Google para acessar a nuvem.";
       } else {

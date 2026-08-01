@@ -1883,16 +1883,32 @@ async function ensureCloudSessionOnUserAction() {
     return true;
   }
 
-  if (!hasUserSessionForCloud() || typeof window.DVHAuth?.signInWithGoogle !== "function") {
+  if (!hasUserSessionForCloud()) {
     return false;
   }
 
   setSaveStatus("Reconectando sessão Google no navegador...");
 
   try {
+    if (typeof window.DVHAuth?.reauthenticateCloudSession === "function") {
+      const recovered = await withTimeout(
+        window.DVHAuth.reauthenticateCloudSession(),
+        45000,
+        "Tempo de reconexão excedido"
+      );
+      if (recovered && window.DVHAuth?.hasCloudSession?.()) {
+        return true;
+      }
+      return canUseCloudNow();
+    }
+
+    if (typeof window.DVHAuth?.signInWithGoogle !== "function") {
+      return false;
+    }
+
     await withTimeout(
       window.DVHAuth.signInWithGoogle(),
-      30000,
+      45000,
       "Tempo de reconexão excedido"
     );
   } catch {
@@ -2296,7 +2312,7 @@ async function saveCharacterAsJson() {
 
     if (!saveLocal && !canSyncCloud) {
       if (hasUserSessionForCloud()) {
-        setSaveStatus("Sessão Google parcial no navegador. Clique em Entrar novamente para reconectar ao Firestore.");
+        setSaveStatus("Sessão Google parcial no Opera. Use Entrar com Google para reconectar a sessão da nuvem.");
         return;
       }
       setSaveStatus("No Chrome, faça login com Google para salvar personagens na conta.");

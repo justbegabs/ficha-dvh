@@ -13,6 +13,7 @@
     db: null,
     persistenceMode: "unknown",
     lastCompatibilityIssue: "",
+    partialSession: false,
     lastGoogleCredential: null,
     lastSuccessfulAuthAt: 0,
     subscribers: [],
@@ -59,8 +60,10 @@
     state.waiters = [];
   }
 
-  function updateCurrentUser(user) {
+  function updateCurrentUser(user, options = {}) {
+    const isPartial = Boolean(options.partial);
     state.currentUser = user || null;
+    state.partialSession = Boolean(user) && isPartial;
     if (user) {
       state.fallbackUser = {
         uid: user.uid,
@@ -318,6 +321,45 @@
     return Boolean(state.auth?.currentUser);
   }
 
+  async function reauthenticateCloudSession() {
+    if (!state.auth) {
+      const error = new Error("Firebase não configurado para login.");
+      error.code = "auth/not-configured";
+      throw error;
+    }
+
+    if (state.signingIn) {
+      return Boolean(state.auth.currentUser);
+    }
+
+    state.signingIn = true;
+    state.explicitSignOutRequested = false;
+
+    const provider = new window.firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+
+    try {
+      const result = await state.auth.signInWithPopup(provider);
+      if (result?.user) {
+        storeRecentGoogleCredential(result);
+        updateCurrentUser(result.user);
+        state.lastCompatibilityIssue = "";
+        return true;
+      }
+
+      return Boolean(state.auth.currentUser);
+    } catch (error) {
+      if (REDIRECT_FALLBACK_CODES.has(error?.code)) {
+        await state.auth.signInWithRedirect(provider);
+        return false;
+      }
+
+      throw error;
+    } finally {
+      state.signingIn = false;
+    }
+  }
+
   async function getUserCollection() {
     if (!state.db) {
       throw new Error("Banco de dados indisponível.");
@@ -472,7 +514,7 @@
         state.pendingSignOutTimer = window.setTimeout(async () => {
           if (canUseOperaFallbackSession()) {
             state.transientNullCount += 1;
-            updateCurrentUser(state.fallbackUser);
+            updateCurrentUser(state.fallbackUser, { partial: true });
             state.lastCompatibilityIssue = "Sessao instavel no Opera. Tentando reconectar automaticamente.";
 
             if (shouldAttemptSessionRecovery()) {
@@ -525,8 +567,16 @@
       return Boolean(state.auth?.currentUser);
     },
 
+    isPartialSession() {
+      return Boolean(state.partialSession);
+    },
+
     async ensureCloudSession() {
       return ensureCloudSession();
+    },
+
+    async reauthenticateCloudSession() {
+      return reauthenticateCloudSession();
     },
 
     getCurrentUser() {
@@ -537,7 +587,8 @@
       return {
         persistenceMode: state.persistenceMode,
         lastCompatibilityIssue: state.lastCompatibilityIssue,
-        operaDetected: getOperaBrowserDetected()
+        operaDetected: getOperaBrowserDetected(),
+        partialSession: state.partialSession
       };
     },
 

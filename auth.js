@@ -267,13 +267,25 @@
   }
 
   function canUseOperaFallbackSession() {
-    // Disabled: partial fallback led to persistent reconnect loops in Opera.
-    return false;
+    if (!getOperaBrowserDetected() || state.explicitSignOutRequested) {
+      return false;
+    }
+
+    if (!state.fallbackUser?.uid) {
+      return false;
+    }
+
+    // Keep user connected while Opera auth state flaps right after login.
+    return Date.now() - state.lastSuccessfulAuthAt <= 2 * 60 * 1000;
   }
 
   function setupSessionRecoveryHooks() {
     const tryRecover = async () => {
-      if (state.currentUser || !getOperaBrowserDetected()) {
+      if (!getOperaBrowserDetected()) {
+        return;
+      }
+
+      if (state.currentUser && !state.partialSession) {
         return;
       }
 
@@ -517,7 +529,22 @@
         const signOutDelayMs = getOperaBrowserDetected() ? 3000 : 1200;
         state.pendingSignOutTimer = window.setTimeout(async () => {
           if (canUseOperaFallbackSession()) {
-            // Disabled by design.
+            updateCurrentUser(state.fallbackUser, { partial: true });
+            state.lastCompatibilityIssue = "Sessao do Opera oscilando. Mantendo conexao e tentando recuperar.";
+
+            if (shouldAttemptSessionRecovery()) {
+              const recovered = await recoverRecentGoogleSession();
+              if (recovered && state.auth?.currentUser) {
+                updateCurrentUser(state.auth.currentUser);
+                state.lastCompatibilityIssue = "";
+              }
+            }
+
+            if (!state.authReady) {
+              state.authReady = true;
+              resolveWaiters();
+            }
+            return;
           }
 
           if (state.auth?.currentUser) {

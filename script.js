@@ -2245,9 +2245,9 @@ async function saveCharacterAsJson() {
     if (canSyncCloud) {
       try {
         if (typeof window.DVHAuth?.saveCharacter === "function") {
-          await withTimeout(window.DVHAuth.saveCharacter(entry), 15000, "Salvamento na conta demorou demais");
+          await window.DVHAuth.saveCharacter(entry);
         } else {
-          await withTimeout(window.DVHAuth.replaceAllCharacters(current), 15000, "Salvamento na conta demorou demais");
+          await window.DVHAuth.replaceAllCharacters(current);
         }
         syncedToCloud = true;
       } catch (error) {

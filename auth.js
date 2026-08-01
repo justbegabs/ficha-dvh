@@ -411,6 +411,14 @@
 
       state.auth = window.firebase.auth();
       state.db = window.firebase.firestore();
+      try {
+        state.db.settings({
+          experimentalAutoDetectLongPolling: true,
+          useFetchStreams: false
+        });
+      } catch {
+        // Ignore settings errors after Firestore has already started.
+      }
       hydrateStoredSessionHints();
       await configureBestPersistence();
       setupSessionRecoveryHooks();

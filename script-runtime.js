@@ -1847,6 +1847,10 @@ function shouldSaveCharactersLocally() {
   return !isChromeBrowser();
 }
 
+function hasUserSessionForCloud() {
+  return Boolean(window.DVHAuth?.getCurrentUser?.()?.uid);
+}
+
 function writeLocalCharacters(characters) {
   localStorage.setItem(CHARACTERS_STORAGE_KEY, JSON.stringify(characters));
 }
@@ -1943,7 +1947,7 @@ async function readStoredCharacters() {
       }
     }
 
-    if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
+    if (window.DVHAuth?.isConfigured?.() && hasUserSessionForCloud()) {
       try {
         return await withTimeout(window.DVHAuth.listCharacters(), 8000, "Leitura da conta demorou demais");
       } catch {
@@ -1964,7 +1968,7 @@ async function readStoredCharacters() {
     }
   }
 
-  if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
+  if (window.DVHAuth?.isConfigured?.() && hasUserSessionForCloud()) {
     try {
       const cloudCharacters = await withTimeout(
         window.DVHAuth.listCharacters(),
@@ -2229,7 +2233,7 @@ async function saveCharacterAsJson() {
 
     const saveLocal = shouldSaveCharactersLocally();
     const authConfigured = Boolean(window.DVHAuth?.isConfigured?.());
-    const canSyncCloud = Boolean(window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.());
+    const canSyncCloud = Boolean(window.DVHAuth?.isConfigured?.() && hasUserSessionForCloud());
 
     if (saveLocal && !canSyncCloud) {
       writeLocalCharacters(current);

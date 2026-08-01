@@ -12,6 +12,10 @@ const menuClose = document.getElementById("menuClose");
 const menuOverlay = document.getElementById("menuOverlay");
 const sideMenu = document.getElementById("sideMenu");
 
+function hasUserSessionForCloud() {
+  return Boolean(window.DVHAuth?.getCurrentUser?.()?.uid);
+}
+
 function openMenu() {
   if (!menuOverlay || !sideMenu || !menuButton) {
     return;
@@ -165,7 +169,7 @@ async function readStoredCharacters() {
     await window.DVHAuth.waitForAuthReady();
   }
 
-  if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
+  if (window.DVHAuth?.isConfigured?.() && hasUserSessionForCloud()) {
     try {
       const cloudCharacters = await window.DVHAuth.listCharacters();
       writeLocalCharacters(cloudCharacters);
@@ -226,7 +230,7 @@ async function renderStoredCharacters() {
     }
 
     const authEnabled = Boolean(window.DVHAuth?.isConfigured?.());
-    const loggedIn = Boolean(window.DVHAuth?.isLoggedIn?.());
+    const loggedIn = hasUserSessionForCloud();
 
     const characters = await readStoredCharacters();
     charactersGrid.innerHTML = "";
@@ -296,7 +300,7 @@ async function renderStoredCharacters() {
       deleteButton.textContent = "Remover";
       deleteButton.addEventListener("click", async () => {
         const authEnabled = Boolean(window.DVHAuth?.isConfigured?.());
-        const loggedIn = Boolean(window.DVHAuth?.isLoggedIn?.());
+        const loggedIn = hasUserSessionForCloud();
 
         if (authEnabled && loggedIn && typeof window.DVHAuth?.deleteCharacter === "function") {
           try {

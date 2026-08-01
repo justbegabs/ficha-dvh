@@ -505,6 +505,10 @@
     },
 
     isLoggedIn() {
+      return Boolean(state.currentUser);
+    },
+
+    hasCloudSession() {
       return Boolean(state.auth?.currentUser);
     },
 

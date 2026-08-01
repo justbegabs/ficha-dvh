@@ -1838,6 +1838,15 @@ function readLocalCharacters() {
   }
 }
 
+function isChromeBrowser() {
+  const userAgent = window.navigator?.userAgent || "";
+  return /Chrome\//i.test(userAgent) && !/Edg\//i.test(userAgent) && !/OPR\//i.test(userAgent);
+}
+
+function shouldSaveCharactersLocally() {
+  return !isChromeBrowser();
+}
+
 function writeLocalCharacters(characters) {
   localStorage.setItem(CHARACTERS_STORAGE_KEY, JSON.stringify(characters));
 }
@@ -1925,6 +1934,26 @@ function mergeStoredCharacters(localCharacters, cloudCharacters) {
 }
 
 async function readStoredCharacters() {
+  if (!shouldSaveCharactersLocally()) {
+    if (window.DVHAuth?.waitForAuthReady) {
+      try {
+        await withTimeout(window.DVHAuth.waitForAuthReady(), 1500, "Auth não pronto");
+      } catch {
+        return [];
+      }
+    }
+
+    if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
+      try {
+        return await window.DVHAuth.listCharacters();
+      } catch {
+        return [];
+      }
+    }
+
+    return [];
+  }
+
   const localCharacters = readLocalCharacters();
   const deletedIds = new Set(readDeletedCharacterIds());
 
@@ -1947,6 +1976,27 @@ async function readStoredCharacters() {
 }
 
 async function persistStoredCharacters(characters) {
+  if (!shouldSaveCharactersLocally()) {
+    if (window.DVHAuth?.waitForAuthReady) {
+      try {
+        await withTimeout(window.DVHAuth.waitForAuthReady(), 1500, "Auth não pronto");
+      } catch {
+        return { savedLocally: false, syncedToCloud: false, requiresLogin: true };
+      }
+    }
+
+    if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
+      try {
+        await window.DVHAuth.replaceAllCharacters(characters);
+        return { savedLocally: false, syncedToCloud: true };
+      } catch {
+        return { savedLocally: false, syncedToCloud: false };
+      }
+    }
+
+    return { savedLocally: false, syncedToCloud: false, requiresLogin: true };
+  }
+
   writeLocalCharacters(characters);
 
   if (window.DVHAuth?.waitForAuthReady) {
@@ -2161,8 +2211,11 @@ async function saveCharacterAsJson() {
       data: payload
     };
 
-    // Use local snapshot as source of truth for immediate save responsiveness.
-    const current = readLocalCharacters();
+    const current = await withTimeout(
+      readStoredCharacters(),
+      8000,
+      "Tempo de leitura excedido"
+    );
     if (current.length >= MAX_CHARACTERS_PER_ACCOUNT) {
       setSaveStatus(`Limite de ${MAX_CHARACTERS_PER_ACCOUNT} fichas por conta atingido.`);
       return;
@@ -2175,12 +2228,17 @@ async function saveCharacterAsJson() {
       "Tempo de salvamento excedido"
     );
 
+    if (result?.requiresLogin) {
+      setSaveStatus("No Chrome, faça login com Google para salvar personagens na conta.");
+      return;
+    }
+
     if (savingToCloud && result?.syncedToCloud) {
-      setSaveStatus(`Personagem salvo localmente e na conta Google. Total: ${current.length}/${MAX_CHARACTERS_PER_ACCOUNT}.`);
+      setSaveStatus(`Personagem salvo na conta Google. Total: ${current.length}/${MAX_CHARACTERS_PER_ACCOUNT}.`);
     } else if (savingToCloud) {
-      setSaveStatus("Personagem salvo localmente, mas a sincronização com a conta Google falhou agora.");
+      setSaveStatus("Não foi possível salvar na conta Google agora. Tente novamente.");
     } else {
-      setSaveStatus("Personagem salvo localmente. Faça login para salvar na conta Google.");
+      setSaveStatus("Faça login com Google para salvar personagens na conta.");
     }
   } catch {
     setSaveStatus("Não foi possível salvar agora. Verifique sua conexão e tente novamente.");

@@ -13,6 +13,10 @@ const menuOverlay = document.getElementById("menuOverlay");
 const sideMenu = document.getElementById("sideMenu");
 
 function hasUserSessionForCloud() {
+  if (typeof window.DVHAuth?.hasCloudSession === "function") {
+    return Boolean(window.DVHAuth.hasCloudSession());
+  }
+
   return Boolean(window.DVHAuth?.getCurrentUser?.()?.uid);
 }
 

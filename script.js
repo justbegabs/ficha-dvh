@@ -1848,6 +1848,10 @@ function shouldSaveCharactersLocally() {
 }
 
 function hasUserSessionForCloud() {
+  if (typeof window.DVHAuth?.hasCloudSession === "function") {
+    return Boolean(window.DVHAuth.hasCloudSession());
+  }
+
   return Boolean(window.DVHAuth?.getCurrentUser?.()?.uid);
 }
 
@@ -2274,9 +2278,17 @@ function syncStateFromInputsBeforeSave() {
 }
 
 async function saveCharacterAsJson() {
+  let saveUiWatchdog = null;
   if (references.saveCharacterButton) {
     references.saveCharacterButton.disabled = true;
   }
+
+  saveUiWatchdog = window.setTimeout(() => {
+    if (references.saveCharacterButton?.disabled) {
+      setSaveStatus("Salvamento demorou mais que o esperado. Tente novamente.");
+      references.saveCharacterButton.disabled = false;
+    }
+  }, 20000);
 
   try {
     syncStateFromInputsBeforeSave();
@@ -2389,6 +2401,10 @@ async function saveCharacterAsJson() {
 
     setSaveStatus("Erro inesperado ao salvar. Tente novamente em alguns segundos.");
   } finally {
+    if (saveUiWatchdog) {
+      window.clearTimeout(saveUiWatchdog);
+    }
+
     if (references.saveCharacterButton) {
       references.saveCharacterButton.disabled = false;
     }

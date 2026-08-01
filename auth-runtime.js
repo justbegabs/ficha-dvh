@@ -281,16 +281,9 @@
   }
 
   function canUseOperaFallbackSession() {
-    if (!getOperaBrowserDetected() || state.explicitSignOutRequested) {
-      return false;
-    }
-
-    if (!state.fallbackUser?.uid) {
-      return false;
-    }
-
-    // Keep a short grace window after successful login to absorb Opera auth flapping.
-    return Date.now() - state.lastSuccessfulAuthAt <= 15 * 60 * 1000;
+    // Partial fallback caused inconsistent Firestore auth state in Opera.
+    // Keep this disabled and require a real Firebase auth session.
+    return false;
   }
 
   function setupSessionRecoveryHooks() {
@@ -553,19 +546,7 @@
 
         state.pendingSignOutTimer = window.setTimeout(async () => {
           if (canUseOperaFallbackSession()) {
-            state.transientNullCount += 1;
-            updateCurrentUser(state.fallbackUser, { partial: true });
-            state.lastCompatibilityIssue = "Sessao instavel no Opera. Tentando reconectar automaticamente.";
-
-            if (shouldAttemptSessionRecovery()) {
-              await recoverRecentGoogleSession();
-            }
-
-            if (!state.authReady) {
-              state.authReady = true;
-              resolveWaiters();
-            }
-            return;
+            // Disabled by design.
           }
 
           if (state.auth?.currentUser) {

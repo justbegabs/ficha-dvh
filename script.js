@@ -2073,8 +2073,54 @@ function applyStoredCharacterData(data) {
   });
 }
 
+function setSaveStatus(message) {
+  if (references.saveCharacterStatus) {
+    references.saveCharacterStatus.textContent = message;
+  }
+
+  if (references.rollResult) {
+    showMessage(references.rollResult, message, false);
+  }
+}
+
+function syncStateFromInputsBeforeSave() {
+  Object.keys(state.attributes).forEach((name) => {
+    const input = document.getElementById(`attribute-${name}`);
+    if (!input) {
+      return;
+    }
+
+    const parsed = Number.parseInt(input.value, 10);
+    if (!Number.isNaN(parsed)) {
+      state.attributes[name] = clamp(parsed, ATTRIBUTE_MIN_VALUE, ATTRIBUTE_MAX_VALUE);
+    }
+  });
+
+  const flatSkills = Object.values(skillGroups).flat();
+  flatSkills.forEach((name) => {
+    const input = document.getElementById(`skill-${name}`);
+    if (!input) {
+      return;
+    }
+
+    const parsed = Number.parseInt(input.value, 10);
+    if (!Number.isNaN(parsed)) {
+      const value = clamp(parsed, SKILL_MIN_VALUE, SKILL_MAX_VALUE);
+      state.skills[name] = value;
+      state.skillCreationBase[name] = value;
+    }
+  });
+
+  // Recalculate informational counters so saved payload matches the UI state.
+  updatePools();
+  updateCharacteristicsCount();
+}
+
 async function saveCharacterAsJson() {
   try {
+    syncStateFromInputsBeforeSave();
+    setSaveStatus("Salvando personagem...");
+
     const savingToCloud = Boolean(window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.());
     const payload = collectCharacterData();
     const id = `char-${Date.now()}`;
@@ -2091,28 +2137,22 @@ async function saveCharacterAsJson() {
 
     const current = await readStoredCharacters();
     if (current.length >= MAX_CHARACTERS_PER_ACCOUNT) {
-      if (references.saveCharacterStatus) {
-        references.saveCharacterStatus.textContent = `Limite de ${MAX_CHARACTERS_PER_ACCOUNT} fichas por conta atingido.`;
-      }
+      setSaveStatus(`Limite de ${MAX_CHARACTERS_PER_ACCOUNT} fichas por conta atingido.`);
       return;
     }
 
     current.push(entry);
     const result = await persistStoredCharacters(current);
 
-    if (references.saveCharacterStatus) {
-      if (savingToCloud && result?.syncedToCloud) {
-        references.saveCharacterStatus.textContent = `Personagem salvo localmente e na conta Google. Total: ${current.length}/${MAX_CHARACTERS_PER_ACCOUNT}.`;
-      } else if (savingToCloud) {
-        references.saveCharacterStatus.textContent = "Personagem salvo localmente, mas a sincronização com a conta Google falhou agora.";
-      } else {
-        references.saveCharacterStatus.textContent = "Personagem salvo localmente. Faça login para salvar na conta Google.";
-      }
+    if (savingToCloud && result?.syncedToCloud) {
+      setSaveStatus(`Personagem salvo localmente e na conta Google. Total: ${current.length}/${MAX_CHARACTERS_PER_ACCOUNT}.`);
+    } else if (savingToCloud) {
+      setSaveStatus("Personagem salvo localmente, mas a sincronização com a conta Google falhou agora.");
+    } else {
+      setSaveStatus("Personagem salvo localmente. Faça login para salvar na conta Google.");
     }
   } catch {
-    if (references.saveCharacterStatus) {
-      references.saveCharacterStatus.textContent = "Não foi possível salvar agora. Verifique sua conexão e tente novamente.";
-    }
+    setSaveStatus("Não foi possível salvar agora. Verifique sua conexão e tente novamente.");
   }
 }
 

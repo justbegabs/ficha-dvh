@@ -2083,6 +2083,24 @@ function setSaveStatus(message) {
   }
 }
 
+function withTimeout(promise, timeoutMs, timeoutMessage) {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => {
+      reject(new Error(timeoutMessage));
+    }, timeoutMs);
+
+    promise
+      .then((result) => {
+        window.clearTimeout(timer);
+        resolve(result);
+      })
+      .catch((error) => {
+        window.clearTimeout(timer);
+        reject(error);
+      });
+  });
+}
+
 function syncStateFromInputsBeforeSave() {
   Object.keys(state.attributes).forEach((name) => {
     const input = document.getElementById(`attribute-${name}`);
@@ -2117,6 +2135,10 @@ function syncStateFromInputsBeforeSave() {
 }
 
 async function saveCharacterAsJson() {
+  if (references.saveCharacterButton) {
+    references.saveCharacterButton.disabled = true;
+  }
+
   try {
     syncStateFromInputsBeforeSave();
     setSaveStatus("Salvando personagem...");
@@ -2135,14 +2157,22 @@ async function saveCharacterAsJson() {
       data: payload
     };
 
-    const current = await readStoredCharacters();
+    const current = await withTimeout(
+      readStoredCharacters(),
+      8000,
+      "Tempo de leitura excedido"
+    );
     if (current.length >= MAX_CHARACTERS_PER_ACCOUNT) {
       setSaveStatus(`Limite de ${MAX_CHARACTERS_PER_ACCOUNT} fichas por conta atingido.`);
       return;
     }
 
     current.push(entry);
-    const result = await persistStoredCharacters(current);
+    const result = await withTimeout(
+      persistStoredCharacters(current),
+      10000,
+      "Tempo de salvamento excedido"
+    );
 
     if (savingToCloud && result?.syncedToCloud) {
       setSaveStatus(`Personagem salvo localmente e na conta Google. Total: ${current.length}/${MAX_CHARACTERS_PER_ACCOUNT}.`);
@@ -2153,6 +2183,10 @@ async function saveCharacterAsJson() {
     }
   } catch {
     setSaveStatus("Não foi possível salvar agora. Verifique sua conexão e tente novamente.");
+  } finally {
+    if (references.saveCharacterButton) {
+      references.saveCharacterButton.disabled = false;
+    }
   }
 }
 

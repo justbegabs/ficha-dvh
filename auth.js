@@ -29,6 +29,8 @@
   const REQUIRED_CONFIG_KEYS = ["apiKey", "authDomain", "projectId", "appId"];
   const MAX_CHARACTERS = 20;
   const GOOGLE_ACCESS_TOKEN_STORAGE_KEY = "dvhGoogleAccessToken";
+  const LAST_AUTH_AT_STORAGE_KEY = "dvhLastAuthAt";
+  const FALLBACK_USER_STORAGE_KEY = "dvhFallbackUser";
 
   function isFilledValue(value) {
     return typeof value === "string" && value.trim() !== "" && !value.startsWith("YOUR_");
@@ -67,8 +69,62 @@
         photoURL: user.photoURL || ""
       };
       state.transientNullCount = 0;
+      try {
+        window.sessionStorage.setItem(FALLBACK_USER_STORAGE_KEY, JSON.stringify(state.fallbackUser));
+      } catch {
+        // Ignore blocked session storage.
+      }
     }
     notifySubscribers();
+  }
+
+  function readFallbackUserFromStorage() {
+    try {
+      const raw = window.sessionStorage.getItem(FALLBACK_USER_STORAGE_KEY);
+      if (!raw) {
+        return null;
+      }
+
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object" || !parsed.uid) {
+        return null;
+      }
+
+      return {
+        uid: String(parsed.uid),
+        email: String(parsed.email || ""),
+        displayName: String(parsed.displayName || ""),
+        photoURL: String(parsed.photoURL || "")
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  function writeLastSuccessfulAuthAt(timestamp) {
+    state.lastSuccessfulAuthAt = timestamp;
+    try {
+      window.sessionStorage.setItem(LAST_AUTH_AT_STORAGE_KEY, String(timestamp));
+    } catch {
+      // Ignore blocked session storage.
+    }
+  }
+
+  function hydrateStoredSessionHints() {
+    const storedFallbackUser = readFallbackUserFromStorage();
+    if (storedFallbackUser) {
+      state.fallbackUser = storedFallbackUser;
+    }
+
+    try {
+      const rawTimestamp = window.sessionStorage.getItem(LAST_AUTH_AT_STORAGE_KEY);
+      const parsedTimestamp = Number.parseInt(rawTimestamp || "", 10);
+      if (Number.isFinite(parsedTimestamp) && parsedTimestamp > 0) {
+        state.lastSuccessfulAuthAt = parsedTimestamp;
+      }
+    } catch {
+      // Ignore blocked session storage.
+    }
   }
 
   function clearPendingSignOutTimer() {
@@ -129,9 +185,14 @@
         displayName: result.user.displayName || "",
         photoURL: result.user.photoURL || ""
       };
+      try {
+        window.sessionStorage.setItem(FALLBACK_USER_STORAGE_KEY, JSON.stringify(state.fallbackUser));
+      } catch {
+        // Ignore blocked session storage.
+      }
     }
 
-    state.lastSuccessfulAuthAt = Date.now();
+    writeLastSuccessfulAuthAt(Date.now());
 
     if (accessToken) {
       try {
@@ -202,7 +263,7 @@
     }
 
     // Keep a short grace window after successful login to absorb Opera auth flapping.
-    return Date.now() - state.lastSuccessfulAuthAt <= 2 * 60 * 1000;
+    return Date.now() - state.lastSuccessfulAuthAt <= 15 * 60 * 1000;
   }
 
   function setupSessionRecoveryHooks() {
@@ -304,6 +365,7 @@
 
       state.auth = window.firebase.auth();
       state.db = window.firebase.firestore();
+      hydrateStoredSessionHints();
       await configureBestPersistence();
       setupSessionRecoveryHooks();
 
@@ -481,6 +543,8 @@
       state.fallbackUser = null;
       try {
         window.sessionStorage.removeItem(GOOGLE_ACCESS_TOKEN_STORAGE_KEY);
+        window.sessionStorage.removeItem(LAST_AUTH_AT_STORAGE_KEY);
+        window.sessionStorage.removeItem(FALLBACK_USER_STORAGE_KEY);
       } catch {
         // Ignore blocked session storage.
       }

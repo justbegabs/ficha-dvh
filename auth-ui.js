@@ -55,7 +55,7 @@
 
     const email = document.createElement("span");
     email.className = "auth-widget__email";
-    email.textContent = "Login não iniciado";
+    email.textContent = "Verificando login...";
 
     const loginButton = document.createElement("button");
     loginButton.type = "button";
@@ -97,6 +97,9 @@
       return;
     }
 
+    refs.email.textContent = "Verificando login...";
+    refs.loginButton.disabled = true;
+
     await window.DVHAuth.waitForAuthReady();
 
     if (!window.DVHAuth.isConfigured()) {
@@ -115,6 +118,7 @@
       refs.email.textContent = loggedIn
         ? (user.email || "Conta Google conectada")
         : `Desconectado${compatibilityNote}`;
+      refs.loginButton.disabled = false;
       refs.loginButton.hidden = loggedIn;
       refs.logoutButton.hidden = !loggedIn;
     };

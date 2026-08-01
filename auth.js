@@ -659,6 +659,12 @@
       provider.setCustomParameters({ prompt: "select_account" });
 
       try {
+        if (getOperaBrowserDetected()) {
+          // Opera is more stable with redirect-based auth than popup persistence.
+          await state.auth.signInWithRedirect(provider);
+          return;
+        }
+
         try {
           const result = await state.auth.signInWithPopup(provider);
           if (result?.user) {

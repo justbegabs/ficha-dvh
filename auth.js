@@ -47,6 +47,11 @@
     state.waiters = [];
   }
 
+  function updateCurrentUser(user) {
+    state.currentUser = user || null;
+    notifySubscribers();
+  }
+
   function getUserCollection() {
     if (!state.currentUser || !state.db) {
       throw new Error("Usuário não autenticado.");
@@ -126,18 +131,26 @@
       state.db = window.firebase.firestore();
 
       try {
-        await state.auth.getRedirectResult();
+        await state.auth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL);
+      } catch {
+        // Some browsers or embedded contexts do not allow persistent auth storage.
+      }
+
+      try {
+        const redirectResult = await state.auth.getRedirectResult();
+        if (redirectResult?.user) {
+          updateCurrentUser(redirectResult.user);
+        }
       } catch {
         // Ignore redirect parsing errors on normal page loads.
       }
 
       state.auth.onAuthStateChanged((user) => {
-        state.currentUser = user || null;
+        updateCurrentUser(user);
         if (!state.authReady) {
           state.authReady = true;
           resolveWaiters();
         }
-        notifySubscribers();
       });
     } catch {
       state.authReady = true;
@@ -200,7 +213,10 @@
 
       try {
         try {
-          await state.auth.signInWithPopup(provider);
+          const result = await state.auth.signInWithPopup(provider);
+          if (result?.user) {
+            updateCurrentUser(result.user);
+          }
         } catch (error) {
           if (REDIRECT_FALLBACK_CODES.has(error?.code)) {
             await state.auth.signInWithRedirect(provider);

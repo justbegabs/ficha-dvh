@@ -6,6 +6,8 @@
     currentUser: null,
     auth: null,
     db: null,
+    persistenceMode: "unknown",
+    lastCompatibilityIssue: "",
     subscribers: [],
     waiters: []
   };
@@ -50,6 +52,34 @@
   function updateCurrentUser(user) {
     state.currentUser = user || null;
     notifySubscribers();
+  }
+
+  function getOperaBrowserDetected() {
+    return /\bOPR\//i.test(window.navigator?.userAgent || "");
+  }
+
+  async function configureBestPersistence() {
+    const persistenceOptions = [
+      { mode: "local", value: window.firebase.auth.Auth.Persistence.LOCAL },
+      { mode: "session", value: window.firebase.auth.Auth.Persistence.SESSION },
+      { mode: "none", value: window.firebase.auth.Auth.Persistence.NONE }
+    ];
+
+    for (const option of persistenceOptions) {
+      try {
+        await state.auth.setPersistence(option.value);
+        state.persistenceMode = option.mode;
+        state.lastCompatibilityIssue = option.mode === "local"
+          ? ""
+          : "Seu navegador limitou a persistência completa do login.";
+        return;
+      } catch {
+        // Try the next persistence mode.
+      }
+    }
+
+    state.persistenceMode = "failed";
+    state.lastCompatibilityIssue = "Seu navegador bloqueou o armazenamento necessário para manter o login.";
   }
 
   function getUserCollection() {
@@ -129,12 +159,7 @@
 
       state.auth = window.firebase.auth();
       state.db = window.firebase.firestore();
-
-      try {
-        await state.auth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL);
-      } catch {
-        // Some browsers or embedded contexts do not allow persistent auth storage.
-      }
+      await configureBestPersistence();
 
       try {
         const redirectResult = await state.auth.getRedirectResult();
@@ -173,6 +198,14 @@
       return state.currentUser;
     },
 
+    getDiagnostics() {
+      return {
+        persistenceMode: state.persistenceMode,
+        lastCompatibilityIssue: state.lastCompatibilityIssue,
+        operaDetected: getOperaBrowserDetected()
+      };
+    },
+
     waitForAuthReady() {
       return new Promise((resolve) => {
         if (state.authReady) {
@@ -200,6 +233,12 @@
     async signInWithGoogle() {
       if (!state.auth) {
         throw new Error("Firebase não configurado para login.");
+      }
+
+      if (state.persistenceMode === "failed") {
+        const error = new Error("Armazenamento bloqueado pelo navegador.");
+        error.code = "auth/web-storage-unsupported";
+        throw error;
       }
 
       if (state.signingIn) {

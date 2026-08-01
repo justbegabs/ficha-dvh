@@ -36,6 +36,10 @@
       return "Sem conexão. Tente novamente";
     }
 
+    if (code === "auth/web-storage-unsupported") {
+      return "O navegador bloqueou cookies ou armazenamento do login";
+    }
+
     return code ? `Não foi possível entrar (${code})` : "Não foi possível entrar";
   }
 
@@ -104,7 +108,13 @@
 
     const update = (user) => {
       const loggedIn = Boolean(user);
-      refs.email.textContent = loggedIn ? (user.email || "Conta Google conectada") : "Desconectado";
+      const diagnostics = window.DVHAuth.getDiagnostics?.();
+      const compatibilityNote = !loggedIn && diagnostics?.operaDetected && diagnostics?.lastCompatibilityIssue
+        ? ` (${diagnostics.lastCompatibilityIssue})`
+        : "";
+      refs.email.textContent = loggedIn
+        ? (user.email || "Conta Google conectada")
+        : `Desconectado${compatibilityNote}`;
       refs.loginButton.hidden = loggedIn;
       refs.logoutButton.hidden = !loggedIn;
     };

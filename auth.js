@@ -109,13 +109,28 @@
   }
 
   function storeRecentGoogleCredential(result) {
+    const hasUser = Boolean(result?.user);
     const credential = window.firebase.auth.GoogleAuthProvider.credentialFromResult(result);
     const accessToken = credential?.accessToken || result?.credential?.accessToken || "";
-    if (!credential && !accessToken) {
+    if (!credential && !accessToken && !hasUser) {
       return;
     }
 
-    state.lastGoogleCredential = credential || window.firebase.auth.GoogleAuthProvider.credential(accessToken);
+    if (credential) {
+      state.lastGoogleCredential = credential;
+    } else if (accessToken) {
+      state.lastGoogleCredential = window.firebase.auth.GoogleAuthProvider.credential(accessToken);
+    }
+
+    if (hasUser) {
+      state.fallbackUser = {
+        uid: result.user.uid,
+        email: result.user.email || "",
+        displayName: result.user.displayName || "",
+        photoURL: result.user.photoURL || ""
+      };
+    }
+
     state.lastSuccessfulAuthAt = Date.now();
 
     if (accessToken) {
@@ -435,11 +450,6 @@
       provider.setCustomParameters({ prompt: "select_account" });
 
       try {
-        if (getOperaBrowserDetected()) {
-          await state.auth.signInWithRedirect(provider);
-          return;
-        }
-
         try {
           const result = await state.auth.signInWithPopup(provider);
           if (result?.user) {

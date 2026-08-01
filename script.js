@@ -92,6 +92,7 @@ const classCatalog = {};
 const ENABLE_DYNAMIC_APPEARANCE_BY_SELECTION = false;
 const CHARACTERS_STORAGE_KEY = "dvhCharacters";
 const SELECTED_CHARACTER_STORAGE_KEY = "dvhSelectedCharacterId";
+const SELECTED_CHARACTER_DATA_STORAGE_KEY = "dvhSelectedCharacterData";
 const MAX_CHARACTERS_PER_ACCOUNT = 20;
 const LEVEL_ZERO_BASE_STATS = {
   life: 10,
@@ -1853,7 +1854,9 @@ async function readStoredCharacters() {
   if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
     try {
       const cloudCharacters = await window.DVHAuth.listCharacters();
-      return mergeStoredCharacters(localCharacters, cloudCharacters);
+      const mergedCharacters = mergeStoredCharacters(localCharacters, cloudCharacters);
+      writeLocalCharacters(mergedCharacters);
+      return mergedCharacters;
     } catch {
       return localCharacters;
     }
@@ -1883,12 +1886,29 @@ async function persistStoredCharacters(characters) {
 
 async function loadStoredCharacterSelection() {
   const selectedId = localStorage.getItem(SELECTED_CHARACTER_STORAGE_KEY);
+  const selectedRawData = localStorage.getItem(SELECTED_CHARACTER_DATA_STORAGE_KEY);
   if (!selectedId) {
+    localStorage.removeItem(SELECTED_CHARACTER_DATA_STORAGE_KEY);
     return false;
+  }
+
+  if (selectedRawData) {
+    try {
+      const selectedData = JSON.parse(selectedRawData);
+      if (selectedData && typeof selectedData === "object") {
+        applyStoredCharacterData(selectedData);
+        localStorage.removeItem(SELECTED_CHARACTER_STORAGE_KEY);
+        localStorage.removeItem(SELECTED_CHARACTER_DATA_STORAGE_KEY);
+        return true;
+      }
+    } catch {
+      // Fall back to stored collection lookup.
+    }
   }
 
   const selected = (await readStoredCharacters()).find((entry) => entry.id === selectedId);
   localStorage.removeItem(SELECTED_CHARACTER_STORAGE_KEY);
+  localStorage.removeItem(SELECTED_CHARACTER_DATA_STORAGE_KEY);
 
   if (!selected?.data) {
     return false;

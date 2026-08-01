@@ -1,5 +1,6 @@
 const CHARACTERS_STORAGE_KEY = "dvhCharacters";
 const SELECTED_CHARACTER_STORAGE_KEY = "dvhSelectedCharacterId";
+const SELECTED_CHARACTER_DATA_STORAGE_KEY = "dvhSelectedCharacterData";
 const MAX_CHARACTERS_PER_ACCOUNT = 20;
 
 const charactersGrid = document.getElementById("charactersGrid");
@@ -113,7 +114,9 @@ async function readStoredCharacters() {
   if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
     try {
       const cloudCharacters = await window.DVHAuth.listCharacters();
-      return mergeStoredCharacters(localCharacters, cloudCharacters);
+      const mergedCharacters = mergeStoredCharacters(localCharacters, cloudCharacters);
+      writeLocalCharacters(mergedCharacters);
+      return mergedCharacters;
     } catch {
       return localCharacters;
     }
@@ -217,6 +220,7 @@ async function renderStoredCharacters() {
       openButton.textContent = "Abrir na ficha";
       openButton.addEventListener("click", () => {
         localStorage.setItem(SELECTED_CHARACTER_STORAGE_KEY, character.id);
+        localStorage.setItem(SELECTED_CHARACTER_DATA_STORAGE_KEY, JSON.stringify(character.data || {}));
         window.location.href = "ficha.html";
       });
 

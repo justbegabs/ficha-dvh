@@ -3,11 +3,14 @@
     initialized: false,
     authReady: false,
     signingIn: false,
+    recoveringSession: false,
     currentUser: null,
     auth: null,
     db: null,
     persistenceMode: "unknown",
     lastCompatibilityIssue: "",
+    lastGoogleCredential: null,
+    lastSuccessfulAuthAt: 0,
     subscribers: [],
     waiters: []
   };
@@ -80,6 +83,46 @@
 
     state.persistenceMode = "failed";
     state.lastCompatibilityIssue = "Seu navegador bloqueou o armazenamento necessário para manter o login.";
+  }
+
+  function storeRecentGoogleCredential(result) {
+    const credential = window.firebase.auth.GoogleAuthProvider.credentialFromResult(result);
+    if (!credential) {
+      return;
+    }
+
+    state.lastGoogleCredential = credential;
+    state.lastSuccessfulAuthAt = Date.now();
+  }
+
+  function shouldAttemptSessionRecovery() {
+    if (state.recoveringSession || !state.lastGoogleCredential || !state.auth) {
+      return false;
+    }
+
+    return Date.now() - state.lastSuccessfulAuthAt <= 15000;
+  }
+
+  async function recoverRecentGoogleSession() {
+    if (!shouldAttemptSessionRecovery()) {
+      return false;
+    }
+
+    state.recoveringSession = true;
+
+    try {
+      const result = await state.auth.signInWithCredential(state.lastGoogleCredential);
+      if (result?.user) {
+        updateCurrentUser(result.user);
+        return true;
+      }
+    } catch {
+      state.lastGoogleCredential = null;
+    } finally {
+      state.recoveringSession = false;
+    }
+
+    return false;
   }
 
   function getUserCollection() {
@@ -164,13 +207,25 @@
       try {
         const redirectResult = await state.auth.getRedirectResult();
         if (redirectResult?.user) {
+          storeRecentGoogleCredential(redirectResult);
           updateCurrentUser(redirectResult.user);
         }
       } catch {
         // Ignore redirect parsing errors on normal page loads.
       }
 
-      state.auth.onAuthStateChanged((user) => {
+      state.auth.onAuthStateChanged(async (user) => {
+        if (!user && shouldAttemptSessionRecovery()) {
+          const recovered = await recoverRecentGoogleSession();
+          if (recovered) {
+            if (!state.authReady) {
+              state.authReady = true;
+              resolveWaiters();
+            }
+            return;
+          }
+        }
+
         updateCurrentUser(user);
         if (!state.authReady) {
           state.authReady = true;
@@ -259,6 +314,7 @@
         try {
           const result = await state.auth.signInWithPopup(provider);
           if (result?.user) {
+            storeRecentGoogleCredential(result);
             updateCurrentUser(result.user);
           }
         } catch (error) {

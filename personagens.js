@@ -87,10 +87,6 @@ async function ensureCloudSessionOnUserAction() {
         return true;
       }
 
-      if (window.DVHAuth?.isPartialSession?.() && /\bOPR\//i.test(window.navigator?.userAgent || "")) {
-        charactersStatus.textContent = "Redirecionando para reconectar o login Google no Opera...";
-      }
-
       return canUseCloudNow();
     }
 

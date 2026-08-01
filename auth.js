@@ -342,6 +342,24 @@
     await batch.commit();
   }
 
+  async function saveCharacter(character) {
+    const collection = getUserCollection();
+    const entryId = character?.id || `char-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const ref = collection.doc(entryId);
+
+    await ref.set({
+      id: entryId,
+      name: character?.name || "Personagem sem nome",
+      className: character?.className || "",
+      raceName: character?.raceName || "",
+      originName: character?.originName || "",
+      savedAt: character?.savedAt || new Date().toISOString(),
+      data: character?.data || {}
+    }, { merge: true });
+
+    return entryId;
+  }
+
   async function initializeAuth() {
     if (state.initialized) {
       return;
@@ -551,6 +569,7 @@
     },
 
     listCharacters,
+    saveCharacter,
     replaceAllCharacters
   };
 

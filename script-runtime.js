@@ -1937,7 +1937,7 @@ async function readStoredCharacters() {
   if (!shouldSaveCharactersLocally()) {
     if (window.DVHAuth?.waitForAuthReady) {
       try {
-        await withTimeout(window.DVHAuth.waitForAuthReady(), 1500, "Auth não pronto");
+        await withTimeout(window.DVHAuth.waitForAuthReady(), 3500, "Auth não pronto");
       } catch {
         return [];
       }
@@ -1945,7 +1945,7 @@ async function readStoredCharacters() {
 
     if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
       try {
-        return await window.DVHAuth.listCharacters();
+        return await withTimeout(window.DVHAuth.listCharacters(), 8000, "Leitura da conta demorou demais");
       } catch {
         return [];
       }
@@ -1958,12 +1958,20 @@ async function readStoredCharacters() {
   const deletedIds = new Set(readDeletedCharacterIds());
 
   if (window.DVHAuth?.waitForAuthReady) {
-    await window.DVHAuth.waitForAuthReady();
+    try {
+      await withTimeout(window.DVHAuth.waitForAuthReady(), 3500, "Auth não pronto");
+    } catch {
+      return localCharacters;
+    }
   }
 
   if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
     try {
-      const cloudCharacters = (await window.DVHAuth.listCharacters()).filter((character) => !deletedIds.has(character.id));
+      const cloudCharacters = (await withTimeout(
+        window.DVHAuth.listCharacters(),
+        8000,
+        "Leitura da conta demorou demais"
+      )).filter((character) => !deletedIds.has(character.id));
       const mergedCharacters = mergeStoredCharacters(localCharacters, cloudCharacters);
       writeLocalCharacters(mergedCharacters);
       return mergedCharacters;
@@ -1979,7 +1987,7 @@ async function persistStoredCharacters(characters) {
   if (!shouldSaveCharactersLocally()) {
     if (window.DVHAuth?.waitForAuthReady) {
       try {
-        await withTimeout(window.DVHAuth.waitForAuthReady(), 1500, "Auth não pronto");
+        await withTimeout(window.DVHAuth.waitForAuthReady(), 3500, "Auth não pronto");
       } catch {
         return { savedLocally: false, syncedToCloud: false, requiresLogin: true };
       }
@@ -1987,7 +1995,7 @@ async function persistStoredCharacters(characters) {
 
     if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
       try {
-        await window.DVHAuth.replaceAllCharacters(characters);
+        await withTimeout(window.DVHAuth.replaceAllCharacters(characters), 10000, "Salvamento na conta demorou demais");
         return { savedLocally: false, syncedToCloud: true };
       } catch {
         return { savedLocally: false, syncedToCloud: false };
@@ -2001,7 +2009,7 @@ async function persistStoredCharacters(characters) {
 
   if (window.DVHAuth?.waitForAuthReady) {
     try {
-      await withTimeout(window.DVHAuth.waitForAuthReady(), 1500, "Auth não pronto");
+      await withTimeout(window.DVHAuth.waitForAuthReady(), 3500, "Auth não pronto");
     } catch {
       return { savedLocally: true, syncedToCloud: false };
     }
@@ -2009,7 +2017,7 @@ async function persistStoredCharacters(characters) {
 
   if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
     try {
-      await window.DVHAuth.replaceAllCharacters(characters);
+      await withTimeout(window.DVHAuth.replaceAllCharacters(characters), 10000, "Salvamento na conta demorou demais");
       clearDeletedCharacterIds();
       return { savedLocally: true, syncedToCloud: true };
     } catch {
@@ -2197,7 +2205,6 @@ async function saveCharacterAsJson() {
     syncStateFromInputsBeforeSave();
     setSaveStatus("Salvando personagem...");
 
-    const savingToCloud = Boolean(window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.());
     const payload = collectCharacterData();
     const id = `char-${Date.now()}`;
     const savedAt = new Date().toISOString();
@@ -2211,37 +2218,67 @@ async function saveCharacterAsJson() {
       data: payload
     };
 
-    const current = await withTimeout(
-      readStoredCharacters(),
-      8000,
-      "Tempo de leitura excedido"
-    );
+    const current = await readStoredCharacters();
     if (current.length >= MAX_CHARACTERS_PER_ACCOUNT) {
       setSaveStatus(`Limite de ${MAX_CHARACTERS_PER_ACCOUNT} fichas por conta atingido.`);
       return;
     }
 
     current.push(entry);
-    const result = await withTimeout(
-      persistStoredCharacters(current),
-      10000,
-      "Tempo de salvamento excedido"
-    );
 
-    if (result?.requiresLogin) {
+    const saveLocal = shouldSaveCharactersLocally();
+    const canSyncCloud = Boolean(window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.());
+
+    if (saveLocal) {
+      writeLocalCharacters(current);
+    }
+
+    if (!saveLocal && !canSyncCloud) {
       setSaveStatus("No Chrome, faça login com Google para salvar personagens na conta.");
       return;
     }
 
-    if (savingToCloud && result?.syncedToCloud) {
+    let syncedToCloud = false;
+    if (canSyncCloud) {
+      try {
+        if (typeof window.DVHAuth?.saveCharacter === "function") {
+          await withTimeout(window.DVHAuth.saveCharacter(entry), 15000, "Salvamento na conta demorou demais");
+        } else {
+          await withTimeout(window.DVHAuth.replaceAllCharacters(current), 15000, "Salvamento na conta demorou demais");
+        }
+        syncedToCloud = true;
+      } catch {
+        syncedToCloud = false;
+      }
+    }
+
+    if (syncedToCloud) {
       setSaveStatus(`Personagem salvo na conta Google. Total: ${current.length}/${MAX_CHARACTERS_PER_ACCOUNT}.`);
-    } else if (savingToCloud) {
+    } else if (canSyncCloud) {
       setSaveStatus("Não foi possível salvar na conta Google agora. Tente novamente.");
+    } else if (saveLocal) {
+      setSaveStatus("Personagem salvo localmente. Faça login para sincronizar com a conta Google.");
     } else {
       setSaveStatus("Faça login com Google para salvar personagens na conta.");
     }
-  } catch {
-    setSaveStatus("Não foi possível salvar agora. Verifique sua conexão e tente novamente.");
+  } catch (error) {
+    const reason = String(error?.message || "").toLowerCase();
+    if (reason.includes("tempo") || reason.includes("timeout")) {
+      setSaveStatus("O salvamento demorou demais para responder. Tente novamente.");
+      return;
+    }
+
+    if (reason.includes("permission") || reason.includes("insufficient") || reason.includes("unauth")) {
+      setSaveStatus("Sua sessão não tem permissão para salvar agora. Entre novamente com Google.");
+      return;
+    }
+
+    if (error?.message) {
+      setSaveStatus(`Erro ao salvar: ${error.message}`);
+      return;
+    }
+
+    setSaveStatus("Erro inesperado ao salvar. Tente novamente em alguns segundos.");
   } finally {
     if (references.saveCharacterButton) {
       references.saveCharacterButton.disabled = false;

@@ -114,11 +114,6 @@
   }
 
   function hydrateStoredSessionHints() {
-    const storedFallbackUser = readFallbackUserFromStorage();
-    if (storedFallbackUser) {
-      state.fallbackUser = storedFallbackUser;
-    }
-
     try {
       const rawTimestamp = window.localStorage.getItem(LAST_AUTH_AT_STORAGE_KEY);
       const parsedTimestamp = Number.parseInt(rawTimestamp || "", 10);
@@ -127,6 +122,16 @@
       }
     } catch {
       // Ignore blocked session storage.
+    }
+
+    const storedFallbackUser = readFallbackUserFromStorage();
+    if (!storedFallbackUser) {
+      return;
+    }
+
+    const isRecentLoginHint = Date.now() - state.lastSuccessfulAuthAt <= 45 * 1000;
+    if (getOperaBrowserDetected() && isRecentLoginHint) {
+      state.fallbackUser = storedFallbackUser;
     }
   }
 
@@ -265,8 +270,8 @@
       return false;
     }
 
-    // Keep a grace window after successful login to absorb Opera auth flapping.
-    return Date.now() - state.lastSuccessfulAuthAt <= 10 * 60 * 1000;
+    // Keep only a short grace window to avoid a permanent partial-session loop.
+    return Date.now() - state.lastSuccessfulAuthAt <= 45 * 1000;
   }
 
   function setupSessionRecoveryHooks() {
@@ -519,8 +524,18 @@
             updateCurrentUser(state.fallbackUser, { partial: true });
             state.lastCompatibilityIssue = "Sessao instavel no Opera. Tentando reconectar automaticamente.";
 
+            let recovered = false;
             if (shouldAttemptSessionRecovery()) {
-              await recoverRecentGoogleSession();
+              recovered = await recoverRecentGoogleSession();
+            }
+
+            if (state.auth?.currentUser) {
+              updateCurrentUser(state.auth.currentUser);
+            } else if (!recovered) {
+              state.fallbackUser = null;
+              state.partialSession = false;
+              state.lastCompatibilityIssue = "Sessao do Opera desconectada. Entre novamente com Google.";
+              updateCurrentUser(null);
             }
 
             if (!state.authReady) {

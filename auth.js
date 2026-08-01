@@ -5,6 +5,9 @@
     signingIn: false,
     recoveringSession: false,
     pendingSignOutTimer: null,
+    explicitSignOutRequested: false,
+    transientNullCount: 0,
+    fallbackUser: null,
     currentUser: null,
     auth: null,
     db: null,
@@ -56,6 +59,15 @@
 
   function updateCurrentUser(user) {
     state.currentUser = user || null;
+    if (user) {
+      state.fallbackUser = {
+        uid: user.uid,
+        email: user.email || "",
+        displayName: user.displayName || "",
+        photoURL: user.photoURL || ""
+      };
+      state.transientNullCount = 0;
+    }
     notifySubscribers();
   }
 
@@ -163,6 +175,19 @@
     }
 
     return false;
+  }
+
+  function canUseOperaFallbackSession() {
+    if (!getOperaBrowserDetected() || state.explicitSignOutRequested) {
+      return false;
+    }
+
+    if (!state.fallbackUser?.uid) {
+      return false;
+    }
+
+    // Keep a short grace window after successful login to absorb Opera auth flapping.
+    return Date.now() - state.lastSuccessfulAuthAt <= 2 * 60 * 1000;
   }
 
   function setupSessionRecoveryHooks() {
@@ -281,6 +306,7 @@
         clearPendingSignOutTimer();
 
         if (user) {
+          state.explicitSignOutRequested = false;
           updateCurrentUser(user);
           if (!state.authReady) {
             state.authReady = true;
@@ -290,6 +316,7 @@
         }
 
         if (state.auth?.currentUser) {
+          state.explicitSignOutRequested = false;
           updateCurrentUser(state.auth.currentUser);
           if (!state.authReady) {
             state.authReady = true;
@@ -299,7 +326,24 @@
         }
 
         state.pendingSignOutTimer = window.setTimeout(async () => {
+          if (canUseOperaFallbackSession()) {
+            state.transientNullCount += 1;
+            updateCurrentUser(state.fallbackUser);
+            state.lastCompatibilityIssue = "Sessao instavel no Opera. Tentando reconectar automaticamente.";
+
+            if (shouldAttemptSessionRecovery()) {
+              await recoverRecentGoogleSession();
+            }
+
+            if (!state.authReady) {
+              state.authReady = true;
+              resolveWaiters();
+            }
+            return;
+          }
+
           if (state.auth?.currentUser) {
+            state.explicitSignOutRequested = false;
             updateCurrentUser(state.auth.currentUser);
           } else if (shouldAttemptSessionRecovery()) {
             const recovered = await recoverRecentGoogleSession();
@@ -385,6 +429,7 @@
       }
 
       state.signingIn = true;
+      state.explicitSignOutRequested = false;
 
       const provider = new window.firebase.auth.GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
@@ -419,9 +464,11 @@
         return;
       }
 
+      state.explicitSignOutRequested = true;
       await state.auth.signOut();
       state.lastGoogleCredential = null;
       state.lastSuccessfulAuthAt = 0;
+      state.fallbackUser = null;
       try {
         window.sessionStorage.removeItem(GOOGLE_ACCESS_TOKEN_STORAGE_KEY);
       } catch {

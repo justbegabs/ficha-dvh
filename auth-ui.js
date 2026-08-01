@@ -112,11 +112,11 @@
     const update = (user) => {
       const loggedIn = Boolean(user);
       const diagnostics = window.DVHAuth.getDiagnostics?.();
-      const compatibilityNote = !loggedIn && diagnostics?.operaDetected && diagnostics?.lastCompatibilityIssue
+      const compatibilityNote = diagnostics?.operaDetected && diagnostics?.lastCompatibilityIssue
         ? ` (${diagnostics.lastCompatibilityIssue})`
         : "";
       refs.email.textContent = loggedIn
-        ? (user.email || "Conta Google conectada")
+        ? `${user.email || "Conta Google conectada"}${compatibilityNote}`
         : `Desconectado${compatibilityNote}`;
       refs.loginButton.disabled = false;
       refs.loginButton.hidden = loggedIn;

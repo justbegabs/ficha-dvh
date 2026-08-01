@@ -4,6 +4,7 @@
     authReady: false,
     signingIn: false,
     recoveringSession: false,
+    pendingSignOutTimer: null,
     currentUser: null,
     auth: null,
     db: null,
@@ -56,6 +57,15 @@
   function updateCurrentUser(user) {
     state.currentUser = user || null;
     notifySubscribers();
+  }
+
+  function clearPendingSignOutTimer() {
+    if (!state.pendingSignOutTimer) {
+      return;
+    }
+
+    window.clearTimeout(state.pendingSignOutTimer);
+    state.pendingSignOutTimer = null;
   }
 
   function getOperaBrowserDetected() {
@@ -155,6 +165,28 @@
     return false;
   }
 
+  function setupSessionRecoveryHooks() {
+    const tryRecover = async () => {
+      if (state.currentUser || !getOperaBrowserDetected()) {
+        return;
+      }
+
+      if (shouldAttemptSessionRecovery()) {
+        await recoverRecentGoogleSession();
+      }
+    };
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        void tryRecover();
+      }
+    });
+
+    window.addEventListener("focus", () => {
+      void tryRecover();
+    });
+  }
+
   function getUserCollection() {
     if (!state.currentUser || !state.db) {
       throw new Error("Usuário não autenticado.");
@@ -233,6 +265,7 @@
       state.auth = window.firebase.auth();
       state.db = window.firebase.firestore();
       await configureBestPersistence();
+      setupSessionRecoveryHooks();
 
       try {
         const redirectResult = await state.auth.getRedirectResult();
@@ -245,22 +278,43 @@
       }
 
       state.auth.onAuthStateChanged(async (user) => {
-        if (!user && shouldAttemptSessionRecovery()) {
-          const recovered = await recoverRecentGoogleSession();
-          if (recovered) {
-            if (!state.authReady) {
-              state.authReady = true;
-              resolveWaiters();
-            }
-            return;
+        clearPendingSignOutTimer();
+
+        if (user) {
+          updateCurrentUser(user);
+          if (!state.authReady) {
+            state.authReady = true;
+            resolveWaiters();
           }
+          return;
         }
 
-        updateCurrentUser(user);
-        if (!state.authReady) {
-          state.authReady = true;
-          resolveWaiters();
+        if (state.auth?.currentUser) {
+          updateCurrentUser(state.auth.currentUser);
+          if (!state.authReady) {
+            state.authReady = true;
+            resolveWaiters();
+          }
+          return;
         }
+
+        state.pendingSignOutTimer = window.setTimeout(async () => {
+          if (state.auth?.currentUser) {
+            updateCurrentUser(state.auth.currentUser);
+          } else if (shouldAttemptSessionRecovery()) {
+            const recovered = await recoverRecentGoogleSession();
+            if (!recovered) {
+              updateCurrentUser(null);
+            }
+          } else {
+            updateCurrentUser(null);
+          }
+
+          if (!state.authReady) {
+            state.authReady = true;
+            resolveWaiters();
+          }
+        }, 1200);
       });
     } catch {
       state.authReady = true;

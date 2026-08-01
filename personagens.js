@@ -2,6 +2,7 @@ const CHARACTERS_STORAGE_KEY = "dvhCharacters";
 const DELETED_CHARACTERS_STORAGE_KEY = "dvhDeletedCharacters";
 const SELECTED_CHARACTER_STORAGE_KEY = "dvhSelectedCharacterId";
 const SELECTED_CHARACTER_DATA_STORAGE_KEY = "dvhSelectedCharacterData";
+const SELECTED_CHARACTER_MAP_STORAGE_KEY = "dvhCharacterSelectionMap";
 const MAX_CHARACTERS_PER_ACCOUNT = 20;
 
 const charactersGrid = document.getElementById("charactersGrid");
@@ -81,6 +82,28 @@ function readLocalCharacters() {
 
 function writeLocalCharacters(characters) {
   localStorage.setItem(CHARACTERS_STORAGE_KEY, JSON.stringify(characters));
+}
+
+function readSelectionMap() {
+  try {
+    const raw = localStorage.getItem(SELECTED_CHARACTER_MAP_STORAGE_KEY);
+    if (!raw) {
+      return {};
+    }
+
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeSelectionMap(map) {
+  localStorage.setItem(SELECTED_CHARACTER_MAP_STORAGE_KEY, JSON.stringify(map));
+}
+
+function createSelectionToken(character) {
+  return `${character?.id || "char"}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 function readDeletedCharacterIds() {
@@ -252,9 +275,20 @@ async function renderStoredCharacters() {
       openButton.className = "character-action";
       openButton.textContent = "Abrir na ficha";
       openButton.addEventListener("click", () => {
+        const token = createSelectionToken(character);
+        const map = readSelectionMap();
+        map[token] = {
+          id: character.id || "",
+          data: character.data || {},
+          createdAt: Date.now()
+        };
+        writeSelectionMap(map);
+
+        // Keep legacy keys for backward compatibility while new token flow is adopted.
         localStorage.setItem(SELECTED_CHARACTER_STORAGE_KEY, character.id);
         localStorage.setItem(SELECTED_CHARACTER_DATA_STORAGE_KEY, JSON.stringify(character.data || {}));
-        window.location.href = "ficha.html";
+
+        window.location.href = `ficha.html?selection=${encodeURIComponent(token)}`;
       });
 
       const deleteButton = document.createElement("button");

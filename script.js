@@ -94,6 +94,7 @@ const CHARACTERS_STORAGE_KEY = "dvhCharacters";
 const DELETED_CHARACTERS_STORAGE_KEY = "dvhDeletedCharacters";
 const SELECTED_CHARACTER_STORAGE_KEY = "dvhSelectedCharacterId";
 const SELECTED_CHARACTER_DATA_STORAGE_KEY = "dvhSelectedCharacterData";
+const SELECTED_CHARACTER_MAP_STORAGE_KEY = "dvhCharacterSelectionMap";
 const MAX_CHARACTERS_PER_ACCOUNT = 20;
 const LEVEL_ZERO_BASE_STATS = {
   life: 10,
@@ -1841,6 +1842,48 @@ function writeLocalCharacters(characters) {
   localStorage.setItem(CHARACTERS_STORAGE_KEY, JSON.stringify(characters));
 }
 
+function readSelectionMap() {
+  try {
+    const raw = localStorage.getItem(SELECTED_CHARACTER_MAP_STORAGE_KEY);
+    if (!raw) {
+      return {};
+    }
+
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeSelectionMap(map) {
+  localStorage.setItem(SELECTED_CHARACTER_MAP_STORAGE_KEY, JSON.stringify(map));
+}
+
+function consumeSelectedCharacterByToken() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("selection");
+  if (!token) {
+    return null;
+  }
+
+  const map = readSelectionMap();
+  const entry = map[token];
+  if (!entry || typeof entry !== "object") {
+    return null;
+  }
+
+  delete map[token];
+  writeSelectionMap(map);
+
+  params.delete("selection");
+  const nextQuery = params.toString();
+  const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash || ""}`;
+  window.history.replaceState(null, "", nextUrl);
+
+  return entry.data && typeof entry.data === "object" ? entry.data : null;
+}
+
 function readDeletedCharacterIds() {
   try {
     const raw = localStorage.getItem(DELETED_CHARACTERS_STORAGE_KEY);
@@ -1929,6 +1972,11 @@ function clearStoredCharacterSelection() {
 }
 
 async function loadStoredCharacterSelection() {
+  const selectedByToken = consumeSelectedCharacterByToken();
+  if (selectedByToken) {
+    return selectedByToken;
+  }
+
   const selectedId = localStorage.getItem(SELECTED_CHARACTER_STORAGE_KEY);
   const selectedRawData = localStorage.getItem(SELECTED_CHARACTER_DATA_STORAGE_KEY);
   if (!selectedId && !selectedRawData) {

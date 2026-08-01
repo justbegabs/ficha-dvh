@@ -288,16 +288,35 @@
     });
   }
 
-  function getUserCollection() {
-    if (!state.currentUser || !state.db) {
-      throw new Error("Usuário não autenticado.");
+  async function ensureDatabaseUser() {
+    if (state.auth?.currentUser) {
+      return state.auth.currentUser;
     }
 
-    return state.db.collection("users").doc(state.currentUser.uid).collection("characters");
+    if (shouldAttemptSessionRecovery()) {
+      await recoverRecentGoogleSession();
+    }
+
+    if (state.auth?.currentUser) {
+      return state.auth.currentUser;
+    }
+
+    const error = new Error("Sessão do Google não está autenticada no momento.");
+    error.code = "auth/unauthenticated";
+    throw error;
+  }
+
+  async function getUserCollection() {
+    if (!state.db) {
+      throw new Error("Banco de dados indisponível.");
+    }
+
+    const user = await ensureDatabaseUser();
+    return state.db.collection("users").doc(user.uid).collection("characters");
   }
 
   async function listCharacters() {
-    const collection = getUserCollection();
+    const collection = await getUserCollection();
     const snapshot = await collection.orderBy("savedAt", "desc").get();
 
     return snapshot.docs.map((doc) => {
@@ -315,7 +334,7 @@
   }
 
   async function replaceAllCharacters(characters) {
-    const collection = getUserCollection();
+    const collection = await getUserCollection();
     const trimmed = Array.isArray(characters) ? characters.slice(0, MAX_CHARACTERS) : [];
 
     const existing = await collection.get();
@@ -343,7 +362,7 @@
   }
 
   async function saveCharacter(character) {
-    const collection = getUserCollection();
+    const collection = await getUserCollection();
     const entryId = character?.id || `char-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const ref = collection.doc(entryId);
 
@@ -358,6 +377,15 @@
     }, { merge: true });
 
     return entryId;
+  }
+
+  async function deleteCharacter(characterId) {
+    if (!characterId) {
+      return;
+    }
+
+    const collection = await getUserCollection();
+    await collection.doc(characterId).delete();
   }
 
   async function initializeAuth() {
@@ -469,7 +497,7 @@
     },
 
     isLoggedIn() {
-      return Boolean(state.currentUser);
+      return Boolean(state.auth?.currentUser);
     },
 
     getCurrentUser() {
@@ -570,6 +598,7 @@
 
     listCharacters,
     saveCharacter,
+    deleteCharacter,
     replaceAllCharacters
   };
 

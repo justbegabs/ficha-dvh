@@ -160,7 +160,6 @@ function mergeStoredCharacters(localCharacters, cloudCharacters) {
 
 async function readStoredCharacters() {
   const localCharacters = readLocalCharacters();
-  const deletedIds = new Set(readDeletedCharacterIds());
 
   if (window.DVHAuth?.waitForAuthReady) {
     await window.DVHAuth.waitForAuthReady();
@@ -168,10 +167,10 @@ async function readStoredCharacters() {
 
   if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
     try {
-      const cloudCharacters = (await window.DVHAuth.listCharacters()).filter((character) => !deletedIds.has(character.id));
-      const mergedCharacters = mergeStoredCharacters(localCharacters, cloudCharacters);
-      writeLocalCharacters(mergedCharacters);
-      return mergedCharacters;
+      const cloudCharacters = await window.DVHAuth.listCharacters();
+      writeLocalCharacters(cloudCharacters);
+      clearDeletedCharacterIds();
+      return cloudCharacters;
     } catch {
       return localCharacters;
     }
@@ -296,9 +295,25 @@ async function renderStoredCharacters() {
       deleteButton.className = "character-action is-danger";
       deleteButton.textContent = "Remover";
       deleteButton.addEventListener("click", async () => {
-        markDeletedCharacterId(character.id);
-        const next = (await readStoredCharacters()).filter((entry) => entry.id !== character.id);
-        await persistStoredCharacters(next);
+        const authEnabled = Boolean(window.DVHAuth?.isConfigured?.());
+        const loggedIn = Boolean(window.DVHAuth?.isLoggedIn?.());
+
+        if (authEnabled && loggedIn && typeof window.DVHAuth?.deleteCharacter === "function") {
+          try {
+            await window.DVHAuth.deleteCharacter(character.id);
+            const fresh = await window.DVHAuth.listCharacters();
+            writeLocalCharacters(fresh);
+            clearDeletedCharacterIds();
+          } catch {
+            charactersStatus.textContent = "Não foi possível remover da conta Google agora. Tente novamente.";
+            return;
+          }
+        } else {
+          markDeletedCharacterId(character.id);
+          const next = (await readStoredCharacters()).filter((entry) => entry.id !== character.id);
+          await persistStoredCharacters(next);
+        }
+
         await renderStoredCharacters();
       });
 

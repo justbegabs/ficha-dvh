@@ -1955,7 +1955,6 @@ async function readStoredCharacters() {
   }
 
   const localCharacters = readLocalCharacters();
-  const deletedIds = new Set(readDeletedCharacterIds());
 
   if (window.DVHAuth?.waitForAuthReady) {
     try {
@@ -1967,14 +1966,16 @@ async function readStoredCharacters() {
 
   if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
     try {
-      const cloudCharacters = (await withTimeout(
+      const cloudCharacters = await withTimeout(
         window.DVHAuth.listCharacters(),
         8000,
         "Leitura da conta demorou demais"
-      )).filter((character) => !deletedIds.has(character.id));
-      const mergedCharacters = mergeStoredCharacters(localCharacters, cloudCharacters);
-      writeLocalCharacters(mergedCharacters);
-      return mergedCharacters;
+      );
+
+      // Logged-in sessions use cloud as canonical source to keep browsers consistent.
+      writeLocalCharacters(cloudCharacters);
+      clearDeletedCharacterIds();
+      return cloudCharacters;
     } catch {
       return localCharacters;
     }
@@ -2227,9 +2228,10 @@ async function saveCharacterAsJson() {
     current.push(entry);
 
     const saveLocal = shouldSaveCharactersLocally();
+    const authConfigured = Boolean(window.DVHAuth?.isConfigured?.());
     const canSyncCloud = Boolean(window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.());
 
-    if (saveLocal) {
+    if (saveLocal && !canSyncCloud) {
       writeLocalCharacters(current);
     }
 
@@ -2239,6 +2241,7 @@ async function saveCharacterAsJson() {
     }
 
     let syncedToCloud = false;
+    let cloudSaveError = null;
     if (canSyncCloud) {
       try {
         if (typeof window.DVHAuth?.saveCharacter === "function") {
@@ -2247,15 +2250,29 @@ async function saveCharacterAsJson() {
           await withTimeout(window.DVHAuth.replaceAllCharacters(current), 15000, "Salvamento na conta demorou demais");
         }
         syncedToCloud = true;
-      } catch {
+      } catch (error) {
         syncedToCloud = false;
+        cloudSaveError = error;
       }
     }
 
     if (syncedToCloud) {
+      writeLocalCharacters(current);
+      clearDeletedCharacterIds();
       setSaveStatus(`Personagem salvo na conta Google. Total: ${current.length}/${MAX_CHARACTERS_PER_ACCOUNT}.`);
-    } else if (canSyncCloud) {
-      setSaveStatus("Não foi possível salvar na conta Google agora. Tente novamente.");
+    } else if (canSyncCloud || authConfigured) {
+      const cloudCode = String(cloudSaveError?.code || "").toLowerCase();
+      if (cloudCode.includes("permission") || cloudCode.includes("denied")) {
+        setSaveStatus("Sua conta não tem permissão no Firestore (permission-denied). Verifique as regras do banco.");
+      } else if (cloudCode.includes("unauth")) {
+        setSaveStatus("Sua sessão Google expirou para o Firestore. Entre novamente e tente salvar.");
+      } else if (cloudCode.includes("deadline") || cloudCode.includes("timeout") || String(cloudSaveError?.message || "").toLowerCase().includes("demorou")) {
+        setSaveStatus("O Firestore demorou para responder. Tente salvar novamente em instantes.");
+      } else if (cloudSaveError?.message) {
+        setSaveStatus(`Falha ao salvar na conta Google: ${cloudSaveError.message}`);
+      } else {
+        setSaveStatus("Não foi possível salvar na conta Google agora. Tente novamente.");
+      }
     } else if (saveLocal) {
       setSaveStatus("Personagem salvo localmente. Faça login para sincronizar com a conta Google.");
     } else {

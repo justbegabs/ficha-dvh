@@ -1821,29 +1821,64 @@ function writeLocalCharacters(characters) {
   localStorage.setItem(CHARACTERS_STORAGE_KEY, JSON.stringify(characters));
 }
 
+function getCharacterTimestamp(character) {
+  const timestamp = new Date(character?.savedAt || "").getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function mergeStoredCharacters(localCharacters, cloudCharacters) {
+  const merged = new Map();
+
+  [...localCharacters, ...cloudCharacters].forEach((character) => {
+    if (!character || !character.id) {
+      return;
+    }
+
+    const previous = merged.get(character.id);
+    if (!previous || getCharacterTimestamp(character) >= getCharacterTimestamp(previous)) {
+      merged.set(character.id, character);
+    }
+  });
+
+  return [...merged.values()];
+}
+
 async function readStoredCharacters() {
+  const localCharacters = readLocalCharacters();
+
   if (window.DVHAuth?.waitForAuthReady) {
     await window.DVHAuth.waitForAuthReady();
   }
 
   if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
-    return window.DVHAuth.listCharacters();
+    try {
+      const cloudCharacters = await window.DVHAuth.listCharacters();
+      return mergeStoredCharacters(localCharacters, cloudCharacters);
+    } catch {
+      return localCharacters;
+    }
   }
 
-  return readLocalCharacters();
+  return localCharacters;
 }
 
 async function persistStoredCharacters(characters) {
+  writeLocalCharacters(characters);
+
   if (window.DVHAuth?.waitForAuthReady) {
     await window.DVHAuth.waitForAuthReady();
   }
 
   if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
-    await window.DVHAuth.replaceAllCharacters(characters);
-    return;
+    try {
+      await window.DVHAuth.replaceAllCharacters(characters);
+      return { savedLocally: true, syncedToCloud: true };
+    } catch {
+      return { savedLocally: true, syncedToCloud: false };
+    }
   }
 
-  writeLocalCharacters(characters);
+  return { savedLocally: true, syncedToCloud: false };
 }
 
 async function loadStoredCharacterSelection() {
@@ -1956,12 +1991,16 @@ async function saveCharacterAsJson() {
     }
 
     current.push(entry);
-    await persistStoredCharacters(current);
+    const result = await persistStoredCharacters(current);
 
     if (references.saveCharacterStatus) {
-      references.saveCharacterStatus.textContent = savingToCloud
-        ? `Personagem salvo na conta Google. Total: ${current.length}/${MAX_CHARACTERS_PER_ACCOUNT}.`
-        : `Personagem salvo localmente. Faça login para salvar na conta Google.`;
+      if (savingToCloud && result?.syncedToCloud) {
+        references.saveCharacterStatus.textContent = `Personagem salvo localmente e na conta Google. Total: ${current.length}/${MAX_CHARACTERS_PER_ACCOUNT}.`;
+      } else if (savingToCloud) {
+        references.saveCharacterStatus.textContent = "Personagem salvo localmente, mas a sincronização com a conta Google falhou agora.";
+      } else {
+        references.saveCharacterStatus.textContent = "Personagem salvo localmente. Faça login para salvar na conta Google.";
+      }
     }
   } catch {
     if (references.saveCharacterStatus) {

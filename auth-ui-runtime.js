@@ -1,4 +1,30 @@
 (function () {
+  const OPERA_AUTO_RECOVERY_ATTEMPTED_KEY = "dvhOperaAutoRecoveryAttempted";
+
+  function shouldRunOperaAutoRecovery() {
+    try {
+      return window.sessionStorage.getItem(OPERA_AUTO_RECOVERY_ATTEMPTED_KEY) !== "1";
+    } catch {
+      return true;
+    }
+  }
+
+  function markOperaAutoRecoveryAttempted() {
+    try {
+      window.sessionStorage.setItem(OPERA_AUTO_RECOVERY_ATTEMPTED_KEY, "1");
+    } catch {
+      // Ignore blocked browser storage.
+    }
+  }
+
+  function clearOperaAutoRecoveryAttempted() {
+    try {
+      window.sessionStorage.removeItem(OPERA_AUTO_RECOVERY_ATTEMPTED_KEY);
+    } catch {
+      // Ignore blocked browser storage.
+    }
+  }
+
   function ensureAuthStyles() {
     if (document.getElementById("auth-widget-styles")) {
       return;
@@ -114,18 +140,39 @@
       const hasCloudSession = window.DVHAuth?.hasCloudSession?.() ?? loggedIn;
       const fullyLoggedIn = loggedIn && hasCloudSession;
       const diagnostics = window.DVHAuth.getDiagnostics?.();
+      const operaDetected = Boolean(diagnostics?.operaDetected);
       const compatibilityNote = diagnostics?.operaDetected && diagnostics?.lastCompatibilityIssue
         ? ` (${diagnostics.lastCompatibilityIssue})`
         : "";
       if (loggedIn && !hasCloudSession) {
         refs.email.textContent = `Sessão parcial detectada. Clique em Entrar para reconectar${compatibilityNote}`;
+
+        if (operaDetected && shouldRunOperaAutoRecovery() && typeof window.DVHAuth?.reauthenticateCloudSession === "function") {
+          markOperaAutoRecoveryAttempted();
+          refs.email.textContent = `Reconectando sessão no Opera...${compatibilityNote}`;
+          refs.loginButton.disabled = true;
+
+          void window.DVHAuth.reauthenticateCloudSession()
+            .catch(() => {
+              // UI will reflect the final auth state via onAuthStateChanged.
+            })
+            .finally(() => {
+              refs.loginButton.disabled = false;
+            });
+        }
       } else {
         refs.email.textContent = fullyLoggedIn
           ? `${user.email || "Conta Google conectada"}${compatibilityNote}`
           : `Desconectado${compatibilityNote}`;
       }
 
-      refs.loginButton.disabled = false;
+      if (fullyLoggedIn || !loggedIn) {
+        clearOperaAutoRecoveryAttempted();
+      }
+
+      if (!(loggedIn && !hasCloudSession && operaDetected && refs.loginButton.disabled)) {
+        refs.loginButton.disabled = false;
+      }
       refs.loginButton.hidden = fullyLoggedIn;
       refs.logoutButton.hidden = !loggedIn;
     };

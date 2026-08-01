@@ -134,7 +134,7 @@
       return;
     }
 
-    const isRecentLoginHint = Date.now() - state.lastSuccessfulAuthAt <= 45 * 1000;
+    const isRecentLoginHint = Date.now() - state.lastSuccessfulAuthAt <= 12 * 1000;
     if (getOperaBrowserDetected() && isRecentLoginHint) {
       state.fallbackUser = storedFallbackUser;
     }
@@ -279,8 +279,8 @@
       return false;
     }
 
-    // Keep only a short grace window and allow this fallback once per login cycle.
-    return Date.now() - state.lastSuccessfulAuthAt <= 45 * 1000;
+    // Keep only a very short grace window and allow this fallback once per login cycle.
+    return Date.now() - state.lastSuccessfulAuthAt <= 12 * 1000;
   }
 
   function setupSessionRecoveryHooks() {

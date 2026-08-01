@@ -24,6 +24,7 @@
 
   const REQUIRED_CONFIG_KEYS = ["apiKey", "authDomain", "projectId", "appId"];
   const MAX_CHARACTERS = 20;
+  const GOOGLE_ACCESS_TOKEN_STORAGE_KEY = "dvhGoogleAccessToken";
 
   function isFilledValue(value) {
     return typeof value === "string" && value.trim() !== "" && !value.startsWith("YOUR_");
@@ -87,16 +88,40 @@
 
   function storeRecentGoogleCredential(result) {
     const credential = window.firebase.auth.GoogleAuthProvider.credentialFromResult(result);
-    if (!credential) {
+    const accessToken = credential?.accessToken || result?.credential?.accessToken || "";
+    if (!credential && !accessToken) {
       return;
     }
 
-    state.lastGoogleCredential = credential;
+    state.lastGoogleCredential = credential || window.firebase.auth.GoogleAuthProvider.credential(accessToken);
     state.lastSuccessfulAuthAt = Date.now();
+
+    if (accessToken) {
+      try {
+        window.sessionStorage.setItem(GOOGLE_ACCESS_TOKEN_STORAGE_KEY, accessToken);
+      } catch {
+        // Ignore blocked session storage.
+      }
+    }
   }
 
   function shouldAttemptSessionRecovery() {
-    if (state.recoveringSession || !state.lastGoogleCredential || !state.auth) {
+    if (state.recoveringSession || !state.auth) {
+      return false;
+    }
+
+    if (!state.lastGoogleCredential) {
+      try {
+        const storedAccessToken = window.sessionStorage.getItem(GOOGLE_ACCESS_TOKEN_STORAGE_KEY);
+        if (storedAccessToken) {
+          state.lastGoogleCredential = window.firebase.auth.GoogleAuthProvider.credential(storedAccessToken);
+        }
+      } catch {
+        // Ignore blocked session storage.
+      }
+    }
+
+    if (!state.lastGoogleCredential) {
       return false;
     }
 
@@ -118,6 +143,11 @@
       }
     } catch {
       state.lastGoogleCredential = null;
+      try {
+        window.sessionStorage.removeItem(GOOGLE_ACCESS_TOKEN_STORAGE_KEY);
+      } catch {
+        // Ignore blocked session storage.
+      }
     } finally {
       state.recoveringSession = false;
     }
@@ -336,6 +366,13 @@
       }
 
       await state.auth.signOut();
+      state.lastGoogleCredential = null;
+      state.lastSuccessfulAuthAt = 0;
+      try {
+        window.sessionStorage.removeItem(GOOGLE_ACCESS_TOKEN_STORAGE_KEY);
+      } catch {
+        // Ignore blocked session storage.
+      }
     },
 
     listCharacters,

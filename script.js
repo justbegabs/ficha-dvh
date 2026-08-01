@@ -91,6 +91,7 @@ const originCatalog = {};
 const classCatalog = {};
 const ENABLE_DYNAMIC_APPEARANCE_BY_SELECTION = false;
 const CHARACTERS_STORAGE_KEY = "dvhCharacters";
+const DELETED_CHARACTERS_STORAGE_KEY = "dvhDeletedCharacters";
 const SELECTED_CHARACTER_STORAGE_KEY = "dvhSelectedCharacterId";
 const SELECTED_CHARACTER_DATA_STORAGE_KEY = "dvhSelectedCharacterData";
 const MAX_CHARACTERS_PER_ACCOUNT = 20;
@@ -412,8 +413,14 @@ async function initialize() {
   syncOriginSelection();
   syncClassSelection();
   syncRaceSelection();
-  const loadedFromStorage = await loadStoredCharacterSelection();
-  if (!loadedFromStorage) {
+  const storedCharacterData = await loadStoredCharacterSelection();
+  if (storedCharacterData) {
+    applyStoredCharacterData(storedCharacterData);
+    syncOriginSelection();
+    syncClassSelection();
+    syncRaceSelection();
+  }
+  if (!storedCharacterData) {
     applyRaceLevelZeroBonuses();
   }
   renderRaceInfo();
@@ -421,6 +428,18 @@ async function initialize() {
   renderCharacteristicsInputs();
   renderSkillInputs();
   renderSelectors();
+  if (storedCharacterData) {
+    applyStoredCharacterData(storedCharacterData);
+    syncOriginSelection();
+    syncClassSelection();
+    syncRaceSelection();
+    renderRaceInfo();
+    renderAttributeInputs();
+    renderCharacteristicsInputs();
+    renderSkillInputs();
+    renderSelectors();
+    clearStoredCharacterSelection();
+  }
   updatePools();
   updateCharacteristicsCount();
   updateHumanAge();
@@ -1822,6 +1841,24 @@ function writeLocalCharacters(characters) {
   localStorage.setItem(CHARACTERS_STORAGE_KEY, JSON.stringify(characters));
 }
 
+function readDeletedCharacterIds() {
+  try {
+    const raw = localStorage.getItem(DELETED_CHARACTERS_STORAGE_KEY);
+    if (!raw) {
+      return [];
+    }
+
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((value) => typeof value === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function clearDeletedCharacterIds() {
+  localStorage.removeItem(DELETED_CHARACTERS_STORAGE_KEY);
+}
+
 function getCharacterTimestamp(character) {
   const timestamp = new Date(character?.savedAt || "").getTime();
   return Number.isNaN(timestamp) ? 0 : timestamp;
@@ -1846,6 +1883,7 @@ function mergeStoredCharacters(localCharacters, cloudCharacters) {
 
 async function readStoredCharacters() {
   const localCharacters = readLocalCharacters();
+  const deletedIds = new Set(readDeletedCharacterIds());
 
   if (window.DVHAuth?.waitForAuthReady) {
     await window.DVHAuth.waitForAuthReady();
@@ -1853,7 +1891,7 @@ async function readStoredCharacters() {
 
   if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
     try {
-      const cloudCharacters = await window.DVHAuth.listCharacters();
+      const cloudCharacters = (await window.DVHAuth.listCharacters()).filter((character) => !deletedIds.has(character.id));
       const mergedCharacters = mergeStoredCharacters(localCharacters, cloudCharacters);
       writeLocalCharacters(mergedCharacters);
       return mergedCharacters;
@@ -1875,6 +1913,7 @@ async function persistStoredCharacters(characters) {
   if (window.DVHAuth?.isConfigured?.() && window.DVHAuth?.isLoggedIn?.()) {
     try {
       await window.DVHAuth.replaceAllCharacters(characters);
+      clearDeletedCharacterIds();
       return { savedLocally: true, syncedToCloud: true };
     } catch {
       return { savedLocally: true, syncedToCloud: false };
@@ -1884,22 +1923,24 @@ async function persistStoredCharacters(characters) {
   return { savedLocally: true, syncedToCloud: false };
 }
 
+function clearStoredCharacterSelection() {
+  localStorage.removeItem(SELECTED_CHARACTER_STORAGE_KEY);
+  localStorage.removeItem(SELECTED_CHARACTER_DATA_STORAGE_KEY);
+}
+
 async function loadStoredCharacterSelection() {
   const selectedId = localStorage.getItem(SELECTED_CHARACTER_STORAGE_KEY);
   const selectedRawData = localStorage.getItem(SELECTED_CHARACTER_DATA_STORAGE_KEY);
-  if (!selectedId) {
-    localStorage.removeItem(SELECTED_CHARACTER_DATA_STORAGE_KEY);
-    return false;
+  if (!selectedId && !selectedRawData) {
+    clearStoredCharacterSelection();
+    return null;
   }
 
   if (selectedRawData) {
     try {
       const selectedData = JSON.parse(selectedRawData);
       if (selectedData && typeof selectedData === "object") {
-        applyStoredCharacterData(selectedData);
-        localStorage.removeItem(SELECTED_CHARACTER_STORAGE_KEY);
-        localStorage.removeItem(SELECTED_CHARACTER_DATA_STORAGE_KEY);
-        return true;
+        return selectedData;
       }
     } catch {
       // Fall back to stored collection lookup.
@@ -1907,15 +1948,13 @@ async function loadStoredCharacterSelection() {
   }
 
   const selected = (await readStoredCharacters()).find((entry) => entry.id === selectedId);
-  localStorage.removeItem(SELECTED_CHARACTER_STORAGE_KEY);
-  localStorage.removeItem(SELECTED_CHARACTER_DATA_STORAGE_KEY);
 
   if (!selected?.data) {
-    return false;
+    clearStoredCharacterSelection();
+    return null;
   }
 
-  applyStoredCharacterData(selected.data);
-  return true;
+  return selected.data;
 }
 
 function applyStoredCharacterData(data) {

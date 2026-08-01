@@ -144,17 +144,11 @@
   }
 
   async function configureBestPersistence() {
-    const persistenceOptions = getOperaBrowserDetected()
-      ? [
-        { mode: "session", value: window.firebase.auth.Auth.Persistence.SESSION },
-        { mode: "local", value: window.firebase.auth.Auth.Persistence.LOCAL },
-        { mode: "none", value: window.firebase.auth.Auth.Persistence.NONE }
-      ]
-      : [
-        { mode: "local", value: window.firebase.auth.Auth.Persistence.LOCAL },
-        { mode: "session", value: window.firebase.auth.Auth.Persistence.SESSION },
-        { mode: "none", value: window.firebase.auth.Auth.Persistence.NONE }
-      ];
+    const persistenceOptions = [
+      { mode: "local", value: window.firebase.auth.Auth.Persistence.LOCAL },
+      { mode: "session", value: window.firebase.auth.Auth.Persistence.SESSION },
+      { mode: "none", value: window.firebase.auth.Auth.Persistence.NONE }
+    ];
 
     for (const option of persistenceOptions) {
       try {
@@ -263,9 +257,16 @@
   }
 
   function canUseOperaFallbackSession() {
-    // Partial fallback caused inconsistent Firestore auth state in Opera.
-    // Keep this disabled and require a real Firebase auth session.
-    return false;
+    if (!getOperaBrowserDetected() || state.explicitSignOutRequested) {
+      return false;
+    }
+
+    if (!state.fallbackUser?.uid) {
+      return false;
+    }
+
+    // Keep a grace window after successful login to absorb Opera auth flapping.
+    return Date.now() - state.lastSuccessfulAuthAt <= 10 * 60 * 1000;
   }
 
   function setupSessionRecoveryHooks() {
@@ -493,6 +494,7 @@
         if (user) {
           state.explicitSignOutRequested = false;
           updateCurrentUser(user);
+          state.lastCompatibilityIssue = "";
           if (!state.authReady) {
             state.authReady = true;
             resolveWaiters();
@@ -513,7 +515,19 @@
         const signOutDelayMs = getOperaBrowserDetected() ? 3000 : 1200;
         state.pendingSignOutTimer = window.setTimeout(async () => {
           if (canUseOperaFallbackSession()) {
-            // Disabled by design.
+            state.transientNullCount += 1;
+            updateCurrentUser(state.fallbackUser, { partial: true });
+            state.lastCompatibilityIssue = "Sessao instavel no Opera. Tentando reconectar automaticamente.";
+
+            if (shouldAttemptSessionRecovery()) {
+              await recoverRecentGoogleSession();
+            }
+
+            if (!state.authReady) {
+              state.authReady = true;
+              resolveWaiters();
+            }
+            return;
           }
 
           if (state.auth?.currentUser) {

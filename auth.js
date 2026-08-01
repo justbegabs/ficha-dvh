@@ -32,7 +32,6 @@
   const GOOGLE_ACCESS_TOKEN_STORAGE_KEY = "dvhGoogleAccessToken";
   const LAST_AUTH_AT_STORAGE_KEY = "dvhLastAuthAt";
   const FALLBACK_USER_STORAGE_KEY = "dvhFallbackUser";
-  const OPERA_PARTIAL_REAUTH_AT_KEY = "dvhOperaPartialReauthAt";
 
   function isFilledValue(value) {
     return typeof value === "string" && value.trim() !== "" && !value.startsWith("YOUR_");
@@ -144,35 +143,18 @@
     return /\bOPR\//i.test(window.navigator?.userAgent || "");
   }
 
-  function shouldThrottleOperaPartialReauth() {
-    try {
-      const raw = window.localStorage.getItem(OPERA_PARTIAL_REAUTH_AT_KEY);
-      const last = Number.parseInt(raw || "", 10);
-      if (!Number.isFinite(last)) {
-        return false;
-      }
-
-      // Prevent redirect loops if Opera keeps restoring a partial session.
-      return Date.now() - last < 2 * 60 * 1000;
-    } catch {
-      return false;
-    }
-  }
-
-  function markOperaPartialReauthAttempt() {
-    try {
-      window.localStorage.setItem(OPERA_PARTIAL_REAUTH_AT_KEY, String(Date.now()));
-    } catch {
-      // Ignore blocked browser storage.
-    }
-  }
-
   async function configureBestPersistence() {
-    const persistenceOptions = [
-      { mode: "local", value: window.firebase.auth.Auth.Persistence.LOCAL },
-      { mode: "session", value: window.firebase.auth.Auth.Persistence.SESSION },
-      { mode: "none", value: window.firebase.auth.Auth.Persistence.NONE }
-    ];
+    const persistenceOptions = getOperaBrowserDetected()
+      ? [
+        { mode: "session", value: window.firebase.auth.Auth.Persistence.SESSION },
+        { mode: "local", value: window.firebase.auth.Auth.Persistence.LOCAL },
+        { mode: "none", value: window.firebase.auth.Auth.Persistence.NONE }
+      ]
+      : [
+        { mode: "local", value: window.firebase.auth.Auth.Persistence.LOCAL },
+        { mode: "session", value: window.firebase.auth.Auth.Persistence.SESSION },
+        { mode: "none", value: window.firebase.auth.Auth.Persistence.NONE }
+      ];
 
     for (const option of persistenceOptions) {
       try {
@@ -356,22 +338,6 @@
     provider.setCustomParameters({ prompt: "select_account" });
 
     try {
-      if (getOperaBrowserDetected() && state.partialSession) {
-        if (shouldThrottleOperaPartialReauth()) {
-          return false;
-        }
-
-        markOperaPartialReauthAttempt();
-        try {
-          await state.auth.signOut();
-        } catch {
-          // Continue even if signOut fails.
-        }
-
-        await state.auth.signInWithRedirect(provider);
-        return false;
-      }
-
       const result = await state.auth.signInWithPopup(provider);
       if (result?.user) {
         storeRecentGoogleCredential(result);
@@ -544,6 +510,7 @@
           return;
         }
 
+        const signOutDelayMs = getOperaBrowserDetected() ? 3000 : 1200;
         state.pendingSignOutTimer = window.setTimeout(async () => {
           if (canUseOperaFallbackSession()) {
             // Disabled by design.
@@ -565,7 +532,7 @@
             state.authReady = true;
             resolveWaiters();
           }
-        }, 1200);
+        }, signOutDelayMs);
       });
     } catch {
       state.authReady = true;
@@ -659,12 +626,6 @@
       provider.setCustomParameters({ prompt: "select_account" });
 
       try {
-        if (getOperaBrowserDetected()) {
-          // Opera is more stable with redirect-based auth than popup persistence.
-          await state.auth.signInWithRedirect(provider);
-          return;
-        }
-
         try {
           const result = await state.auth.signInWithPopup(provider);
           if (result?.user) {

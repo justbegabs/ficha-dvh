@@ -306,6 +306,18 @@
     throw error;
   }
 
+  async function ensureCloudSession() {
+    if (state.auth?.currentUser) {
+      return true;
+    }
+
+    if (shouldAttemptSessionRecovery()) {
+      await recoverRecentGoogleSession();
+    }
+
+    return Boolean(state.auth?.currentUser);
+  }
+
   async function getUserCollection() {
     if (!state.db) {
       throw new Error("Banco de dados indisponível.");
@@ -414,7 +426,8 @@
       try {
         state.db.settings({
           experimentalAutoDetectLongPolling: true,
-          useFetchStreams: false
+          useFetchStreams: false,
+          merge: true
         });
       } catch {
         // Ignore settings errors after Firestore has already started.
@@ -510,6 +523,10 @@
 
     hasCloudSession() {
       return Boolean(state.auth?.currentUser);
+    },
+
+    async ensureCloudSession() {
+      return ensureCloudSession();
     },
 
     getCurrentUser() {

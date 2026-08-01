@@ -1851,6 +1851,29 @@ function hasUserSessionForCloud() {
   return Boolean(window.DVHAuth?.getCurrentUser?.()?.uid);
 }
 
+async function canUseCloudNow() {
+  if (!window.DVHAuth?.isConfigured?.()) {
+    return false;
+  }
+
+  if (window.DVHAuth?.hasCloudSession?.()) {
+    return true;
+  }
+
+  if (typeof window.DVHAuth?.ensureCloudSession === "function") {
+    try {
+      const recovered = await window.DVHAuth.ensureCloudSession();
+      if (recovered && window.DVHAuth?.hasCloudSession?.()) {
+        return true;
+      }
+    } catch {
+      return false;
+    }
+  }
+
+  return Boolean(window.DVHAuth?.hasCloudSession?.());
+}
+
 function writeLocalCharacters(characters) {
   localStorage.setItem(CHARACTERS_STORAGE_KEY, JSON.stringify(characters));
 }
@@ -1947,7 +1970,7 @@ async function readStoredCharacters() {
       }
     }
 
-    if (window.DVHAuth?.isConfigured?.() && hasUserSessionForCloud()) {
+    if (window.DVHAuth?.isConfigured?.() && (await canUseCloudNow())) {
       try {
         return await withTimeout(window.DVHAuth.listCharacters(), 8000, "Leitura da conta demorou demais");
       } catch {
@@ -1968,7 +1991,7 @@ async function readStoredCharacters() {
     }
   }
 
-  if (window.DVHAuth?.isConfigured?.() && hasUserSessionForCloud()) {
+  if (window.DVHAuth?.isConfigured?.() && (await canUseCloudNow())) {
     try {
       const cloudCharacters = await withTimeout(
         window.DVHAuth.listCharacters(),
@@ -2233,13 +2256,17 @@ async function saveCharacterAsJson() {
 
     const saveLocal = shouldSaveCharactersLocally();
     const authConfigured = Boolean(window.DVHAuth?.isConfigured?.());
-    const canSyncCloud = Boolean(window.DVHAuth?.isConfigured?.() && hasUserSessionForCloud());
+    const canSyncCloud = await canUseCloudNow();
 
     if (saveLocal && !canSyncCloud) {
       writeLocalCharacters(current);
     }
 
     if (!saveLocal && !canSyncCloud) {
+      if (hasUserSessionForCloud()) {
+        setSaveStatus("Sessão Google parcial no navegador. Clique em Entrar novamente para reconectar ao Firestore.");
+        return;
+      }
       setSaveStatus("No Chrome, faça login com Google para salvar personagens na conta.");
       return;
     }

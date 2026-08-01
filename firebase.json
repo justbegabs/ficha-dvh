@@ -27,5 +27,8 @@
       "sistema-dvh.web.app",
       "sistema-dvh.firebaseapp.com"
     ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
   }
 }

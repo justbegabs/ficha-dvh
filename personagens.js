@@ -16,6 +16,29 @@ function hasUserSessionForCloud() {
   return Boolean(window.DVHAuth?.getCurrentUser?.()?.uid);
 }
 
+async function canUseCloudNow() {
+  if (!window.DVHAuth?.isConfigured?.()) {
+    return false;
+  }
+
+  if (window.DVHAuth?.hasCloudSession?.()) {
+    return true;
+  }
+
+  if (typeof window.DVHAuth?.ensureCloudSession === "function") {
+    try {
+      const recovered = await window.DVHAuth.ensureCloudSession();
+      if (recovered && window.DVHAuth?.hasCloudSession?.()) {
+        return true;
+      }
+    } catch {
+      return false;
+    }
+  }
+
+  return Boolean(window.DVHAuth?.hasCloudSession?.());
+}
+
 function openMenu() {
   if (!menuOverlay || !sideMenu || !menuButton) {
     return;
@@ -169,7 +192,7 @@ async function readStoredCharacters() {
     await window.DVHAuth.waitForAuthReady();
   }
 
-  if (window.DVHAuth?.isConfigured?.() && hasUserSessionForCloud()) {
+  if (window.DVHAuth?.isConfigured?.() && (await canUseCloudNow())) {
     try {
       const cloudCharacters = await window.DVHAuth.listCharacters();
       writeLocalCharacters(cloudCharacters);
@@ -230,13 +253,16 @@ async function renderStoredCharacters() {
     }
 
     const authEnabled = Boolean(window.DVHAuth?.isConfigured?.());
-    const loggedIn = hasUserSessionForCloud();
+    const hasUiSession = hasUserSessionForCloud();
+    const loggedIn = await canUseCloudNow();
 
     const characters = await readStoredCharacters();
     charactersGrid.innerHTML = "";
 
     if (!characters.length) {
-      if (authEnabled && !loggedIn) {
+      if (authEnabled && hasUiSession && !loggedIn) {
+        charactersStatus.textContent = "Sessão parcial detectada no navegador. Clique em Entrar com Google para reconectar a nuvem.";
+      } else if (authEnabled && !loggedIn) {
         charactersStatus.textContent = "Nenhum personagem salvo localmente. Faça login com Google para acessar a nuvem.";
       } else {
         charactersStatus.textContent = authEnabled
@@ -300,7 +326,7 @@ async function renderStoredCharacters() {
       deleteButton.textContent = "Remover";
       deleteButton.addEventListener("click", async () => {
         const authEnabled = Boolean(window.DVHAuth?.isConfigured?.());
-        const loggedIn = hasUserSessionForCloud();
+        const loggedIn = await canUseCloudNow();
 
         if (authEnabled && loggedIn && typeof window.DVHAuth?.deleteCharacter === "function") {
           try {

@@ -14,6 +14,7 @@
     persistenceMode: "unknown",
     lastCompatibilityIssue: "",
     partialSession: false,
+    operaPartialFallbackUsed: false,
     lastGoogleCredential: null,
     lastSuccessfulAuthAt: 0,
     subscribers: [],
@@ -64,6 +65,10 @@
     const isPartial = Boolean(options.partial);
     state.currentUser = user || null;
     state.partialSession = Boolean(user) && isPartial;
+    if (user && !isPartial) {
+      // A real Firebase user session is active again.
+      state.operaPartialFallbackUsed = false;
+    }
     if (user) {
       state.fallbackUser = {
         uid: user.uid,
@@ -266,11 +271,15 @@
       return false;
     }
 
+    if (state.operaPartialFallbackUsed) {
+      return false;
+    }
+
     if (!state.fallbackUser?.uid) {
       return false;
     }
 
-    // Keep only a short grace window to avoid a permanent partial-session loop.
+    // Keep only a short grace window and allow this fallback once per login cycle.
     return Date.now() - state.lastSuccessfulAuthAt <= 45 * 1000;
   }
 
@@ -521,6 +530,7 @@
         state.pendingSignOutTimer = window.setTimeout(async () => {
           if (canUseOperaFallbackSession()) {
             state.transientNullCount += 1;
+            state.operaPartialFallbackUsed = true;
             updateCurrentUser(state.fallbackUser, { partial: true });
             state.lastCompatibilityIssue = "Sessao instavel no Opera. Tentando reconectar automaticamente.";
 
@@ -650,6 +660,7 @@
 
       state.signingIn = true;
       state.explicitSignOutRequested = false;
+      state.operaPartialFallbackUsed = false;
 
       const provider = new window.firebase.auth.GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
@@ -684,6 +695,8 @@
       state.lastGoogleCredential = null;
       state.lastSuccessfulAuthAt = 0;
       state.fallbackUser = null;
+      state.partialSession = false;
+      state.operaPartialFallbackUsed = false;
       try {
         window.localStorage.removeItem(GOOGLE_ACCESS_TOKEN_STORAGE_KEY);
         window.localStorage.removeItem(LAST_AUTH_AT_STORAGE_KEY);

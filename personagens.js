@@ -332,7 +332,7 @@ async function renderStoredCharacters() {
 
     if (!characters.length) {
       if (authEnabled && hasUiSession && !loggedIn) {
-        charactersStatus.textContent = "Sessão parcial detectada no Opera. Clique em Entrar com Google para reconectar a nuvem.";
+        charactersStatus.textContent = "Sessão desconectada no Opera. Clique em Entrar com Google para reconectar a nuvem.";
       } else if (authEnabled && !loggedIn) {
         charactersStatus.textContent = "Nenhum personagem salvo localmente. Faça login com Google para acessar a nuvem.";
       } else {

@@ -2329,7 +2329,7 @@ async function saveCharacterAsJson() {
 
     if (!saveLocal && !canSyncCloud) {
       if (hasUserSessionForCloud()) {
-        setSaveStatus("Sessão Google parcial no Opera. Use Entrar com Google para reconectar a sessão da nuvem.");
+        setSaveStatus("Sessão desconectada no Opera. Use Entrar com Google para reconectar a sessão da nuvem.");
         return;
       }
       setSaveStatus("No Chrome, faça login com Google para salvar personagens na conta.");

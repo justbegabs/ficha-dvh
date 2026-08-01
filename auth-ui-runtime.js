@@ -138,14 +138,14 @@
     const update = (user) => {
       const loggedIn = Boolean(user);
       const hasCloudSession = window.DVHAuth?.hasCloudSession?.() ?? loggedIn;
-      const fullyLoggedIn = loggedIn && hasCloudSession;
+      const fullyLoggedIn = hasCloudSession;
       const diagnostics = window.DVHAuth.getDiagnostics?.();
       const operaDetected = Boolean(diagnostics?.operaDetected);
       const compatibilityNote = diagnostics?.operaDetected && diagnostics?.lastCompatibilityIssue
         ? ` (${diagnostics.lastCompatibilityIssue})`
         : "";
       if (loggedIn && !hasCloudSession) {
-        refs.email.textContent = `Sessão parcial detectada. Clique em Entrar para reconectar${compatibilityNote}`;
+        refs.email.textContent = `Sessão desconectada no Opera. Clique em Entrar para reconectar${compatibilityNote}`;
 
         if (operaDetected && shouldRunOperaAutoRecovery() && typeof window.DVHAuth?.reauthenticateCloudSession === "function") {
           markOperaAutoRecoveryAttempted();

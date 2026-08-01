@@ -167,26 +167,28 @@ async function renderStoredCharacters() {
       await window.DVHAuth.waitForAuthReady();
     }
 
-    const authEnabled = window.DVHAuth?.isConfigured?.();
-    const loggedIn = window.DVHAuth?.isLoggedIn?.();
-
-    if (authEnabled && !loggedIn) {
-      charactersGrid.innerHTML = "";
-      charactersStatus.textContent = "Faça login com Google para carregar suas fichas salvas.";
-      return;
-    }
+    const authEnabled = Boolean(window.DVHAuth?.isConfigured?.());
+    const loggedIn = Boolean(window.DVHAuth?.isLoggedIn?.());
 
     const characters = await readStoredCharacters();
     charactersGrid.innerHTML = "";
 
     if (!characters.length) {
-      charactersStatus.textContent = authEnabled
-        ? `Nenhum personagem salvo ainda. Limite por conta: ${MAX_CHARACTERS_PER_ACCOUNT}.`
-        : "Nenhum personagem salvo ainda.";
+      if (authEnabled && !loggedIn) {
+        charactersStatus.textContent = "Nenhum personagem salvo localmente. Faça login com Google para acessar a nuvem.";
+      } else {
+        charactersStatus.textContent = authEnabled
+          ? `Nenhum personagem salvo ainda. Limite por conta: ${MAX_CHARACTERS_PER_ACCOUNT}.`
+          : "Nenhum personagem salvo ainda.";
+      }
       return;
     }
 
-    charactersStatus.textContent = `${characters.length}/${MAX_CHARACTERS_PER_ACCOUNT} personagem(ns) salvo(s)`;
+    if (authEnabled && !loggedIn) {
+      charactersStatus.textContent = `${characters.length} personagem(ns) salvo(s) localmente. Faça login para sincronizar com a conta Google.`;
+    } else {
+      charactersStatus.textContent = `${characters.length}/${MAX_CHARACTERS_PER_ACCOUNT} personagem(ns) salvo(s)`;
+    }
 
     [...characters]
       .sort((a, b) => new Date(b.savedAt || 0).getTime() - new Date(a.savedAt || 0).getTime())

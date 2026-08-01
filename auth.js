@@ -251,6 +251,11 @@
       provider.setCustomParameters({ prompt: "select_account" });
 
       try {
+        if (getOperaBrowserDetected()) {
+          await state.auth.signInWithRedirect(provider);
+          return;
+        }
+
         try {
           const result = await state.auth.signInWithPopup(provider);
           if (result?.user) {

@@ -5,6 +5,7 @@
     signingIn: false,
     recoveringSession: false,
     pendingSignOutTimer: null,
+    pendingOperaRecoveryTimer: null,
     explicitSignOutRequested: false,
     transientNullCount: 0,
     fallbackUser: null,
@@ -149,6 +150,15 @@
     state.pendingSignOutTimer = null;
   }
 
+  function clearPendingOperaRecoveryTimer() {
+    if (!state.pendingOperaRecoveryTimer) {
+      return;
+    }
+
+    window.clearTimeout(state.pendingOperaRecoveryTimer);
+    state.pendingOperaRecoveryTimer = null;
+  }
+
   function getOperaBrowserDetected() {
     return /\bOPR\//i.test(window.navigator?.userAgent || "");
   }
@@ -279,6 +289,39 @@
     return Date.now() - state.lastSuccessfulAuthAt <= 2 * 60 * 1000;
   }
 
+  function scheduleOperaRecoveryAttempt(delayMs = 1500) {
+    if (!getOperaBrowserDetected() || state.pendingOperaRecoveryTimer) {
+      return;
+    }
+
+    state.pendingOperaRecoveryTimer = window.setTimeout(async () => {
+      state.pendingOperaRecoveryTimer = null;
+
+      if (state.auth?.currentUser || !state.partialSession) {
+        return;
+      }
+
+      let recovered = false;
+      if (shouldAttemptSessionRecovery()) {
+        recovered = await recoverRecentGoogleSession();
+      }
+
+      if (recovered && state.auth?.currentUser) {
+        updateCurrentUser(state.auth.currentUser);
+        state.lastCompatibilityIssue = "";
+        return;
+      }
+
+      if (canUseOperaFallbackSession()) {
+        scheduleOperaRecoveryAttempt(2500);
+        return;
+      }
+
+      updateCurrentUser(null);
+      state.lastCompatibilityIssue = "Nao foi possivel manter a sessao do Opera. Entre novamente.";
+    }, delayMs);
+  }
+
   function setupSessionRecoveryHooks() {
     const tryRecover = async () => {
       if (!getOperaBrowserDetected()) {
@@ -290,7 +333,16 @@
       }
 
       if (shouldAttemptSessionRecovery()) {
-        await recoverRecentGoogleSession();
+        const recovered = await recoverRecentGoogleSession();
+        if (recovered && state.auth?.currentUser) {
+          updateCurrentUser(state.auth.currentUser);
+          state.lastCompatibilityIssue = "";
+          return;
+        }
+      }
+
+      if (state.partialSession && canUseOperaFallbackSession()) {
+        scheduleOperaRecoveryAttempt(1000);
       }
     };
 
@@ -506,6 +558,7 @@
         clearPendingSignOutTimer();
 
         if (user) {
+          clearPendingOperaRecoveryTimer();
           state.explicitSignOutRequested = false;
           updateCurrentUser(user);
           state.lastCompatibilityIssue = "";
@@ -517,6 +570,7 @@
         }
 
         if (state.auth?.currentUser) {
+          clearPendingOperaRecoveryTimer();
           state.explicitSignOutRequested = false;
           updateCurrentUser(state.auth.currentUser);
           if (!state.authReady) {
@@ -544,8 +598,12 @@
               state.authReady = true;
               resolveWaiters();
             }
+
+            scheduleOperaRecoveryAttempt(1500);
             return;
           }
+
+          clearPendingOperaRecoveryTimer();
 
           if (state.auth?.currentUser) {
             state.explicitSignOutRequested = false;
@@ -683,6 +741,7 @@
       }
 
       state.explicitSignOutRequested = true;
+      clearPendingOperaRecoveryTimer();
       await state.auth.signOut();
       state.lastGoogleCredential = null;
       state.lastSuccessfulAuthAt = 0;

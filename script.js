@@ -1862,7 +1862,11 @@ async function canUseCloudNow() {
 
   if (typeof window.DVHAuth?.ensureCloudSession === "function") {
     try {
-      const recovered = await window.DVHAuth.ensureCloudSession();
+      const recovered = await withTimeout(
+        window.DVHAuth.ensureCloudSession(),
+        6000,
+        "Reconexão da sessão demorou demais"
+      );
       if (recovered && window.DVHAuth?.hasCloudSession?.()) {
         return true;
       }
@@ -1872,6 +1876,30 @@ async function canUseCloudNow() {
   }
 
   return Boolean(window.DVHAuth?.hasCloudSession?.());
+}
+
+async function ensureCloudSessionOnUserAction() {
+  if (await canUseCloudNow()) {
+    return true;
+  }
+
+  if (!hasUserSessionForCloud() || typeof window.DVHAuth?.signInWithGoogle !== "function") {
+    return false;
+  }
+
+  setSaveStatus("Reconectando sessão Google no navegador...");
+
+  try {
+    await withTimeout(
+      window.DVHAuth.signInWithGoogle(),
+      30000,
+      "Tempo de reconexão excedido"
+    );
+  } catch {
+    return false;
+  }
+
+  return canUseCloudNow();
 }
 
 function writeLocalCharacters(characters) {
@@ -2256,7 +2284,11 @@ async function saveCharacterAsJson() {
 
     const saveLocal = shouldSaveCharactersLocally();
     const authConfigured = Boolean(window.DVHAuth?.isConfigured?.());
-    const canSyncCloud = await canUseCloudNow();
+    let canSyncCloud = await canUseCloudNow();
+
+    if (!canSyncCloud && hasUserSessionForCloud()) {
+      canSyncCloud = await ensureCloudSessionOnUserAction();
+    }
 
     if (saveLocal && !canSyncCloud) {
       writeLocalCharacters(current);
@@ -2276,9 +2308,17 @@ async function saveCharacterAsJson() {
     if (canSyncCloud) {
       try {
         if (typeof window.DVHAuth?.saveCharacter === "function") {
-          await window.DVHAuth.saveCharacter(entry);
+          await withTimeout(
+            window.DVHAuth.saveCharacter(entry),
+            45000,
+            "Salvamento na conta demorou demais"
+          );
         } else {
-          await window.DVHAuth.replaceAllCharacters(current);
+          await withTimeout(
+            window.DVHAuth.replaceAllCharacters(current),
+            45000,
+            "Salvamento na conta demorou demais"
+          );
         }
         syncedToCloud = true;
       } catch (error) {

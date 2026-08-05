@@ -7,6 +7,84 @@
   ];
 
   const COLLECTION_ROOT = "cmsContent";
+  const EDITABLE_SECTIONS = ["informacoes", "races", "origens", "classes"];
+  const BASE_IDS_BY_SECTION = {
+    informacoes: [
+      "introducao-do-mundo",
+      "introducao-de-npcs",
+      "documentos-nao-oficiais",
+      "mecanicas"
+    ],
+    races: [
+      "alien",
+      "anao",
+      "anjo",
+      "anjocaido",
+      "banshee",
+      "bruxa",
+      "ciborgue",
+      "demonio",
+      "elfo",
+      "esqueleto",
+      "fae",
+      "humano",
+      "kanima",
+      "kitsune",
+      "lobisomem",
+      "metamorfo",
+      "neko",
+      "ninfa",
+      "nogitsune",
+      "satiro",
+      "semideus",
+      "sereia",
+      "subuco",
+      "vampiro",
+      "veliria"
+    ],
+    origens: [
+      "amnesico",
+      "artista",
+      "conspiracionista",
+      "criancaperdida",
+      "eremita",
+      "escolhido",
+      "exilado",
+      "experimento",
+      "forasteiro",
+      "ginasta",
+      "guerreiro",
+      "herdeiro",
+      "inventor",
+      "jornalista",
+      "militar",
+      "motorista",
+      "nomade",
+      "profeta",
+      "programador",
+      "psicologo",
+      "religioso",
+      "servente",
+      "universitario",
+      "vingativo"
+    ],
+    classes: [
+      "mago",
+      "atirador",
+      "armadilheiro",
+      "combatente",
+      "investigador",
+      "curandeiro",
+      "suporte",
+      "tecnologico",
+      "clerigo",
+      "demonologista",
+      "domador",
+      "espiao",
+      "carteado",
+      "arsenalhumano"
+    ]
+  };
 
   const loginButton = document.getElementById("loginButton");
   const logoutButton = document.getElementById("logoutButton");
@@ -57,6 +135,44 @@
   let auth = null;
   let currentUser = null;
   let isAuthorizedAdmin = false;
+
+  function isEditableSection(section) {
+    return EDITABLE_SECTIONS.includes(String(section || ""));
+  }
+
+  function getBaseFolderForSection(section) {
+    if (section === "informacoes") {
+      return "infos";
+    }
+    return section;
+  }
+
+  async function loadBaseMainItems(section) {
+    const ids = BASE_IDS_BY_SECTION[section] || [];
+    const folder = getBaseFolderForSection(section);
+
+    const items = await Promise.all(
+      ids.map(async (id) => {
+        try {
+          const response = await fetch(`${folder}/${id}.json`, { cache: "no-store" });
+          if (!response.ok) {
+            return null;
+          }
+
+          const payload = await response.json();
+          return {
+            id,
+            payload: payload && typeof payload === "object" ? payload : {},
+            source: "base"
+          };
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    return items.filter(Boolean);
+  }
 
   function setStatus(element, message, kind) {
     if (!element) {
@@ -392,6 +508,11 @@
     }
 
     const { section, id, payload } = readMainForm();
+    if (!isEditableSection(section)) {
+      setStatus(formStatus, "Esta seção não pode ser editada neste painel.", "error");
+      return;
+    }
+
     if (!id) {
       setStatus(formStatus, "Informe um ID válido (slug).", "error");
       return;
@@ -485,32 +606,33 @@
     }
   }
 
-  function renderMainItems(section, docs) {
+  function renderMainItems(section, entries) {
     if (!itemsList) {
       return;
     }
 
     itemsList.innerHTML = "";
-    const activeDocs = docs.filter((doc) => doc.data()?.active === true);
-    if (!activeDocs.length) {
+    if (!entries.length) {
       setStatus(itemsStatus, "Nenhum item principal cadastrado nesta seção.", "");
       return;
     }
 
-    setStatus(itemsStatus, `${activeDocs.length} item(ns) principal(is).`, "ok");
+    setStatus(itemsStatus, `${entries.length} item(ns) principal(is).`, "ok");
 
-    activeDocs.forEach((doc) => {
-      const data = doc.data() || {};
+    entries.forEach((entry) => {
+      const id = entry.id;
+      const data = entry.payload || {};
+      const source = entry.source || "cms";
 
       const item = document.createElement("article");
       item.className = "item";
 
       const title = document.createElement("strong");
-      title.textContent = data.displayName || doc.id;
+      title.textContent = data.displayName || id;
 
       const meta = document.createElement("div");
       meta.className = "item-meta";
-      meta.textContent = `ID: ${doc.id} | Categoria: ${data.category || "-"}`;
+      meta.textContent = `ID: ${id} | Categoria: ${data.category || "-"} | Fonte: ${source === "base" ? "JSON" : "Admin"}`;
 
       const summary = document.createElement("div");
       summary.className = "item-meta";
@@ -528,7 +650,7 @@
       editButton.className = "secondary";
       editButton.textContent = "Editar";
       editButton.addEventListener("click", () => {
-        fillMainForm(section, doc.id, data);
+        fillMainForm(section, id, data);
         setStatus(formStatus, "Item principal carregado.", "ok");
       });
 
@@ -537,11 +659,14 @@
       removeButton.className = "danger";
       removeButton.textContent = "Remover";
       removeButton.addEventListener("click", async () => {
-        fillMainForm(section, doc.id, data);
+        fillMainForm(section, id, data);
         await removeEntry();
       });
 
-      actions.append(editButton, removeButton);
+      actions.append(editButton);
+      if (source === "cms") {
+        actions.append(removeButton);
+      }
       item.append(title, meta, summary, cover, actions);
       itemsList.appendChild(item);
     });
@@ -639,16 +764,43 @@
     }
 
     const section = filterSection?.value || "informacoes";
+    if (!isEditableSection(section)) {
+      setStatus(itemsStatus, "Esta seção não pode ser editada neste painel.", "error");
+      return;
+    }
+
     setStatus(itemsStatus, "Carregando itens principais...", "");
 
     try {
-      const snapshot = await db
+      const [snapshot, baseItems] = await Promise.all([
+        db
         .collection(COLLECTION_ROOT)
         .doc(section)
         .collection("items")
-        .get();
+        .get(),
+        loadBaseMainItems(section)
+      ]);
 
-      renderMainItems(section, snapshot.docs);
+      const mergedById = new Map();
+
+      baseItems.forEach((entry) => {
+        mergedById.set(entry.id, entry);
+      });
+
+      snapshot.docs.forEach((doc) => {
+        const data = doc.data() || {};
+        if (data.active === false) {
+          return;
+        }
+
+        mergedById.set(doc.id, {
+          id: doc.id,
+          payload: data,
+          source: "cms"
+        });
+      });
+
+      renderMainItems(section, [...mergedById.values()]);
     } catch (error) {
       const details = error?.code || error?.message || "erro desconhecido";
       setStatus(itemsStatus, `Falha ao carregar itens (${details}).`, "error");

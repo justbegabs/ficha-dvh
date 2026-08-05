@@ -267,6 +267,7 @@
     }
 
     activeRichEditor.focus();
+    document.execCommand("styleWithCSS", false, true);
     document.execCommand(command, false, value);
     const targetField = activeRichEditor.dataset.fieldId || "";
     syncTextareaFromRichEditor(targetField);

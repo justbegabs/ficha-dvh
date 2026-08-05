@@ -168,7 +168,53 @@
     }
 
     elements.forEach((node) => {
-      const tag = node.tagName?.toLowerCase() || "";
+      let tag = node.tagName?.toLowerCase() || "";
+
+      // Converte marcação legada (<font>) para span com estilo permitido.
+      if (tag === "font") {
+        const styleEntries = [];
+        const colorAttr = node.getAttribute("color");
+        const faceAttr = node.getAttribute("face");
+        const sizeAttr = node.getAttribute("size");
+
+        if (colorAttr) {
+          styleEntries.push(`color: ${colorAttr}`);
+        }
+        if (faceAttr) {
+          styleEntries.push(`font-family: ${faceAttr}`);
+        }
+        if (sizeAttr) {
+          const sizeMap = {
+            "1": "0.75rem",
+            "2": "0.875rem",
+            "3": "1rem",
+            "4": "1.125rem",
+            "5": "1.25rem",
+            "6": "1.5rem",
+            "7": "1.875rem"
+          };
+          const mappedSize = sizeMap[String(sizeAttr).trim()];
+          if (mappedSize) {
+            styleEntries.push(`font-size: ${mappedSize}`);
+          }
+        }
+
+        const span = document.createElement("span");
+        const existingStyle = node.getAttribute("style") || "";
+        span.setAttribute("style", [existingStyle, ...styleEntries].filter(Boolean).join("; "));
+
+        while (node.firstChild) {
+          span.appendChild(node.firstChild);
+        }
+
+        const parent = node.parentNode;
+        if (parent) {
+          parent.replaceChild(span, node);
+          node = span;
+          tag = "span";
+        }
+      }
+
       if (!ALLOWED_RICH_TAGS.has(tag)) {
         const parent = node.parentNode;
         if (!parent) {

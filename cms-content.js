@@ -3,6 +3,36 @@
   let initialized = false;
   let initFailed = false;
 
+  const ALLOWED_RICH_TAGS = new Set([
+    "p",
+    "div",
+    "span",
+    "strong",
+    "em",
+    "u",
+    "s",
+    "br",
+    "ul",
+    "ol",
+    "li",
+    "blockquote",
+    "h3",
+    "h4",
+    "a"
+  ]);
+
+  const ALLOWED_STYLE_PROPS = new Set([
+    "color",
+    "background-color",
+    "font-family",
+    "font-size",
+    "font-style",
+    "font-weight",
+    "text-decoration",
+    "text-align",
+    "line-height"
+  ]);
+
   function hasSdk() {
     return Boolean(window.firebase?.initializeApp && window.firebase?.firestore);
   }
@@ -44,6 +74,165 @@
     } catch {
       return null;
     }
+  }
+
+  function escapeHtml(value) {
+    return String(value || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  function isSafeStyleValue(property, value) {
+    const safeValue = String(value || "").trim();
+    if (!safeValue) {
+      return false;
+    }
+
+    if (property === "color" || property === "background-color") {
+      return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(safeValue)
+        || /^(rgb|rgba|hsl|hsla)\(([^)]+)\)$/i.test(safeValue)
+        || /^[a-z]+$/i.test(safeValue);
+    }
+
+    if (property === "font-family") {
+      return /^[a-z0-9\-\s,'\"]+$/i.test(safeValue);
+    }
+
+    if (property === "font-size") {
+      return /^\d+(\.\d+)?(px|em|rem|%)$/i.test(safeValue);
+    }
+
+    if (property === "font-style") {
+      return /^(normal|italic|oblique)$/i.test(safeValue);
+    }
+
+    if (property === "font-weight") {
+      return /^(normal|bold|bolder|lighter|[1-9]00)$/i.test(safeValue);
+    }
+
+    if (property === "text-decoration") {
+      return /^(none|underline|line-through|overline)$/i.test(safeValue);
+    }
+
+    if (property === "text-align") {
+      return /^(left|right|center|justify)$/i.test(safeValue);
+    }
+
+    if (property === "line-height") {
+      return /^(normal|\d+(\.\d+)?(px|em|rem|%)?)$/i.test(safeValue);
+    }
+
+    return false;
+  }
+
+  function sanitizeInlineStyles(styleValue) {
+    return String(styleValue || "")
+      .split(";")
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+      .map((entry) => {
+        const separator = entry.indexOf(":");
+        if (separator <= 0) {
+          return null;
+        }
+
+        const property = entry.slice(0, separator).trim().toLowerCase();
+        const value = entry.slice(separator + 1).trim();
+        if (!ALLOWED_STYLE_PROPS.has(property) || !isSafeStyleValue(property, value)) {
+          return null;
+        }
+
+        return `${property}: ${value}`;
+      })
+      .filter(Boolean)
+      .join("; ");
+  }
+
+  function sanitizeRichText(value) {
+    const source = String(value || "");
+    if (!source.trim()) {
+      return "";
+    }
+
+    const template = document.createElement("template");
+    template.innerHTML = source;
+
+    const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT);
+    const elements = [];
+
+    while (walker.nextNode()) {
+      elements.push(walker.currentNode);
+    }
+
+    elements.forEach((node) => {
+      const tag = node.tagName?.toLowerCase() || "";
+      if (!ALLOWED_RICH_TAGS.has(tag)) {
+        const parent = node.parentNode;
+        if (!parent) {
+          return;
+        }
+
+        while (node.firstChild) {
+          parent.insertBefore(node.firstChild, node);
+        }
+        parent.removeChild(node);
+        return;
+      }
+
+      const attrs = [...node.attributes];
+      attrs.forEach((attr) => {
+        const attrName = attr.name.toLowerCase();
+        if (attrName === "style") {
+          const safeStyle = sanitizeInlineStyles(attr.value);
+          if (safeStyle) {
+            node.setAttribute("style", safeStyle);
+          } else {
+            node.removeAttribute("style");
+          }
+          return;
+        }
+
+        if (tag === "a" && (attrName === "href" || attrName === "target" || attrName === "rel")) {
+          if (attrName === "href") {
+            const hrefValue = String(attr.value || "").trim();
+            const safeHref = /^(https?:|mailto:|tel:|\/|#)/i.test(hrefValue);
+            if (!safeHref) {
+              node.removeAttribute("href");
+            }
+          }
+          return;
+        }
+
+        node.removeAttribute(attr.name);
+      });
+    });
+
+    return template.innerHTML.trim();
+  }
+
+  function toRichHtml(value) {
+    const raw = String(value || "").trim();
+    if (!raw) {
+      return "";
+    }
+
+    const hasHtmlTag = /<\/?[a-z][\s\S]*>/i.test(raw);
+    const normalized = hasHtmlTag ? raw : escapeHtml(raw).replace(/\n/g, "<br>");
+    return sanitizeRichText(normalized);
+  }
+
+  function stripRichText(value) {
+    const safeHtml = toRichHtml(value);
+    if (!safeHtml) {
+      return "";
+    }
+
+    const template = document.createElement("template");
+    template.innerHTML = safeHtml;
+    return String(template.content.textContent || "").trim();
   }
 
   function normalizeEntry(id, data) {
@@ -192,6 +381,9 @@
     getEntries,
     getEntry,
     getSubEntries,
-    getSubEntry
+    getSubEntry,
+    sanitizeRichText,
+    toRichHtml,
+    stripRichText
   };
 })();

@@ -9,6 +9,22 @@
     return;
   }
 
+  function toRichHtml(value) {
+    if (window.DVHCmsContent?.toRichHtml) {
+      return window.DVHCmsContent.toRichHtml(value);
+    }
+
+    return String(value || "").replace(/\n/g, "<br>");
+  }
+
+  function stripRichText(value) {
+    if (window.DVHCmsContent?.stripRichText) {
+      return window.DVHCmsContent.stripRichText(value);
+    }
+
+    return String(value || "").trim();
+  }
+
   function setText(id, value) {
     const element = document.getElementById(id);
     if (!element || typeof value !== "string" || !value.trim()) {
@@ -16,6 +32,15 @@
     }
 
     element.textContent = value.trim();
+  }
+
+  function setRichText(id, value) {
+    const element = document.getElementById(id);
+    if (!element || typeof value !== "string" || !value.trim()) {
+      return;
+    }
+
+    element.innerHTML = toRichHtml(value);
   }
 
   function setCoverImage(url) {
@@ -60,11 +85,13 @@
         ? `<div class="sub-card__cover"><img src="${item.coverImageUrl}" alt="Capa de ${item.displayName || item.id}" loading="lazy" /></div>`
         : "";
 
+      const safeSummary = stripRichText(item.summary || "Sem resumo.");
+
       card.innerHTML = `
         ${cover}
         <div class="sub-card__body">
           <strong>${item.displayName || item.id}</strong>
-          <span>${item.summary || "Sem resumo."}</span>
+          <span>${safeSummary || "Sem resumo."}</span>
         </div>
       `;
 
@@ -80,11 +107,11 @@
     const entry = await window.DVHCmsContent.getEntry("informacoes", infoId);
     if (entry) {
       setText("infoPageTitle", entry.displayName);
-      setText("infoPageSubtitle", entry.summary);
+      setRichText("infoPageSubtitle", entry.summary);
       setText("infoSectionTitleOne", entry.sectionTitleOne);
-      setText("infoSectionTextOne", entry.description);
+      setRichText("infoSectionTextOne", entry.description);
       setText("infoSectionTitleTwo", entry.sectionTitleTwo);
-      setText("infoSectionTextTwo", entry.extraText);
+      setRichText("infoSectionTextTwo", entry.extraText);
       setCoverImage(entry.coverImageUrl);
     }
 

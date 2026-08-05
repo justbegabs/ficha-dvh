@@ -29,6 +29,29 @@ const detailHero = document.getElementById("detailHero");
 const selectButton = document.getElementById("selectButton");
 const relatedLink = document.getElementById("relatedLink");
 
+function toRichHtml(value) {
+  if (window.DVHCmsContent?.toRichHtml) {
+    return window.DVHCmsContent.toRichHtml(value);
+  }
+
+  const safe = String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+  return safe.replace(/\n/g, "<br>");
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 if (detailType === "info" && selectButton) {
   selectButton.remove();
 }
@@ -103,8 +126,8 @@ function renderDetail(data) {
     `<span>Arquivo: ${detailId}.json</span>`,
     `<span>Tipo: ${typeLabel}</span>`
   ].join("");
-  detailSummary.textContent = summary;
-  detailInfo.innerHTML = infoLines.map((line) => `<div>${line}</div>`).join("");
+  detailSummary.innerHTML = toRichHtml(summary);
+  detailInfo.innerHTML = infoLines.map((line) => `<div>${escapeHtml(line)}</div>`).join("");
 
   if (selectButton) {
     if (detailType === "info") {

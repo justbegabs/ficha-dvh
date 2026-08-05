@@ -114,6 +114,60 @@
       color: #ffe6b0;
       line-height: 1;
     }
+
+    .rich-editor {
+      border: 1px solid rgba(0, 213, 255, 0.35);
+      border-radius: 10px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .rich-editor__toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      padding: 0.45rem;
+      border-bottom: 1px solid rgba(0, 213, 255, 0.28);
+      background: rgba(0, 0, 0, 0.16);
+    }
+
+    .rich-editor__toolbar button {
+      min-height: 30px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.78rem;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #386ea0, #244968);
+    }
+
+    .rich-editor__toolbar select,
+    .rich-editor__toolbar input[type="color"] {
+      width: auto;
+      min-height: 30px;
+      padding: 0.2rem 0.4rem;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 213, 255, 0.35);
+      background: rgba(255, 255, 255, 0.14);
+      color: #eef5ff;
+      font-size: 0.78rem;
+    }
+
+    .rich-editor__content {
+      min-height: 140px;
+      padding: 0.65rem;
+      color: #eef5ff;
+      outline: none;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .rich-editor__content:empty::before {
+      content: attr(data-placeholder);
+      color: rgba(234, 242, 255, 0.55);
+    }
+
+    textarea.rich-source {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -162,10 +216,10 @@
         <input id="entryCategory" type="text" placeholder="Lore, Sistema, etc." autocomplete="off" />
 
         <label for="entrySummary">Resumo</label>
-        <textarea id="entrySummary" placeholder="Resumo curto para card/lista"></textarea>
+        <textarea id="entrySummary" data-richtext="true" class="rich-source" placeholder="Resumo curto para card/lista"></textarea>
 
         <label for="entryDescription">Descrição</label>
-        <textarea id="entryDescription" placeholder="Texto maior para a página de detalhe"></textarea>
+        <textarea id="entryDescription" data-richtext="true" class="rich-source" placeholder="Texto maior para a página de detalhe"></textarea>
 
         <label for="entryCoverImageUrl">Foto de capa (URL)</label>
         <input id="entryCoverImageUrl" type="url" placeholder="https://..." autocomplete="off" />
@@ -174,7 +228,7 @@
         <input id="entrySectionTitleOne" type="text" placeholder="Ex: Panorama" autocomplete="off" />
 
         <label for="entryExtraText">Texto complementar / bloco 2</label>
-        <textarea id="entryExtraText" placeholder="Texto do segundo bloco para páginas fixas de informações"></textarea>
+        <textarea id="entryExtraText" data-richtext="true" class="rich-source" placeholder="Texto do segundo bloco para páginas fixas de informações"></textarea>
 
         <label for="entrySectionTitleTwo">Título do bloco 2 (informações fixas)</label>
         <input id="entrySectionTitleTwo" type="text" placeholder="Ex: Conflitos Atuais" autocomplete="off" />
@@ -201,10 +255,10 @@
           <input id="subDisplayName" type="text" placeholder="Nome do NPC ou tópico" autocomplete="off" />
 
           <label for="subSummary">Resumo curto</label>
-          <textarea id="subSummary" placeholder="Resumo para card da sub-info"></textarea>
+          <textarea id="subSummary" data-richtext="true" class="rich-source" placeholder="Resumo para card da sub-info"></textarea>
 
           <label for="subDescription">Descrição principal</label>
-          <textarea id="subDescription" placeholder="Texto principal da página da sub-info"></textarea>
+          <textarea id="subDescription" data-richtext="true" class="rich-source" placeholder="Texto principal da página da sub-info"></textarea>
 
           <label for="subCoverImageUrl">Foto de capa da sub-info (URL)</label>
           <input id="subCoverImageUrl" type="url" placeholder="https://..." autocomplete="off" />
@@ -216,7 +270,7 @@
           <input id="subAge" type="text" placeholder="Ex: 34" autocomplete="off" />
 
           <label for="subAppearance">Aparência (perfil)</label>
-          <textarea id="subAppearance" placeholder="Descrição de aparência"></textarea>
+          <textarea id="subAppearance" data-richtext="true" class="rich-source" placeholder="Descrição de aparência"></textarea>
 
           <label for="subRole">Papel/Função (perfil)</label>
           <input id="subRole" type="text" placeholder="Ex: Capitão da Guarda" autocomplete="off" />

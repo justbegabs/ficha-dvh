@@ -23,6 +23,22 @@
     "mecanicas": "info-mecanicas.html"
   };
 
+  function toRichHtml(value) {
+    if (window.DVHCmsContent?.toRichHtml) {
+      return window.DVHCmsContent.toRichHtml(value);
+    }
+
+    return String(value || "").replace(/\n/g, "<br>");
+  }
+
+  function stripRichText(value) {
+    if (window.DVHCmsContent?.stripRichText) {
+      return window.DVHCmsContent.stripRichText(value);
+    }
+
+    return String(value || "").trim();
+  }
+
   function setFallback(message) {
     if (subSummary) {
       subSummary.textContent = message;
@@ -35,6 +51,20 @@
     }
 
     element.textContent = value && String(value).trim() ? String(value).trim() : "-";
+  }
+
+  function setRichText(element, value, fallback) {
+    if (!element) {
+      return;
+    }
+
+    const content = String(value || "").trim();
+    if (!content) {
+      element.textContent = fallback || "-";
+      return;
+    }
+
+    element.innerHTML = toRichHtml(content);
   }
 
   function renderDetails(details) {
@@ -56,7 +86,7 @@
     entries.forEach(([key, value]) => {
       const line = document.createElement("div");
       line.className = "detail-line";
-      line.innerHTML = `<strong>${key}</strong><br>${value}`;
+      line.innerHTML = `<strong>${stripRichText(key)}</strong><br>${toRichHtml(value)}`;
       detailsList.appendChild(line);
     });
   }
@@ -80,7 +110,9 @@
     items.forEach((section) => {
       const field = document.createElement("div");
       field.className = "field";
-      field.innerHTML = `<strong>${section?.title || "Seção"}</strong><span>${section?.text || ""}</span>`;
+      const safeTitle = stripRichText(section?.title || "Seção");
+      const safeText = toRichHtml(section?.text || "");
+      field.innerHTML = `<strong>${safeTitle}</strong><span>${safeText}</span>`;
       extraSections.appendChild(field);
     });
   }
@@ -109,12 +141,8 @@
     if (subTitle) {
       subTitle.textContent = entry.displayName || subId;
     }
-    if (subSummary) {
-      subSummary.textContent = entry.summary || "Sem resumo.";
-    }
-    if (subDescription) {
-      subDescription.textContent = entry.description || "Sem descrição.";
-    }
+    setRichText(subSummary, entry.summary, "Sem resumo.");
+    setRichText(subDescription, entry.description, "Sem descrição.");
 
     if (subCover && subCoverImage && entry.coverImageUrl) {
       subCoverImage.src = entry.coverImageUrl;
@@ -123,7 +151,7 @@
 
     setText(profileName, entry.profile?.name);
     setText(profileAge, entry.profile?.age);
-    setText(profileAppearance, entry.profile?.appearance);
+    setRichText(profileAppearance, entry.profile?.appearance, "-");
     setText(profileRole, entry.profile?.role);
 
     renderDetails(entry.details);

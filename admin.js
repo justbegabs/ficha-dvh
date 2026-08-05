@@ -135,6 +135,16 @@
   let auth = null;
   let currentUser = null;
   let isAuthorizedAdmin = false;
+  const richEditorByField = new Map();
+  const RICH_TEXT_FIELD_IDS = [
+    "entrySummary",
+    "entryDescription",
+    "entryExtraText",
+    "subSummary",
+    "subDescription",
+    "subAppearance"
+  ];
+  let activeRichEditor = null;
 
   function isEditableSection(section) {
     return EDITABLE_SECTIONS.includes(String(section || ""));
@@ -187,6 +197,217 @@
     if (kind === "error") {
       element.classList.add("error");
     }
+  }
+
+  function escapeHtml(value) {
+    return String(value || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  function normalizeRichHtml(value) {
+    const raw = String(value || "").trim();
+    if (!raw) {
+      return "";
+    }
+
+    const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(raw);
+    if (looksLikeHtml) {
+      return raw;
+    }
+
+    return escapeHtml(raw).replace(/\n/g, "<br>");
+  }
+
+  function sanitizeRichHtml(value) {
+    if (window.DVHCmsContent?.sanitizeRichText) {
+      return window.DVHCmsContent.sanitizeRichText(value);
+    }
+    return String(value || "").trim();
+  }
+
+  function syncRichEditorFromTextarea(textareaId) {
+    const source = document.getElementById(textareaId);
+    const editor = richEditorByField.get(textareaId);
+    if (!source || !editor) {
+      return;
+    }
+
+    editor.innerHTML = sanitizeRichHtml(normalizeRichHtml(source.value || ""));
+  }
+
+  function syncAllRichEditorsFromTextarea() {
+    RICH_TEXT_FIELD_IDS.forEach((textareaId) => {
+      syncRichEditorFromTextarea(textareaId);
+    });
+  }
+
+  function syncTextareaFromRichEditor(textareaId) {
+    const source = document.getElementById(textareaId);
+    const editor = richEditorByField.get(textareaId);
+    if (!source || !editor) {
+      return;
+    }
+
+    source.value = sanitizeRichHtml(editor.innerHTML || "").trim();
+  }
+
+  function syncAllTextareasFromRichEditor() {
+    RICH_TEXT_FIELD_IDS.forEach((textareaId) => {
+      syncTextareaFromRichEditor(textareaId);
+    });
+  }
+
+  function applyRichEditorCommand(command, value) {
+    if (!activeRichEditor) {
+      return;
+    }
+
+    activeRichEditor.focus();
+    document.execCommand(command, false, value);
+    const targetField = activeRichEditor.dataset.fieldId || "";
+    syncTextareaFromRichEditor(targetField);
+  }
+
+  function buildRichToolbar(textareaId) {
+    const toolbar = document.createElement("div");
+    toolbar.className = "rich-editor__toolbar";
+
+    const commandButtons = [
+      { label: "B", command: "bold", title: "Negrito" },
+      { label: "I", command: "italic", title: "Itálico" },
+      { label: "U", command: "underline", title: "Sublinhado" },
+      { label: "Lista", command: "insertUnorderedList", title: "Lista" },
+      { label: "Esq", command: "justifyLeft", title: "Alinhar à esquerda" },
+      { label: "Centro", command: "justifyCenter", title: "Centralizar" },
+      { label: "Dir", command: "justifyRight", title: "Alinhar à direita" }
+    ];
+
+    commandButtons.forEach((buttonConfig) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = buttonConfig.label;
+      button.title = buttonConfig.title;
+      button.addEventListener("click", () => {
+        applyRichEditorCommand(buttonConfig.command);
+      });
+      toolbar.appendChild(button);
+    });
+
+    const fontSelect = document.createElement("select");
+    fontSelect.innerHTML = [
+      '<option value="">Fonte</option>',
+      '<option value="Raleway">Raleway</option>',
+      '<option value="Teko">Teko</option>',
+      '<option value="Georgia">Georgia</option>',
+      '<option value="Times New Roman">Times</option>',
+      '<option value="Courier New">Courier</option>'
+    ].join("");
+    fontSelect.addEventListener("change", () => {
+      if (fontSelect.value) {
+        applyRichEditorCommand("fontName", fontSelect.value);
+      }
+      fontSelect.value = "";
+    });
+    toolbar.appendChild(fontSelect);
+
+    const sizeSelect = document.createElement("select");
+    sizeSelect.innerHTML = [
+      '<option value="">Tamanho</option>',
+      '<option value="2">Pequeno</option>',
+      '<option value="3">Normal</option>',
+      '<option value="4">Médio</option>',
+      '<option value="5">Grande</option>',
+      '<option value="6">Título</option>'
+    ].join("");
+    sizeSelect.addEventListener("change", () => {
+      if (sizeSelect.value) {
+        applyRichEditorCommand("fontSize", sizeSelect.value);
+      }
+      sizeSelect.value = "";
+    });
+    toolbar.appendChild(sizeSelect);
+
+    const colorInput = document.createElement("input");
+    colorInput.type = "color";
+    colorInput.title = "Cor do texto";
+    colorInput.value = "#eef5ff";
+    colorInput.addEventListener("input", () => {
+      applyRichEditorCommand("foreColor", colorInput.value);
+    });
+    toolbar.appendChild(colorInput);
+
+    const clearStyleButton = document.createElement("button");
+    clearStyleButton.type = "button";
+    clearStyleButton.textContent = "Limpar";
+    clearStyleButton.title = "Limpar formatação";
+    clearStyleButton.addEventListener("click", () => {
+      applyRichEditorCommand("removeFormat");
+    });
+    toolbar.appendChild(clearStyleButton);
+
+    const htmlButton = document.createElement("button");
+    htmlButton.type = "button";
+    htmlButton.textContent = "HTML";
+    htmlButton.title = "Editar HTML manualmente";
+    htmlButton.addEventListener("click", () => {
+      const source = document.getElementById(textareaId);
+      if (!source) {
+        return;
+      }
+
+      const nextValue = window.prompt("Edite o HTML deste campo:", source.value || "");
+      if (nextValue == null) {
+        return;
+      }
+
+      source.value = sanitizeRichHtml(nextValue);
+      syncRichEditorFromTextarea(textareaId);
+    });
+    toolbar.appendChild(htmlButton);
+
+    return toolbar;
+  }
+
+  function setupRichTextEditors() {
+    RICH_TEXT_FIELD_IDS.forEach((textareaId) => {
+      const textarea = document.getElementById(textareaId);
+      if (!textarea || richEditorByField.has(textareaId)) {
+        return;
+      }
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "rich-editor";
+
+      const toolbar = buildRichToolbar(textareaId);
+      const editor = document.createElement("div");
+      editor.className = "rich-editor__content";
+      editor.contentEditable = "true";
+      editor.dataset.fieldId = textareaId;
+      editor.setAttribute("role", "textbox");
+      editor.setAttribute("aria-multiline", "true");
+      editor.dataset.placeholder = textarea.getAttribute("placeholder") || "Digite aqui";
+
+      editor.addEventListener("focus", () => {
+        activeRichEditor = editor;
+      });
+
+      editor.addEventListener("input", () => {
+        syncTextareaFromRichEditor(textareaId);
+      });
+
+      editor.addEventListener("blur", () => {
+        syncTextareaFromRichEditor(textareaId);
+      });
+
+      wrapper.append(toolbar, editor);
+      textarea.insertAdjacentElement("afterend", wrapper);
+      richEditorByField.set(textareaId, editor);
+      syncRichEditorFromTextarea(textareaId);
+    });
   }
 
   function slugify(value) {
@@ -338,6 +559,8 @@
   }
 
   function readMainForm() {
+    syncAllTextareasFromRichEditor();
+
     const section = entrySection?.value || "informacoes";
     const id = slugify(entryId?.value || "");
     const displayName = String(entryDisplayName?.value || "").trim();
@@ -372,6 +595,8 @@
   }
 
   function readSubForm() {
+    syncAllTextareasFromRichEditor();
+
     const parentId = slugify(subParentInfoId?.value || "");
     const id = slugify(subId?.value || "");
     const displayName = String(subDisplayName?.value || "").trim();
@@ -421,6 +646,7 @@
     if (entryExtraText) entryExtraText.value = payload.extraText || "";
     if (entrySectionTitleTwo) entrySectionTitleTwo.value = payload.sectionTitleTwo || "";
     if (entryAgeFactor) entryAgeFactor.value = payload.ageFactor ?? "";
+    syncAllRichEditorsFromTextarea();
     updateModeUi();
   }
 
@@ -439,6 +665,7 @@
     if (subRole) subRole.value = payload.profile?.role || "";
     if (subDetails) subDetails.value = serializeDetails(payload.details || {});
     if (subSections) subSections.value = serializeSections(payload.sections || []);
+    syncAllRichEditorsFromTextarea();
     updateModeUi();
   }
 
@@ -465,6 +692,8 @@
     if (subRole) subRole.value = "";
     if (subDetails) subDetails.value = "";
     if (subSections) subSections.value = "";
+
+    syncAllRichEditorsFromTextarea();
 
     setStatus(formStatus, "", "");
   }
@@ -896,6 +1125,8 @@
   }
 
   function bootstrap() {
+    setupRichTextEditors();
+
     if (!ensureFirebase()) {
       return;
     }

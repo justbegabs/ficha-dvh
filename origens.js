@@ -115,7 +115,21 @@ async function loadOrigins() {
     })
   );
 
-  allOrigins = origins.filter(Boolean);
+  const baseOrigins = origins.filter(Boolean).map((origin) => ({ ...origin, source: "base" }));
+  let cmsOrigins = [];
+  if (window.DVHCmsContent?.getEntries) {
+    cmsOrigins = await window.DVHCmsContent.getEntries("origens");
+  }
+
+  const mergedById = new Map();
+  baseOrigins.forEach((origin) => {
+    mergedById.set(origin.id, origin);
+  });
+  cmsOrigins.forEach((origin) => {
+    mergedById.set(origin.id, origin);
+  });
+
+  allOrigins = [...mergedById.values()];
   renderOrigins(allOrigins);
 
   if (originSearch) {
@@ -149,16 +163,18 @@ function renderOrigins(origins) {
     card.style.setProperty("--card-glow", theme["--page-glow"] || "rgba(0, 213, 255, 0.18)");
     card.style.setProperty("--card-accent", theme["--accent-soft"] || "#ffc14f");
 
+    const sourceLabel = origin.source === "cms" ? "Admin" : "JSON";
     card.innerHTML = `
       <span class="race-card__tag">Origem</span>
       <strong>${origin.displayName || origin.id}</strong>
-      <span class="race-card__meta">JSON: ${origin.id}.json</span>
+      <span class="race-card__meta">${sourceLabel}: ${origin.id}</span>
       <span class="race-card__detail">${origin.summary || "Origem carregada do JSON."}</span>
       <span class="race-card__action">Ver detalhes</span>
     `;
 
     card.addEventListener("click", () => {
-      window.location.href = `detail.html?type=origin&id=${encodeURIComponent(origin.id)}`;
+      const sourceParam = origin.source === "cms" ? "&source=cms" : "";
+      window.location.href = `detail.html?type=origin&id=${encodeURIComponent(origin.id)}${sourceParam}`;
     });
 
     originGrid.appendChild(card);

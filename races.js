@@ -116,7 +116,21 @@ async function loadRaces() {
     })
   );
 
-  allRaces = races.filter(Boolean);
+  const baseRaces = races.filter(Boolean).map((race) => ({ ...race, source: "base" }));
+  let cmsRaces = [];
+  if (window.DVHCmsContent?.getEntries) {
+    cmsRaces = await window.DVHCmsContent.getEntries("races");
+  }
+
+  const mergedById = new Map();
+  baseRaces.forEach((race) => {
+    mergedById.set(race.id, race);
+  });
+  cmsRaces.forEach((race) => {
+    mergedById.set(race.id, race);
+  });
+
+  allRaces = [...mergedById.values()];
   renderRaces(allRaces);
 
   if (raceSearch) {
@@ -156,16 +170,18 @@ function renderRaces(races) {
       `Tema: ${race.displayName || race.id}`
     ];
 
+    const sourceLabel = race.source === "cms" ? "Admin" : "JSON";
     card.innerHTML = `
       <span class="race-card__tag">Raça</span>
       <strong>${race.displayName || race.id}</strong>
-      <span class="race-card__meta">JSON: ${race.id}.json</span>
+      <span class="race-card__meta">${sourceLabel}: ${race.id}</span>
       <span class="race-card__detail">${detailLines.join("<br>")}</span>
       <span class="race-card__action">Ver detalhes</span>
     `;
 
     card.addEventListener("click", () => {
-      window.location.href = `detail.html?type=race&id=${encodeURIComponent(race.id)}`;
+      const sourceParam = race.source === "cms" ? "&source=cms" : "";
+      window.location.href = `detail.html?type=race&id=${encodeURIComponent(race.id)}${sourceParam}`;
     });
 
     raceGrid.appendChild(card);

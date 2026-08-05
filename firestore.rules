@@ -1,12 +1,30 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && request.auth.token.email in [
+          "justbegabs@gmail.com"
+        ];
+    }
+
     match /users/{userId}/characters/{characterId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /cmsContent/{section}/items/{itemId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /cmsContent/informacoes/items/{itemId}/subitems/{subId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
     }
 
     match /{document=**} {

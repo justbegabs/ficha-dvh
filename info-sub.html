@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sub-informação - Sistema dos Deuses</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;700;800&family=Teko:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-1: #0f2943;
+      --bg-2: #2b567d;
+      --ink: #eaf2ff;
+      --muted: #b6c8df;
+      --panel: rgba(11, 31, 56, 0.86);
+      --line: rgba(96, 202, 255, 0.58);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Raleway", sans-serif;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(96, 202, 255, 0.2), transparent 30%),
+        radial-gradient(circle at 90% 0%, rgba(8, 255, 206, 0.15), transparent 22%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-2));
+    }
+
+    .shell { max-width: 1080px; margin: 0 auto; padding: 1rem; display: grid; gap: 1rem; }
+    .hero { text-align: center; padding-top: 1rem; }
+    .hero h1 { margin: 0 0 0.5rem; font-family: "Teko", sans-serif; font-size: clamp(2rem, 5vw, 3.4rem); color: #ffe6b0; }
+    .hero p { margin: 0; color: var(--muted); }
+
+    .panel { border: 1px solid var(--line); border-radius: 16px; background: var(--panel); overflow: hidden; box-shadow: 0 16px 26px rgba(0, 0, 0, 0.25); }
+    .cover img { width: 100%; max-height: 360px; object-fit: cover; display: block; }
+    .body { padding: 1rem; display: grid; gap: 0.8rem; }
+    .grid { display: grid; gap: 0.8rem; grid-template-columns: 1fr; }
+    .field { border: 1px solid rgba(96, 202, 255, 0.35); border-radius: 12px; padding: 0.75rem; background: rgba(255, 255, 255, 0.08); }
+    .field strong { display: block; margin-bottom: 0.35rem; color: #ffe6b0; }
+    .section-title { margin: 0; font-family: "Teko", sans-serif; font-size: 1.9rem; color: #ffe6b0; }
+    .details-list { display: grid; gap: 0.45rem; }
+    .detail-line { border: 1px solid rgba(96, 202, 255, 0.28); border-radius: 10px; padding: 0.55rem; background: rgba(255, 255, 255, 0.06); }
+    .extra-sections { display: grid; gap: 0.65rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+    .action-link { text-decoration: none; color: #fff8f2; background: linear-gradient(135deg, #d85c37, #a33d24); padding: 0.5rem 0.9rem; border-radius: 10px; font-weight: 800; }
+    .action-link.alt { background: linear-gradient(135deg, #5e6c84, #435063); }
+    .hidden { display: none !important; }
+
+    @media (min-width: 900px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <h1 id="subTitle">Sub-informação</h1>
+      <p id="subSummary">Carregando conteúdo...</p>
+    </section>
+
+    <article class="panel">
+      <div id="subCover" class="cover hidden">
+        <img id="subCoverImage" alt="Capa da sub-informação" loading="lazy" />
+      </div>
+      <div class="body">
+        <div id="subDescription" class="field">Sem descrição.</div>
+
+        <h2 class="section-title">Perfil</h2>
+        <div class="grid">
+          <div class="field"><strong>Nome</strong><span id="profileName">-</span></div>
+          <div class="field"><strong>Idade</strong><span id="profileAge">-</span></div>
+          <div class="field"><strong>Aparência</strong><span id="profileAppearance">-</span></div>
+          <div class="field"><strong>Papel</strong><span id="profileRole">-</span></div>
+        </div>
+
+        <h2 class="section-title">Detalhes</h2>
+        <div id="detailsList" class="details-list"></div>
+
+        <h2 class="section-title">Seções adicionais</h2>
+        <div id="extraSections" class="extra-sections"></div>
+
+        <div class="actions">
+          <a id="backToParent" class="action-link" href="info.html">Voltar para Info</a>
+          <a class="action-link alt" href="info.html">Voltar para Informações</a>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="cms-content.js"></script>
+  <script src="info-sub.js"></script>
+</body>
+</html>

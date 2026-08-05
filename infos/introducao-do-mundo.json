@@ -1,0 +1,15 @@
+{
+  "displayName": "Introdução do Mundo",
+  "category": "Lore",
+  "summary": "Panorama geral do mundo, ambientação e tom da campanha.",
+  "description": "Apresenta as bases do cenário, os pilares da história e os conflitos que definem o estado atual do mundo.",
+  "theme": {
+    "--page-bg-start": "#10253f",
+    "--page-bg-mid": "#234e77",
+    "--page-bg-end": "#091a2d",
+    "--page-glow": "rgba(0, 213, 255, 0.2)",
+    "--panel-bg": "rgba(11, 31, 56, 0.82)",
+    "--panel-border": "rgba(0, 213, 255, 0.7)",
+    "--accent-soft": "#ffc14f"
+  }
+}

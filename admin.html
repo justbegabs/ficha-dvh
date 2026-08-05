@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Conteúdo - Sistema dos Deuses</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;700;800&family=Teko:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-1: #0b1d33;
+      --bg-2: #1e436a;
+      --ink: #eaf2ff;
+      --muted: #b6c8df;
+      --panel: rgba(11, 31, 56, 0.84);
+      --line: rgba(0, 213, 255, 0.45);
+      --danger: #ff8b8b;
+      --ok: #8dffbc;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Raleway", sans-serif;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(94, 196, 255, 0.2), transparent 30%),
+        radial-gradient(circle at 90% 0%, rgba(8, 255, 206, 0.15), transparent 22%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-2));
+    }
+
+    .shell { max-width: 1200px; margin: 0 auto; padding: 1rem; display: grid; gap: 1rem; }
+    .hero { text-align: center; padding-top: 1rem; }
+    .hero h1 { margin: 0 0 0.6rem; font-family: "Teko", sans-serif; font-size: clamp(2rem, 5vw, 3.6rem); color: #ffe6b0; }
+    .hero p { margin: 0; color: var(--muted); }
+
+    .panel {
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: 0 16px 28px rgba(0, 0, 0, 0.25);
+      padding: 1rem;
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .row { display: grid; gap: 0.8rem; grid-template-columns: 1fr; }
+
+    @media (min-width: 980px) {
+      .row { grid-template-columns: 1.2fr 1fr; }
+    }
+
+    label { font-weight: 700; color: #f5f9ff; }
+    input, select, textarea {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 213, 255, 0.35);
+      background: rgba(255, 255, 255, 0.08);
+      color: #eef5ff;
+      padding: 0.55rem 0.65rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+    button {
+      border: 0;
+      border-radius: 10px;
+      min-height: 40px;
+      padding: 0.45rem 0.85rem;
+      font-weight: 800;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(135deg, #d85c37, #a33d24);
+    }
+    button.secondary { background: linear-gradient(135deg, #5e6c84, #435063); }
+    button.danger { background: linear-gradient(135deg, #b14343, #7e2424); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .status { min-height: 1.4rem; color: #dce9f9; font-weight: 700; }
+    .status.error { color: var(--danger); }
+    .status.ok { color: var(--ok); }
+
+    .list { display: grid; gap: 0.55rem; }
+    .item {
+      border-radius: 12px;
+      border: 1px solid rgba(0, 213, 255, 0.25);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.7rem;
+      display: grid;
+      gap: 0.45rem;
+    }
+    .item strong { font-family: "Teko", sans-serif; font-size: 1.5rem; line-height: 1; color: #ffe9be; }
+    .item-meta { color: #cfe1f8; font-size: 0.9rem; }
+    .item-actions { display: flex; gap: 0.5rem; }
+
+    .small { font-size: 0.85rem; color: #cfe1f8; }
+    .hidden { display: none !important; }
+    .nav-link { color: #ffe6b0; text-decoration: none; font-weight: 700; }
+    .fieldset {
+      border: 1px dashed rgba(0, 213, 255, 0.35);
+      border-radius: 12px;
+      padding: 0.8rem;
+      display: grid;
+      gap: 0.6rem;
+    }
+    .fieldset h3 {
+      margin: 0;
+      font-family: "Teko", sans-serif;
+      font-size: 1.6rem;
+      color: #ffe6b0;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <h1>Painel Admin de Conteúdo</h1>
+      <p>Adicione, edite e remova itens de Informações, Raças, Origens e Classes sem editar arquivos.</p>
+    </section>
+
+    <section class="panel">
+      <div class="actions">
+        <button id="loginButton" type="button">Entrar com Google</button>
+        <button id="logoutButton" type="button" class="secondary hidden">Sair</button>
+        <a class="nav-link" href="index.html">Voltar à Home</a>
+      </div>
+      <div id="authStatus" class="status">Faça login para continuar.</div>
+      <div class="small">Acesso permitido apenas para e-mails admins configurados no arquivo admin.js.</div>
+      <div class="small">Para editar páginas fixas de Informações, use seção Informações e um dos IDs: introducao-do-mundo, introducao-de-npcs, documentos-nao-oficiais, mecanicas.</div>
+    </section>
+
+    <section id="adminPanel" class="row hidden">
+      <article class="panel">
+        <label for="entryKind">Tipo de cadastro</label>
+        <select id="entryKind">
+          <option value="main">Item principal</option>
+          <option value="sub">Sub-info (dentro de Informações)</option>
+        </select>
+
+        <label for="entrySection">Seção</label>
+        <select id="entrySection">
+          <option value="informacoes">Informações</option>
+          <option value="races">Raças</option>
+          <option value="origens">Origens</option>
+          <option value="classes">Classes</option>
+        </select>
+
+        <div id="mainFields" class="fieldset">
+          <h3>Item principal</h3>
+        <label for="entryId">ID (slug)</label>
+        <input id="entryId" type="text" placeholder="ex: reino-do-norte" autocomplete="off" />
+
+        <label for="entryDisplayName">Nome de exibição</label>
+        <input id="entryDisplayName" type="text" placeholder="Nome que aparece no card" autocomplete="off" />
+
+        <label for="entryCategory">Categoria</label>
+        <input id="entryCategory" type="text" placeholder="Lore, Sistema, etc." autocomplete="off" />
+
+        <label for="entrySummary">Resumo</label>
+        <textarea id="entrySummary" placeholder="Resumo curto para card/lista"></textarea>
+
+        <label for="entryDescription">Descrição</label>
+        <textarea id="entryDescription" placeholder="Texto maior para a página de detalhe"></textarea>
+
+        <label for="entryCoverImageUrl">Foto de capa (URL)</label>
+        <input id="entryCoverImageUrl" type="url" placeholder="https://..." autocomplete="off" />
+
+        <label for="entrySectionTitleOne">Título do bloco 1 (informações fixas)</label>
+        <input id="entrySectionTitleOne" type="text" placeholder="Ex: Panorama" autocomplete="off" />
+
+        <label for="entryExtraText">Texto complementar / bloco 2</label>
+        <textarea id="entryExtraText" placeholder="Texto do segundo bloco para páginas fixas de informações"></textarea>
+
+        <label for="entrySectionTitleTwo">Título do bloco 2 (informações fixas)</label>
+        <input id="entrySectionTitleTwo" type="text" placeholder="Ex: Conflitos Atuais" autocomplete="off" />
+
+        <label for="entryAgeFactor">Fator de idade (raças)</label>
+        <input id="entryAgeFactor" type="number" step="0.1" placeholder="Opcional" />
+        </div>
+
+        <div id="subFields" class="fieldset hidden">
+          <h3>Sub-info</h3>
+
+          <label for="subParentInfoId">ID da info pai</label>
+          <select id="subParentInfoId">
+            <option value="introducao-do-mundo">introducao-do-mundo</option>
+            <option value="introducao-de-npcs">introducao-de-npcs</option>
+            <option value="documentos-nao-oficiais">documentos-nao-oficiais</option>
+            <option value="mecanicas">mecanicas</option>
+          </select>
+
+          <label for="subId">ID da sub-info (slug)</label>
+          <input id="subId" type="text" placeholder="ex: npc-arthur-vale" autocomplete="off" />
+
+          <label for="subDisplayName">Título da sub-info</label>
+          <input id="subDisplayName" type="text" placeholder="Nome do NPC ou tópico" autocomplete="off" />
+
+          <label for="subSummary">Resumo curto</label>
+          <textarea id="subSummary" placeholder="Resumo para card da sub-info"></textarea>
+
+          <label for="subDescription">Descrição principal</label>
+          <textarea id="subDescription" placeholder="Texto principal da página da sub-info"></textarea>
+
+          <label for="subCoverImageUrl">Foto de capa da sub-info (URL)</label>
+          <input id="subCoverImageUrl" type="url" placeholder="https://..." autocomplete="off" />
+
+          <label for="subName">Nome (perfil)</label>
+          <input id="subName" type="text" placeholder="Ex: Arthur Vale" autocomplete="off" />
+
+          <label for="subAge">Idade (perfil)</label>
+          <input id="subAge" type="text" placeholder="Ex: 34" autocomplete="off" />
+
+          <label for="subAppearance">Aparência (perfil)</label>
+          <textarea id="subAppearance" placeholder="Descrição de aparência"></textarea>
+
+          <label for="subRole">Papel/Função (perfil)</label>
+          <input id="subRole" type="text" placeholder="Ex: Capitão da Guarda" autocomplete="off" />
+
+          <label for="subDetails">Detalhes extras (uma linha por item: chave: valor)</label>
+          <textarea id="subDetails" placeholder="Facção: Vigias do Norte&#10;Voz: Grave"></textarea>
+
+          <label for="subSections">Seções adicionais (uma linha por seção: Título::Texto)</label>
+          <textarea id="subSections" placeholder="História::Texto da história&#10;Segredos::Texto dos segredos"></textarea>
+        </div>
+
+        <div class="actions">
+          <button id="saveButton" type="button">Salvar / Atualizar</button>
+          <button id="clearButton" type="button" class="secondary">Limpar formulário</button>
+          <button id="deleteButton" type="button" class="danger">Remover item</button>
+        </div>
+
+        <div id="formStatus" class="status"></div>
+      </article>
+
+      <article class="panel">
+        <label for="listKind">Tipo de listagem</label>
+        <select id="listKind">
+          <option value="main">Itens principais</option>
+          <option value="sub">Sub-infos</option>
+        </select>
+
+        <label for="filterSection">Itens cadastrados</label>
+        <select id="filterSection">
+          <option value="informacoes">Informações</option>
+          <option value="races">Raças</option>
+          <option value="origens">Origens</option>
+          <option value="classes">Classes</option>
+        </select>
+
+        <label for="listParentInfoId">Info pai (para sub-infos)</label>
+        <select id="listParentInfoId">
+          <option value="introducao-do-mundo">introducao-do-mundo</option>
+          <option value="introducao-de-npcs">introducao-de-npcs</option>
+          <option value="documentos-nao-oficiais">documentos-nao-oficiais</option>
+          <option value="mecanicas">mecanicas</option>
+        </select>
+        <div id="itemsStatus" class="status">Carregando itens...</div>
+        <div id="itemsList" class="list"></div>
+      </article>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

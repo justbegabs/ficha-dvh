@@ -1,0 +1,15 @@
+{
+  "displayName": "Guia do Sistema",
+  "category": "Documentação",
+  "summary": "Resumo rápido para orientar o uso da ficha, listas e salvamento.",
+  "description": "Esta entrada serve como exemplo para a página de informações. Adicione novos arquivos JSON na pasta infos e registre os nomes no array infoFiles em info.js.",
+  "theme": {
+    "--page-bg-start": "#0e2a44",
+    "--page-bg-mid": "#1f4971",
+    "--page-bg-end": "#08182d",
+    "--page-glow": "rgba(0, 213, 255, 0.2)",
+    "--panel-bg": "rgba(11, 31, 56, 0.82)",
+    "--panel-border": "rgba(0, 213, 255, 0.7)",
+    "--accent-soft": "#ffc14f"
+  }
+}

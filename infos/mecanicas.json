@@ -1,0 +1,15 @@
+{
+  "displayName": "Mecânicas",
+  "category": "Sistema",
+  "summary": "Resumo das mecanicas centrais e fluxo de jogo na ficha.",
+  "description": "Explica as principais interacoes entre atributos, pericias, recursos e tomadas de decisao durante as cenas.",
+  "theme": {
+    "--page-bg-start": "#0f2943",
+    "--page-bg-mid": "#2b567d",
+    "--page-bg-end": "#0a1b30",
+    "--page-glow": "rgba(96, 202, 255, 0.22)",
+    "--panel-bg": "rgba(11, 31, 56, 0.84)",
+    "--panel-border": "rgba(96, 202, 255, 0.72)",
+    "--accent-soft": "#ffc867"
+  }
+}

@@ -1,8 +1,22 @@
 const params = new URLSearchParams(window.location.search);
-const detailType = params.get("type") || "race";
+const detailTypeRaw = params.get("type") || "race";
+const detailType = ["origin", "class", "race", "info"].includes(detailTypeRaw) ? detailTypeRaw : "race";
 const detailId = params.get("id") || "";
-const folder = detailType === "origin" ? "origens" : detailType === "class" ? "classes" : "races";
-const listPage = detailType === "origin" ? "origens.html" : detailType === "class" ? "classes.html" : "races.html";
+const detailSource = params.get("source") || "base";
+const folder = detailType === "origin"
+  ? "origens"
+  : detailType === "class"
+    ? "classes"
+    : detailType === "info"
+      ? "infos"
+      : "races";
+const listPage = detailType === "origin"
+  ? "origens.html"
+  : detailType === "class"
+    ? "classes.html"
+    : detailType === "info"
+      ? "info.html"
+      : "races.html";
 
 const title = document.getElementById("detailTitle");
 const subtitle = document.getElementById("detailSubtitle");
@@ -15,10 +29,29 @@ const detailHero = document.getElementById("detailHero");
 const selectButton = document.getElementById("selectButton");
 const relatedLink = document.getElementById("relatedLink");
 
+if (detailType === "info" && selectButton) {
+  selectButton.remove();
+}
+
 async function loadDetail() {
   if (!detailId) {
     renderError("Nenhum detalhe foi selecionado.");
     return;
+  }
+
+  if (detailSource === "cms" && window.DVHCmsContent?.getEntry) {
+    const section = detailType === "origin"
+      ? "origens"
+      : detailType === "class"
+        ? "classes"
+        : detailType === "info"
+          ? "informacoes"
+          : "races";
+    const cmsEntry = await window.DVHCmsContent.getEntry(section, detailId);
+    if (cmsEntry) {
+      renderDetail(cmsEntry);
+      return;
+    }
   }
 
   try {
@@ -48,14 +81,22 @@ function renderDetail(data) {
   document.documentElement.style.setProperty("--line", theme["--panel-border"] || "rgba(0, 213, 255, 0.7)");
   document.documentElement.style.setProperty("--accent-soft", theme["--accent-soft"] || "#ffc14f");
 
-  const typeLabel = detailType === "origin" ? "Origem" : detailType === "class" ? "Classe" : "Raça";
+  const typeLabel = detailType === "origin"
+    ? "Origem"
+    : detailType === "class"
+      ? "Classe"
+      : detailType === "info"
+        ? "Info"
+        : "Raça";
 
   title.textContent = `${typeLabel}: ${displayName}`;
   subtitle.textContent = detailType === "origin"
     ? "Detalhes da origem carregados do JSON."
     : detailType === "class"
       ? "Detalhes da classe carregados do JSON."
-      : "Detalhes da raça carregados do JSON.";
+      : detailType === "info"
+        ? "Detalhes da informação carregados do JSON."
+        : "Detalhes da raça carregados do JSON.";
   detailTag.textContent = typeLabel;
   detailName.textContent = displayName;
   detailMeta.innerHTML = [
@@ -66,15 +107,26 @@ function renderDetail(data) {
   detailInfo.innerHTML = infoLines.map((line) => `<div>${line}</div>`).join("");
 
   if (selectButton) {
-    selectButton.textContent = detailType === "origin" ? "Usar origem na ficha" : detailType === "class" ? "Usar classe na ficha" : "Usar raça na ficha";
-    selectButton.addEventListener("click", () => {
-      localStorage.setItem(detailType === "origin" ? "selectedOrigin" : detailType === "class" ? "selectedClass" : "selectedRace", detailId);
-      window.location.href = "ficha.html";
-    });
+    if (detailType === "info") {
+      // Button is removed early for info pages.
+    } else {
+      selectButton.hidden = false;
+      selectButton.textContent = detailType === "origin" ? "Usar origem na ficha" : detailType === "class" ? "Usar classe na ficha" : "Usar raça na ficha";
+      selectButton.addEventListener("click", () => {
+        localStorage.setItem(detailType === "origin" ? "selectedOrigin" : detailType === "class" ? "selectedClass" : "selectedRace", detailId);
+        window.location.href = "ficha.html";
+      });
+    }
   }
 
   if (relatedLink) {
-    relatedLink.textContent = detailType === "origin" ? "Abrir lista de origens" : detailType === "class" ? "Abrir lista de classes" : "Abrir lista de raças";
+    relatedLink.textContent = detailType === "origin"
+      ? "Abrir lista de origens"
+      : detailType === "class"
+        ? "Abrir lista de classes"
+        : detailType === "info"
+          ? "Abrir lista de informações"
+          : "Abrir lista de raças";
     relatedLink.href = listPage;
   }
 }

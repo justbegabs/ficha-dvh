@@ -1,0 +1,15 @@
+{
+  "displayName": "Documentos Não Oficiais",
+  "category": "Material Extra",
+  "summary": "Compilado de textos paralelos, notas e referencias suplementares.",
+  "description": "Agrupa materiais complementares que expandem o entendimento do mundo sem alterar as regras oficiais da mesa.",
+  "theme": {
+    "--page-bg-start": "#142339",
+    "--page-bg-mid": "#2d4969",
+    "--page-bg-end": "#0a1627",
+    "--page-glow": "rgba(148, 219, 255, 0.2)",
+    "--panel-bg": "rgba(12, 30, 52, 0.84)",
+    "--panel-border": "rgba(148, 219, 255, 0.68)",
+    "--accent-soft": "#ffd790"
+  }
+}

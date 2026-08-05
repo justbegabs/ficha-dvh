@@ -105,7 +105,21 @@ async function loadClasses() {
     })
   );
 
-  allClasses = classes.filter(Boolean);
+  const baseClasses = classes.filter(Boolean).map((entry) => ({ ...entry, source: "base" }));
+  let cmsClasses = [];
+  if (window.DVHCmsContent?.getEntries) {
+    cmsClasses = await window.DVHCmsContent.getEntries("classes");
+  }
+
+  const mergedById = new Map();
+  baseClasses.forEach((entry) => {
+    mergedById.set(entry.id, entry);
+  });
+  cmsClasses.forEach((entry) => {
+    mergedById.set(entry.id, entry);
+  });
+
+  allClasses = [...mergedById.values()];
   renderClasses(allClasses);
 
   if (classSearch) {
@@ -139,15 +153,17 @@ function renderClasses(entries) {
     card.style.setProperty("--card-glow", theme["--page-glow"] || "rgba(0, 213, 255, 0.18)");
     card.style.setProperty("--card-accent", theme["--accent-soft"] || "#ffc14f");
 
+    const sourceLabel = entry.source === "cms" ? "Admin" : "JSON";
     card.innerHTML = `
       <span class="race-card__tag">Classe</span>
       <strong>${entry.displayName || entry.id}</strong>
-      <span class="race-card__meta">JSON: ${entry.id}.json</span>
+      <span class="race-card__meta">${sourceLabel}: ${entry.id}</span>
       <span class="race-card__action">Ver detalhes</span>
     `;
 
     card.addEventListener("click", () => {
-      window.location.href = `detail.html?type=class&id=${encodeURIComponent(entry.id)}`;
+      const sourceParam = entry.source === "cms" ? "&source=cms" : "";
+      window.location.href = `detail.html?type=class&id=${encodeURIComponent(entry.id)}${sourceParam}`;
     });
 
     classGrid.appendChild(card);

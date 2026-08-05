@@ -1,0 +1,15 @@
+{
+  "displayName": "Indrodução de NPC's",
+  "category": "Personagens",
+  "summary": "Visao geral dos NPC's, papeis narrativos e relacoes importantes.",
+  "description": "Reune os personagens nao jogaveis mais relevantes, seus objetivos e como eles influenciam os eventos do mundo.",
+  "theme": {
+    "--page-bg-start": "#1a2742",
+    "--page-bg-mid": "#385a87",
+    "--page-bg-end": "#0a1a30",
+    "--page-glow": "rgba(120, 208, 255, 0.2)",
+    "--panel-bg": "rgba(14, 33, 59, 0.84)",
+    "--panel-border": "rgba(120, 208, 255, 0.7)",
+    "--accent-soft": "#ffce70"
+  }
+}

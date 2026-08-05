@@ -2,6 +2,9 @@
   const ADMIN_EMAILS = [
     "justbegabs@gmail.com"
   ];
+  const ADMIN_UIDS = [
+    // Opcional: adicione UIDs admins aqui para evitar depender apenas do claim de e-mail.
+  ];
 
   const COLLECTION_ROOT = "cmsContent";
 
@@ -167,6 +170,10 @@
     return ADMIN_EMAILS.includes(String(email || "").toLowerCase());
   }
 
+  function isAdminUid(uid) {
+    return ADMIN_UIDS.includes(String(uid || ""));
+  }
+
   function updateModeUi() {
     const isSub = (entryKind?.value || "main") === "sub";
     mainFields?.classList.toggle("hidden", isSub);
@@ -195,17 +202,18 @@
     }
 
     const email = currentUser.email || "";
-    isAuthorizedAdmin = isAdminEmail(email);
+    const uid = currentUser.uid || "";
+    isAuthorizedAdmin = isAdminEmail(email) || isAdminUid(uid);
 
     if (!isAuthorizedAdmin) {
-      setStatus(authStatus, `Acesso negado para ${email}.`, "error");
+      setStatus(authStatus, `Acesso negado para ${email || "sem-email"}. UID: ${uid || "desconhecido"}.`, "error");
       loginButton?.classList.add("hidden");
       logoutButton?.classList.remove("hidden");
       adminPanel?.classList.add("hidden");
       return;
     }
 
-    setStatus(authStatus, `Conectado como admin: ${email}`, "ok");
+    setStatus(authStatus, `Conectado como admin: ${email || "sem-email"} (UID: ${uid || "desconhecido"})`, "ok");
     loginButton?.classList.add("hidden");
     logoutButton?.classList.remove("hidden");
     adminPanel?.classList.remove("hidden");
@@ -376,8 +384,9 @@
 
         setStatus(formStatus, "Sub-info salva com sucesso.", "ok");
         await refreshItems();
-      } catch {
-        setStatus(formStatus, "Não foi possível salvar a sub-info.", "error");
+      } catch (error) {
+        const details = error?.code || error?.message || "erro desconhecido";
+        setStatus(formStatus, `Não foi possível salvar a sub-info (${details}).`, "error");
       }
       return;
     }
@@ -398,8 +407,9 @@
 
       setStatus(formStatus, "Item salvo com sucesso.", "ok");
       await refreshItems();
-    } catch {
-      setStatus(formStatus, "Não foi possível salvar o item.", "error");
+    } catch (error) {
+      const details = error?.code || error?.message || "erro desconhecido";
+      setStatus(formStatus, `Não foi possível salvar o item (${details}).`, "error");
     }
   }
 
@@ -438,8 +448,9 @@
 
         setStatus(formStatus, "Sub-info removida com sucesso.", "ok");
         await refreshItems();
-      } catch {
-        setStatus(formStatus, "Não foi possível remover a sub-info.", "error");
+      } catch (error) {
+        const details = error?.code || error?.message || "erro desconhecido";
+        setStatus(formStatus, `Não foi possível remover a sub-info (${details}).`, "error");
       }
       return;
     }
@@ -468,8 +479,9 @@
 
       setStatus(formStatus, "Item removido com sucesso.", "ok");
       await refreshItems();
-    } catch {
-      setStatus(formStatus, "Não foi possível remover o item.", "error");
+    } catch (error) {
+      const details = error?.code || error?.message || "erro desconhecido";
+      setStatus(formStatus, `Não foi possível remover o item (${details}).`, "error");
     }
   }
 
@@ -619,8 +631,9 @@
           .get();
 
         renderSubItems(parentId, snapshot.docs);
-      } catch {
-        setStatus(itemsStatus, "Falha ao carregar sub-infos.", "error");
+      } catch (error) {
+        const details = error?.code || error?.message || "erro desconhecido";
+        setStatus(itemsStatus, `Falha ao carregar sub-infos (${details}).`, "error");
       }
       return;
     }
@@ -636,8 +649,9 @@
         .get();
 
       renderMainItems(section, snapshot.docs);
-    } catch {
-      setStatus(itemsStatus, "Falha ao carregar itens.", "error");
+    } catch (error) {
+      const details = error?.code || error?.message || "erro desconhecido";
+      setStatus(itemsStatus, `Falha ao carregar itens (${details}).`, "error");
     }
   }
 
@@ -651,8 +665,12 @@
 
     try {
       await auth.signInWithPopup(provider);
-    } catch {
-      setStatus(authStatus, "Não foi possível concluir o login Google.", "error");
+      if (auth.currentUser) {
+        await auth.currentUser.getIdToken(true);
+      }
+    } catch (error) {
+      const details = error?.code || error?.message || "erro desconhecido";
+      setStatus(authStatus, `Não foi possível concluir o login Google (${details}).`, "error");
     }
   }
 

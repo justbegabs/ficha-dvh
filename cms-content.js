@@ -91,10 +91,22 @@
       return false;
     }
 
+    const lowered = safeValue.toLowerCase();
+    const hasUnsafeToken = lowered.includes("javascript:")
+      || lowered.includes("expression(")
+      || lowered.includes("url(")
+      || lowered.includes("@import");
+    if (hasUnsafeToken) {
+      return false;
+    }
+
     if (property === "color" || property === "background-color") {
       return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(safeValue)
+        || /^#([0-9a-f]{8})$/i.test(safeValue)
         || /^(rgb|rgba|hsl|hsla)\(([^)]+)\)$/i.test(safeValue)
-        || /^[a-z]+$/i.test(safeValue);
+        || /^(transparent|currentcolor|inherit|initial|unset)$/i.test(safeValue)
+        || /^[a-z]+$/i.test(safeValue)
+        || /^var\(--[a-z0-9\-]+\)$/i.test(safeValue);
     }
 
     if (property === "font-family") {

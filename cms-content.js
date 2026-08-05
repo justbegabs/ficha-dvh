@@ -240,8 +240,8 @@
     return {
       id,
       displayName: safe.displayName || id,
-      summary: safe.summary || safe.description || "",
-      description: safe.description || safe.summary || "",
+      summary: safe.summary || "",
+      description: safe.description || "",
       extraText: safe.extraText || "",
       sectionTitleOne: safe.sectionTitleOne || "",
       sectionTitleTwo: safe.sectionTitleTwo || "",
@@ -260,8 +260,8 @@
     return {
       id,
       displayName: safe.displayName || id,
-      summary: safe.summary || safe.description || "",
-      description: safe.description || safe.summary || "",
+      summary: safe.summary || "",
+      description: safe.description || "",
       coverImageUrl: safe.coverImageUrl || "",
       profile: {
         name: profile.name || "",
